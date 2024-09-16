@@ -37,7 +37,7 @@
         <v-row class="m0">
             <v-btn v-for="(item,index) in floor" :key="index" class="ml-10" @click="selectFloor =item">Tầng {{ item }}</v-btn>
         </v-row>
-        <div class="d-flex flex-wrap">
+        <div class="d-flex flex-wrap item">
             <v-card class="pa-4 itemRoom" color="peach" dark v-for="item in Roomfilter" :key="item.id">
                 <v-row justify="space-between">
                     <v-icon>mdi-home</v-icon>
@@ -51,6 +51,10 @@
                         <v-icon>mdi-account-circle</v-icon>
                         {{ item.customer }}
                     </v-col>
+                </v-row>
+                <v-row class="justify-space-between">
+                    <router-link class="link" v-show="item.customer==null">Thêm khách</router-link>
+                    <v-btn v-show="item.customer!=null">Tìm khách mới</v-btn>
                 </v-row>
                 <v-row justify="space-around" class="mt-4">
                     <v-btn icon size="small">
@@ -98,6 +102,7 @@
                     {id: 6,floor:3, Name: '302', PriceRoom: '4.000.000', customer:'Phạm Quang Hưng, Phạm Thị Minh Trang'},
                     {id: 7,floor:4, Name: '401', PriceRoom: '3.000.000', customer:'Phạm Quang Hưng, Phạm Thị Minh Trang'},
                     {id: 8,floor:4, Name: '402', PriceRoom: '5.000.000', customer:'Phạm Quang Hưng, Phạm Thị Minh Trang'},
+                    {id: 9,floor:1, Name: '103', PriceRoom: '1.000.000', customer:null},
                 ],
             }
         },
@@ -136,5 +141,16 @@
     width: 20%;
     margin: 1%;
     border-radius: 30px;
+}
+.link{
+    text-decoration: none !important;
+    border: 1px solid black;
+    border-radius: 25px;
+    padding: 5px;
+    background-color: blue;
+    color: white;
+}
+.item{
+    background-color: white;
 }
 </style>

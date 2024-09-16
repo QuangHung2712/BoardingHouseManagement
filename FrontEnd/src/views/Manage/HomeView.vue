@@ -42,21 +42,26 @@
   <v-row class="m0">
     <v-col cols="2" class="menu">
       <div  >
-        <button 
-        @click="setActiveMenu(0)"  
-        class="menuitem"
-        :class="{'active-menu': activeMenu === 0}">
+        <router-link 
+          @click="setActiveMenu(0)"
+          to="/homepage" 
+          class="menuitem"
+          :class="{'active-menu': activeMenu === 0}"
+        >
+          <v-icon icon="mdi-home-silo-outline"></v-icon>
           <span>Trang chủ</span>
-        </button>
+      </router-link>
       </div>
       <div >
-        <button 
-          @click="setActiveMenu(1)" 
-          :class="{'active-menu': activeMenu === 1}" 
-          class=" menuitem">
-          <v-icon icon="mdi-home" />
+        <router-link 
+          @click="setActiveMenu(1)"
+          to="/roompage" 
+          class="menuitem"
+          :class="{'active-menu': activeMenu === 1}"
+        >
+          <v-icon>mdi-home</v-icon>
           <span>Phòng</span>
-        </button>
+        </router-link>
       </div>
       <div>
         <button 
@@ -112,17 +117,13 @@
       </div>
     </v-col>
     <v-col cols="10">
-      <home-page-view v-show="Menu===0"></home-page-view>
-      <RoomView v-show="Menu===1"></RoomView>
+      <router-view></router-view>
     </v-col>
   </v-row>
 </v-main>
 </template>
 <script>
-import HomePageView from '../../components/HomePageView.vue'
-import RoomView from '@/components/RoomView.vue';
   export default {
-  components: { HomePageView,RoomView },
     data(){
       return{
         AddressTower:[
@@ -174,6 +175,8 @@ import RoomView from '@/components/RoomView.vue';
   display: flex;
   align-items: center;
   font-size: 140%;
+  color: black;
+  text-decoration: none !important;
 }
 .menu .menuitem span{
   margin-left: 5px;
@@ -188,7 +191,7 @@ import RoomView from '@/components/RoomView.vue';
 }
 .active-menu {
   background-color: #fcb93c;
-  color: white;
+  color: white !important;
   border-radius: 20px;
 }
 .profile{
