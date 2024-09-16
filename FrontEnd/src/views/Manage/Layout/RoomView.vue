@@ -1,6 +1,6 @@
 <template>
     <v-row class="m0 filter">
-        <v-col cols="3"><b class="text-h4">Danh sách phòng</b></v-col>
+        <v-col cols="3"><b class="text-h5">Danh sách phòng</b></v-col>
         <v-col cols="3">
             <v-select
                 clearable

@@ -3,29 +3,43 @@ import { createRouter, createWebHistory } from 'vue-router'
 const routes = [
   {
     path: '/',
-    name: 'HomePage',
-    component: () => import('../views/Manage/HomeView.vue'),
+    name: 'home',
+    component: () => import('../views/HomeView.vue')
+  },
+  {
+    path: '/manage',
+    name: 'manage',
+    component: () => import('../views/Manage/HomeManage.vue'),
     children: [
       {
-        path: 'homepage',
-        name: 'homepage',
-        component: () => import('../views/Manage/Layout/HomePageView.vue')
+        path: '',
+        name: 'towerpage',
+        component: () => import('../views/Manage/Layout/TowerView.vue'),
       },
       {
-        path: 'roompage',
-        name: 'roompage',
-        component: () => import('../views/Manage/Layout/RoomView.vue')
+        path: ':idtower',
+        name: 'towerDetails',
+        component: () => import('../views/Manage/Layout/TowerDetail.vue'),
+        children:[
+          {
+            path: 'homepage',
+            name: 'homepage',
+            component: () => import('../views/Manage/Layout/HomePageView.vue')
+          },
+          {
+            path: 'room',
+            name: 'roompage',
+            component: () => import('../views/Manage/Layout/RoomView.vue')
+          },
+          {
+            path: 'service',
+            name: 'servicepage',
+            component: () => import('../views/Manage/Layout/ServiceView.vue')
+          },
+        ]
       },
     ]
   },
-  {
-    path: '/about',
-    name: 'about',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
-  }
 ]
 
 const router = createRouter({
