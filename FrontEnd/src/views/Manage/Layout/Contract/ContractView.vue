@@ -9,7 +9,5 @@
     </v-row>
 </template>
 <style scoped>
-    .filter{
-        height: 1vh;
-    }
+
 </style>
