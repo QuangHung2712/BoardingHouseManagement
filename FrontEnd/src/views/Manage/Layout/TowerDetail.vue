@@ -4,7 +4,7 @@
       <div >
         <router-link 
           @click="setActiveMenu(0)"
-          to="/manage/homepage" 
+          :to="`/manage/${towerId}/home`" 
           class="menuitem"
           :class="{'active-menu': activeMenu === 0}"
         >
@@ -15,7 +15,7 @@
       <div >
         <router-link 
           @click="setActiveMenu(1)"
-          to="/manage/room" 
+          :to="{name:'room', params: {idtower: towerId}}" 
           class="menuitem"
           :class="{'active-menu': activeMenu === 1}"
         >
@@ -25,7 +25,7 @@
       </div>
       <div>
         <router-link 
-          to="/manage/service" 
+          :to="`/manage/${towerId}/service`" 
           @click="setActiveMenu(2)" 
           :class="{'active-menu': activeMenu === 2}" 
           class="menuitem">
@@ -53,6 +53,7 @@
       </div>
       <div>
         <router-link 
+          :to="`/manage/${towerId}/contract`"
           @click="setActiveMenu(5)" 
           :class="{'active-menu': activeMenu === 5}" 
           class="menuitem">
@@ -97,13 +98,18 @@
             return{
                 activeMenu: null,
                 Menu:0,
+                towerId : 0,
             }
+        },
+        mounted() {
+          const idtower = this.$route.params.idtower;
+          this.towerId = idtower
         },
         methods:{
             setActiveMenu(menuIndex) {
                 this.activeMenu = menuIndex;
                 this.Menu = menuIndex
-            }
+            },
         }
     }
 </script>

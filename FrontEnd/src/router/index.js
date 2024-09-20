@@ -17,28 +17,38 @@ const routes = [
         component: () => import('../views/Manage/Layout/TowerView.vue'),
       },
       {
-        path: ':idtower',
+        path: ':idtower', 
         name: 'towerDetails',
         component: () => import('../views/Manage/Layout/TowerDetail.vue'),
         children:[
           {
-            path: 'homepage',
-            name: 'homepage',
+            path: 'home',
+            name: 'home',
             component: () => import('../views/Manage/Layout/HomePageView.vue')
           },
           {
             path: 'room',
-            name: 'roompage',
+            name: 'room',
             component: () => import('../views/Manage/Layout/RoomView.vue')
           },
           {
             path: 'service',
-            name: 'servicepage',
+            name: 'service',
             component: () => import('../views/Manage/Layout/ServiceView.vue')
+          },
+          {
+            path: 'contract',
+            name: 'contract',
+            component: () => import('../views/Manage/Layout/Contract/ContractView.vue')
           },
         ]
       },
     ]
+  },
+  {
+    path: '/login',
+    name: 'login',
+    component: () => import('../views/Manage/Login/PageLogin.vue')
   },
 ]
 

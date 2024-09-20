@@ -31,7 +31,7 @@
             <div>
                 <v-btn class="mr-6 rounded-xl">Giảm Giá phòng</v-btn>
                 <v-btn class="mr-6 rounded-xl">Khách thuê</v-btn>
-                <v-btn class="mr-6 rounded-xl">Thêm phòng</v-btn>
+                <v-btn class="mr-6 rounded-xl" @click="btnAddRoom()">Thêm phòng</v-btn>
             </div>
         </v-row>
         <v-row class="m0">
@@ -76,6 +76,15 @@
             </v-card>
         </div>
     </div>
+    <v-dialog v-model="dialogEdit" class="dialog">
+            <v-card>
+                <v-card-title>{{titleDialog}}</v-card-title>
+                <v-card-actions class="justify-space-between">
+                    <v-btn @click="dialogEdit=false">Hủy</v-btn>
+                    <v-btn >Lưu</v-btn>
+                </v-card-actions>
+            </v-card>
+    </v-dialog>
 </template>
 <script>
     export default{
@@ -89,10 +98,13 @@
                     {title:'Chưa thanh toán', value:false},
                     {title:'Đã thanh toán',value:true}
                 ],
+                dialogEdit : false,
+                titleDialog: '',
                 RoomAvailable: 0, //Phòng còn trống
                 RoomRented: 0, //Phòng đã cho thuê
                 RoomNoFee: 0, //Phòng chưa trả phí
                 selectFloor:1,
+                towerId : 0, // Id của khu trọ đã được chọn
                 RoomData:[
                     {id: 1,floor:1, Name: '101', PriceRoom: '3.000.000', customer:'Phạm Quang Hưng, Phạm Thị Minh Trang'},
                     {id: 2,floor:1, Name: '102', PriceRoom: '2.500.000', customer:'Phạm Quang Hưng, Phạm Thị Minh Trang'},
@@ -106,6 +118,10 @@
                 ],
             }
         },
+        mounted() {
+          const idtower = this.$route.params.idtower;
+          this.towerId = idtower
+        },
         computed:{
             floor(){
                 return Math.max(...this.RoomData.map(room=>room.floor));
@@ -115,6 +131,12 @@
                     const matches = room.floor == this.selectFloor;
                     return matches
                 })
+            }
+        },
+        methods:{
+            btnAddRoom(){
+                this.titleDialog = 'Thêm phòng';
+                this.dialogEdit = true;
             }
         }
     }
@@ -152,5 +174,13 @@
 }
 .item{
     background-color: white;
+}
+.dialog{
+    width: 80%;
+    height: 80vh;
+}
+.dialog .v-btn{
+    background-color: blue;
+    color: whitesmoke;
 }
 </style>
