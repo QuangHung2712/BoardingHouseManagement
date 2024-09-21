@@ -116,7 +116,7 @@
 <style scoped>
 .menu{
   background-color: #fed9c2;
-  height: 88vh;
+  height: 92vh;
   display: flex;
   flex-direction: column;
 

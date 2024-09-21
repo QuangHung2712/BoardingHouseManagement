@@ -1,8 +1,8 @@
 <template>
 <v-main>
-  <v-row class="m0 header d-flex">
+  <v-row class="header d-flex">
     <v-col cols="4" >
-      <button class="text-left text-header">QUẢN LÝ NHÀ TRỌ</button>
+      <button class="text-left text-header mt-1">QUẢN LÝ NHÀ TRỌ</button>
     </v-col>
     <v-col cols="4">
       <v-row v-show="!AddressTower" class="m0 d-flex align-center">
@@ -19,7 +19,7 @@
       </v-row>
     </v-col>
     <v-col cols="4" class="p0	">
-      <button @click="diglogProfile = !diglogProfile" class=" profile d-flex mt-8 mr-5">
+      <button @click="diglogProfile = !diglogProfile" class=" profile d-flex mt-7 mr-5">
         <p>{{ NameLandlord }}</p>
         <v-icon icon="mdi-menu-down"></v-icon>
       </button>
@@ -164,7 +164,7 @@
   padding: 1%;
   border-radius: 10px;
   position: absolute;
-  top: 9%; /* Điều chỉnh khoảng cách từ đỉnh */
+  top: 7%; /* Điều chỉnh khoảng cách từ đỉnh */
   right: 2%; /* Điều chỉnh khoảng cách từ cạnh phải */
   z-index: 2000; /* Đảm bảo nằm trên tất cả các thành phần khác */
 }
