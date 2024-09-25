@@ -5,18 +5,7 @@
       <button class="text-left text-header mt-1">QUẢN LÝ NHÀ TRỌ</button>
     </v-col>
     <v-col cols="4">
-      <v-row v-show="!AddressTower" class="m0 d-flex align-center">
-        <v-col cols="3" class="p0 mb-5 title-address">
-          Địa chỉ: 
-        </v-col>
-        <v-col cols="9" class="p0">
-          <v-select 
-          v-model="selectTower"
-          :items="AddressTower"
-          item-title="title"
-          item-value="value"></v-select>
-        </v-col>
-      </v-row>
+
     </v-col>
     <v-col cols="4" class="p0	">
       <button @click="diglogProfile = !diglogProfile" class=" profile d-flex mt-7 mr-5">

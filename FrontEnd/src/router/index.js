@@ -39,7 +39,14 @@ const routes = [
           {
             path: 'contract',
             name: 'contract',
-            component: () => import('../views/Manage/Layout/Contract/ContractView.vue')
+            component: () => import('../views/Manage/Layout/Contract/ContractView.vue'),
+            children: [
+              {
+                path: 'createEdit/:idcontract',
+                name: 'createEdit',
+                component:()=> import('../views/Manage/Layout/Contract/CreateEditContract.vue')
+              }
+            ]
           },
         ]
       },
