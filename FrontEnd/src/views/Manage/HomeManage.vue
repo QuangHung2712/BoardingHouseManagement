@@ -1,10 +1,10 @@
 <template>
 <v-main>
-  <v-row class="header d-flex">
-    <v-col cols="4" >
-      <button class="text-left text-header mt-1">QUẢN LÝ NHÀ TRỌ</button>
+  <v-row class="header d-flex m0">
+    <v-col cols="4" class="p0">
+      <button class="text-left text-header mt-1 ">QUẢN LÝ NHÀ TRỌ</button>
     </v-col>
-    <v-col cols="4">
+    <v-col cols="4" class="p0">
 
     </v-col>
     <v-col cols="4" class="p0	">
@@ -141,6 +141,9 @@
 .header{
   background-color: #fed9c2;
   height: 12vh;
+  position: sticky;
+  top: 0;
+  z-index: 2000;
 }
 .profile{
   width: 100%;
@@ -153,7 +156,7 @@
   padding: 1%;
   border-radius: 10px;
   position: absolute;
-  top: 7%; /* Điều chỉnh khoảng cách từ đỉnh */
+  margin-top: 0,5%;
   right: 2%; /* Điều chỉnh khoảng cách từ cạnh phải */
   z-index: 2000; /* Đảm bảo nằm trên tất cả các thành phần khác */
 }

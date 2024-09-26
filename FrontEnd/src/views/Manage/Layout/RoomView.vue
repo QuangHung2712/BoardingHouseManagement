@@ -1,7 +1,7 @@
 <template>
     <v-row class="m0 filter">
-        <v-col cols="3"><b class="text-h5">Danh sách phòng</b></v-col>
-        <v-col cols="3">
+        <v-col cols="3" class="p0 px-3"><b class="text-h5">Danh sách phòng</b></v-col>
+        <v-col cols="3" class="p0 px-3">
             <v-select
                 clearable
                 label="Trạng thái phòng"
@@ -11,7 +11,7 @@
                 variant="outlined">
             </v-select>
         </v-col>
-        <v-col cols="3">
+        <v-col cols="3" class="p0 px-3">
             <v-select
                 clearable
                 label="Trạng thái phí"
@@ -21,7 +21,7 @@
                 variant="outlined">
             </v-select>
         </v-col>
-        <v-col cols="3">
+        <v-col cols="3" class="p0 px-3">
             <v-text-field clearable label="Số phòng"></v-text-field>
         </v-col>
     </v-row>
@@ -34,12 +34,12 @@
                 <v-btn class="mr-6 rounded-xl" @click="btnAddRoom()">Thêm phòng</v-btn>
             </div>
         </v-row>
-        <v-row class="m0">
-            <v-btn v-for="(item,index) in floor" :key="index" class="ml-10" @click="selectFloor =item">Tầng {{ item }}</v-btn>
-        </v-row>
+        <v-tabs class="m0">
+            <v-tab v-for="(item,index) in floor" :key="index" class="ml-10" @click="selectFloor =item">Tầng {{ item }}</v-tab>
+        </v-tabs>
         <div class="d-flex flex-wrap item">
-            <v-card class="pa-4 itemRoom" color="peach" dark v-for="item in Roomfilter" :key="item.id">
-                <v-row justify="space-between">
+            <v-card class="pa-4 itemRoom" color="peach" dark v-for="item in Roomfilter" :key="item.id" :class="item.customer ===null ? 'itemRoomEmpty':'' ">
+                <v-row justify="space-between pa-2">
                     <v-icon>mdi-home</v-icon>
                     <span>{{ item.Name }}</span>
                     <v-spacer></v-spacer>
@@ -160,6 +160,7 @@
     padding-top: 10px;
 }
 .itemRoom{
+    background-color: #85c1e9;
     width: 20%;
     margin: 1%;
     border-radius: 30px;
@@ -173,7 +174,8 @@
     color: white;
 }
 .item{
-    background-color: white;
+    margin-left: 1%;
+    margin-right: 1%;
 }
 .dialog{
     width: 80%;
@@ -182,5 +184,8 @@
 .dialog .v-btn{
     background-color: blue;
     color: whitesmoke;
+}
+.itemRoomEmpty{
+    background-color: white;
 }
 </style>

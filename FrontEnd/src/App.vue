@@ -22,6 +22,6 @@ export default {
   margin: 0px !important;
 }
 .p0{
-  padding: 0px;
+  padding: 0px !important; 
 }
 </style>

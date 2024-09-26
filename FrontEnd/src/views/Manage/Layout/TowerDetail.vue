@@ -88,7 +88,7 @@
       </div>
     </v-col>
     <v-col cols="10">
-      <router-view></router-view>
+      <router-view ></router-view>
     </v-col>
   </v-row>
 </template>
@@ -116,9 +116,12 @@
 <style scoped>
 .menu{
   background-color: #fed9c2;
-  height: 92vh;
+  height: 88vh;
   display: flex;
   flex-direction: column;
+  position: sticky;
+  top: 12%;
+  z-index: 1000;
 
 }
 .menu div{
