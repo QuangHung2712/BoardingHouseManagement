@@ -57,20 +57,20 @@
                     <v-btn v-show="item.customer!=null">Tìm khách mới</v-btn>
                 </v-row>
                 <v-row justify="space-around" class="mt-4">
-                    <v-btn icon size="small">
+                    <v-btn v-show="item.customer !== null" icon size="small" @click="ViewdialogPayChange(item.id,'Trả Phòng')">
                         <v-icon>mdi-refresh</v-icon>
                     </v-btn>
-                    <v-btn icon size="small">
+                    <v-btn v-show="item.customer !== null" icon size="small" @click="ViewdialogPayChange(item.id,'Đổi phòng')">
                         <v-icon>mdi-phone</v-icon>
                     </v-btn>
                     <v-btn icon size="small">
                         <v-icon>mdi-delete</v-icon>
                     </v-btn>
-                    <v-btn icon size="small">
-                        <v-icon>mdi-pencil</v-icon>
+                    <v-btn icon size="small" @click="btnAddCreateRoom(item.id)">
+                        <v-icon >mdi-pencil</v-icon>
                     </v-btn>
-                    <v-btn icon size="small">
-                        <v-icon>mdi-eye</v-icon>
+                    <v-btn icon size="small" @click="btnAddCreateRoom(item.id)">
+                        <v-icon >mdi-eye</v-icon>
                     </v-btn>
                 </v-row>
             </v-card>
@@ -84,6 +84,56 @@
                     <v-btn >Lưu</v-btn>
                 </v-card-actions>
             </v-card>
+    </v-dialog>
+    <v-dialog v-model="dialogPayChange" style="width: 40%;">
+        <v-card>
+            <v-card-title class="d-flex justify-space-between"> 
+                <span class="pl-10">{{ titledialogPayChange }}</span>
+                <v-spacer></v-spacer>
+                <v-icon>mdi-home</v-icon>
+                <span class="pr-10">{{ selectRoom.Name }}</span>
+            </v-card-title>
+            <div v-show="titledialogPayChange ==='Trả Phòng'" class="mx-3 bg-dialog">
+                    <v-row class="m0 align-center px-5 py-1">
+                        <v-col cols="3" class="p0">Số điện</v-col>
+                        <v-col cols="9" class="p0 mt-1"><v-text-field clearable></v-text-field></v-col>
+                    </v-row>
+                    <v-row class="m0 align-center px-5 py-1">
+                        <v-col cols="3" class="p0">Số nước</v-col>
+                        <v-col cols="9" class="p0 mt-1"><v-text-field clearable></v-text-field></v-col>
+                    </v-row>
+                    <v-row class="m0 align-center px-5 py-1">
+                        <v-col cols="3" class="p0">Tiền phạt</v-col>
+                        <v-col cols="9" class="p0 mt-1"><v-text-field clearable></v-text-field></v-col>
+                    </v-row>
+                    <v-row class="m0 align-center px-5 py-1">
+                        <v-col cols="3" class="p0">Ghi chú</v-col>
+                        <v-col cols="9" class="p0 mt-1"><v-textarea rows="4" clearable></v-textarea></v-col>
+                    </v-row>
+            </div>
+            <div v-show="titledialogPayChange ==='Đổi phòng'" class="mx-3 bg-dialog">
+                    <v-row class="m0 align-center px-5 py-1">
+                        <v-col cols="3" class="p0">Nhà trọ</v-col>
+                        <v-col cols="9" class="p0 mt-1"><v-select clearable></v-select></v-col>
+                    </v-row>
+                    <v-row class="m0 align-center px-5 py-1">
+                        <v-col cols="3" class="p0">Tầng</v-col>
+                        <v-col cols="9" class="p0 mt-1"><v-select clearable></v-select></v-col>
+                    </v-row>
+                    <v-row class="m0 align-center px-5 py-1">
+                        <v-col cols="3" class="p0">Phòng</v-col>
+                        <v-col cols="9" class="p0 mt-1"><v-select clearable></v-select></v-col>
+                    </v-row>
+                    <v-row class="m0 align-center px-5 py-1">
+                        <v-col cols="3" class="p0">Thời Gian đổi</v-col>
+                        <v-col cols="9" class="p0 mt-1"><v-select clearable></v-select></v-col>
+                    </v-row>
+            </div>
+            <v-card-actions class="justify-space-between">
+                <v-btn @click="dialogPayChange=false">Hủy</v-btn>
+                <v-btn >Đồng ý</v-btn>
+            </v-card-actions>
+        </v-card>
     </v-dialog>
 </template>
 <script>
@@ -99,7 +149,10 @@
                     {title:'Đã thanh toán',value:true}
                 ],
                 dialogEdit : false,
-                titleDialog: '',
+                dialogPayChange : false,
+                titledialogPayChange: '',
+                titleDialogEdit: '',
+                selectRoomId: 0,
                 RoomAvailable: 0, //Phòng còn trống
                 RoomRented: 0, //Phòng đã cho thuê
                 RoomNoFee: 0, //Phòng chưa trả phí
@@ -116,6 +169,8 @@
                     {id: 8,floor:4, Name: '402', PriceRoom: '5.000.000', customer:'Phạm Quang Hưng, Phạm Thị Minh Trang'},
                     {id: 9,floor:1, Name: '103', PriceRoom: '1.000.000', customer:null},
                 ],
+                selectRoom:{id: 8,floor:4, Name: '402', PriceRoom: '5.000.000', customer:'Phạm Quang Hưng, Phạm Thị Minh Trang'},
+
             }
         },
         mounted() {
@@ -134,9 +189,19 @@
             }
         },
         methods:{
+            btnAddCreateRoom(roomId){
+                this.dialogEdit = true;
+                this.titleDialog = 'Sửa phòng'
+                this.selectRoomId = roomId;
+            },
             btnAddRoom(){
                 this.titleDialog = 'Thêm phòng';
                 this.dialogEdit = true;
+            },
+            ViewdialogPayChange(roomId,title){
+                this.selectRoomId = roomId;
+                this.titledialogPayChange = title;
+                this.dialogPayChange = true;
             }
         }
     }
@@ -187,5 +252,9 @@
 }
 .itemRoomEmpty{
     background-color: white;
+}
+.bg-dialog{
+    background-color: #d9d9d9;
+    border-radius: 25px;
 }
 </style>

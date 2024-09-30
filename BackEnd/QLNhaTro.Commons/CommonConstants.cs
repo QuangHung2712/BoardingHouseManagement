@@ -10,7 +10,7 @@ namespace QLNhaTro.Commons
     {
         public class DefaultValue
         {
-            public const string DEFAULT_CONTROLLER_ROUTẺ = "api/[controller]/[action]";
+            public const string DEFAULT_CONTROLLER_ROUTER = "api/[controller]/[action]";
         }
         public class AppSettingKeys
         {

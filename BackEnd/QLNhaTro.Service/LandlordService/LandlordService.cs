@@ -21,37 +21,53 @@ namespace QLNhaTro.Service.LandlordService
             
             if(input.LandlordId <= 0)
             {
-                var landlord = new Landlord
+                try
                 {
-                    FullName = input.FullName,
-                    DoB = input.DoB,
-                    PhoneNumber = input.PhoneNumber,    
-                    Email = input.Email,
-                    CCCD = input.CCCD,
-                    Address = input.Address,
-                };
-                _Context.Landlord.Add(landlord);
-                await _Context.SaveChangesAsync();
+                    var landlord = new Landlord
+                    {
+                        FullName = input.FullName,
+                        DoB = input.DoB,
+                        PhoneNumber = input.PhoneNumber,
+                        Email = input.Email,
+                        CCCD = input.CCCD,
+                        Address = input.Address,
+                    };
+                    _Context.Landlord.Add(landlord);
+                    await _Context.SaveChangesAsync();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    return false;
+                    throw;
+                }
             }
             else
             {
                 var landlord = _Context.Landlord.Where(record => record.Id == input.LandlordId && record.IsDeleted == false).FirstOrDefault();
                 if (landlord == null)
                 {
-                    return false;
-                    throw new Exception();
+                    return false;                }
+                try
+                {   
+                    landlord = new Landlord
+                    {
+                        FullName = input.FullName,
+                        DoB = input.DoB,
+                        PhoneNumber = input.PhoneNumber,
+                        Email = input.Email,
+                        CCCD = input.CCCD,
+                        Address = input.Address,
+                    };
+                    _Context.Landlord.Update(landlord);
+                    await _Context.SaveChangesAsync();
                 }
-                landlord = new Landlord
+                catch(Exception ex)
                 {
-                    FullName = input.FullName,
-                    DoB = input.DoB,
-                    PhoneNumber = input.PhoneNumber,
-                    Email = input.Email,
-                    CCCD = input.CCCD,
-                    Address = input.Address,
-                };
-                _Context.Landlord.Update(landlord);
-                await _Context.SaveChangesAsync();
+                    Console.WriteLine(ex.Message);
+                    return false;
+                    throw;
+                }
             }
             return true;
         }
@@ -62,9 +78,18 @@ namespace QLNhaTro.Service.LandlordService
             {
                 return false;
             }
-            landlord.IsDeleted = true;
-            _Context.Landlord.Update(landlord);
-            await _Context.SaveChangesAsync();
+            try
+            {
+                landlord.IsDeleted = true;
+                _Context.Landlord.Update(landlord);
+                await _Context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return false;
+                throw;
+            }
             return true;
         }
     }

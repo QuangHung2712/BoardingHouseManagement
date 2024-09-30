@@ -4,12 +4,12 @@
             <h1>{{ title }}</h1>
         </v-col>
         <v-col offset="4" col="4" class="d-flex justify-space-between mt-2">
-            <v-btn @click="btnBack()">Quay về</v-btn>
-            <v-btn>Lưu</v-btn>
+            <v-btn class="btn btn-primary" @click="btnBack()">Quay về</v-btn>
+            <v-btn class="btn btn-primary">Lưu</v-btn>
         </v-col>
     </V-row>
     <v-tabs v-model="btn">
-        <v-tab :class="btn === 0 ? 'active-tab' : 'inactive-tab'">Thông tin khách thuê</v-tab>
+      <v-tab :class="btn === 0 ? 'active-tab' : 'inactive-tab'">Thông tin khách thuê</v-tab>
       <v-tab :class="btn === 1 ? 'active-tab' : 'inactive-tab'">Dịch Vụ</v-tab>
       <v-tab :class="btn === 2 ? 'active-tab' : 'inactive-tab'">Hợp đồng</v-tab>
     </v-tabs>

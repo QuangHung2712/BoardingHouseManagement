@@ -1,6 +1,6 @@
 <template>
 <v-main>
-  <v-row class="header d-flex m0">
+  <v-row class="header d-flex m0 align-center	">
     <v-col cols="4" class="p0">
       <button class="text-left text-header mt-1 ">QUẢN LÝ NHÀ TRỌ</button>
     </v-col>
@@ -8,7 +8,7 @@
 
     </v-col>
     <v-col cols="4" class="p0	">
-      <button @click="diglogProfile = !diglogProfile" class=" profile d-flex mt-7 mr-5">
+      <button @click="diglogProfile = !diglogProfile" class=" profile d-flex mr-5">
         <p>{{ NameLandlord }}</p>
         <v-icon icon="mdi-menu-down"></v-icon>
       </button>
