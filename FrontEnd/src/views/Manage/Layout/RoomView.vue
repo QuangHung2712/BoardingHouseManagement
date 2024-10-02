@@ -63,8 +63,8 @@
                     <v-btn v-show="item.customer !== null" icon size="small" @click="ViewdialogPayChange(item.id,'Đổi phòng')">
                         <v-icon>mdi-phone</v-icon>
                     </v-btn>
-                    <v-btn icon size="small">
-                        <v-icon>mdi-delete</v-icon>
+                    <v-btn icon size="small" @click="btnDeleteRoom(item.id,item.Name)">
+                        <v-icon >mdi-delete</v-icon>
                     </v-btn>
                     <v-btn icon size="small" @click="btnAddCreateRoom(item.id)">
                         <v-icon >mdi-pencil</v-icon>
@@ -95,12 +95,12 @@
             </v-card-title>
             <div v-show="titledialogPayChange ==='Trả Phòng'" class="mx-3 bg-dialog">
                     <v-row class="m0 align-center px-5 py-1">
-                        <v-col cols="3" class="p0">Số điện</v-col>
-                        <v-col cols="9" class="p0 mt-1"><v-text-field clearable></v-text-field></v-col>
+                        <v-col cols="3" class="p0">Số điện mới</v-col>
+                        <v-col cols="9" class="p0 mt-1"><v-text-field type="number" clearable></v-text-field></v-col>
                     </v-row>
                     <v-row class="m0 align-center px-5 py-1">
-                        <v-col cols="3" class="p0">Số nước</v-col>
-                        <v-col cols="9" class="p0 mt-1"><v-text-field clearable></v-text-field></v-col>
+                        <v-col cols="3" class="p0">Số nước mới</v-col>
+                        <v-col cols="9" class="p0 mt-1"><v-text-field type="number" clearable></v-text-field></v-col>
                     </v-row>
                     <v-row class="m0 align-center px-5 py-1">
                         <v-col cols="3" class="p0">Tiền phạt</v-col>
@@ -202,6 +202,9 @@
                 this.selectRoomId = roomId;
                 this.titledialogPayChange = title;
                 this.dialogPayChange = true;
+            },
+            btnDeleteRoom(idRoom,nameRoom){
+                var result = confirm('Bạn có chắc chắn muốn xóa phòng: ' + nameRoom)
             }
         }
     }

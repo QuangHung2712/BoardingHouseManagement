@@ -7,17 +7,34 @@
         <v-col cols="2"><v-text-field clearable label="Số phòng" v-model="roomName"></v-text-field></v-col>
         <v-col cols="2" class="d-flex justify-center mt-2"><v-btn @click="goToContractEdit(0)" class=" rounded-xl">Thêm hợp đồng</v-btn></v-col>
     </v-row>
-        <v-data-table 
-        :headers="headers"
-        :items="dataContract"
-        :items-per-page="6"
-        class="border-sm rounded-xl">
-            <template v-slot:[`item.actions`]="{ item }">
-            <v-icon small @click="viewDetails(item)">mdi-eye</v-icon>
-            <v-icon class="ml-5" small @click="goToContractEdit(item.id)">mdi-pencil-circle </v-icon>
-            <v-icon class="ml-5" small @click="viewEditContract()">mdi-delete-empty </v-icon>
-            </template>
-        </v-data-table>
+    <v-data-table 
+    :headers="headers"
+    :items="dataContract"
+    :items-per-page="6"
+    class="border-sm rounded-xl">
+        <template v-slot:[`item.actions`]="{ item }">
+        <v-icon small @click="viewDetails(item.id)">mdi-eye</v-icon>
+        <v-icon class="ml-5" small @click="goToContractEdit(item.id)">mdi-pencil-circle </v-icon>
+        <v-icon class="ml-5" small @click="btnDeleteContract(item.id,item.RoomName)">mdi-delete-empty </v-icon>
+        </template>
+    </v-data-table>'
+    <v-dialog v-model="dialogDetailContract">
+        <v-card>
+            <v-card-item>
+                <v-row class="m0">
+                    <v-col cols="6" class="text-h5">
+                        Chi tiết hợp đồng phòng {{  }}
+                    </v-col>
+                    <v-col cols="6" class="d-flex justify-space-around">
+                        <v-btn>Gia hạn hợp đồng</v-btn>
+                        <v-btn @click="btnEditContract()">Sửa hợp đồng</v-btn>
+                        <v-btn @click="btnClose()">Đóng</v-btn>
+                    </v-col>
+                </v-row>
+            </v-card-item>
+        </v-card>
+    </v-dialog>
+        
 </template>
 <script>
     export default{
@@ -27,6 +44,8 @@
                 StartDate: '',
                 customerSDT: '',
                 roomName: '',
+                SelectIdContract: 0,
+                dialogDetailContract: false,
                 headers:[
                     {title: 'Tên khách thuê',value: 'customerName'},
                     {title: 'Số phòng', value: 'RoomName'},
@@ -44,7 +63,7 @@
                     {id:6, customerId: 1, customerName: 'Phạm Quang Hưng', roomId: 1, RoomName : '205', startDate:'27/12/2024', Deposit: 2000000, numberPhone:'0359988934'},
                     {id:7, customerId: 1, customerName: 'Phạm Quang Hưng', roomId: 1, RoomName : '303', startDate:'27/12/2024', Deposit: 2000000, numberPhone:'0359988934'},
 
-                ]
+                ],
             }
         },
         computed:{
@@ -63,11 +82,29 @@
           this.towerId = idtower
         },
         methods:{
-            viewEditContract(){
-                alert('Buttom đã được click')
-            },
             goToContractEdit(idcontract) {
                 this.$router.push({ name: 'createEdit', params: { idcontract } });
+            },
+            viewDetails(idcontract){
+                this.dialogDetailContract = true;
+                this.SelectIdContract = idcontract;
+            },
+            btnClose(){
+                this.dialogDetailContract = false;
+                this.SelectIdContract = null;
+            },
+            btnEditContract(){
+                const  idcontract = this.SelectIdContract;
+                this.$router.push({ name: 'createEdit', params: { idcontract } });
+            },
+            btnDeleteContract(idcontract,roomName){
+                var resutl = confirm('Bạn có chắc chắn muốn xóa hợp đồng của phòng ' + roomName)
+                if(resutl){
+                    alert('Hợp đồng đã được xóa');
+                }
+                else{
+                    alert('Xóa không thành công');
+                }
             }
         }
     }
@@ -75,5 +112,8 @@
 <style scoped>
 .filter .v-col{
     padding-bottom: 5px;
+}
+.v-dialog{
+    width: 85%;
 }
 </style>

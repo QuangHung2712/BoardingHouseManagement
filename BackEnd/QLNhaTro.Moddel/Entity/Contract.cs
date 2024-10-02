@@ -15,8 +15,6 @@ namespace QLNhaTro.Moddel.Entity
         public virtual Room Room { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
-        public decimal PriceElectricity { get; set; }
-        public decimal? PriceWater { get; set; }
         public decimal Deposit {  get; set; }
         public virtual ICollection<ServiceRoom> ServiceMotels { get; set; }
         public DateTime? TerminationDate { get; set; }

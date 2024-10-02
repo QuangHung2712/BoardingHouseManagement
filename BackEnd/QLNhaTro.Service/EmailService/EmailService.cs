@@ -22,30 +22,6 @@ namespace QLNhaTro.Service.EmailService
             _Context = context;
             _EmailSettings = options.Value;
         }
-        public async Task<bool> CreateEditEmail(CreateEditEmailReqModels input)
-        {
-            if(input.Id <= 0)
-            {
-                try
-                {
-                    var email = new EmailUser
-                    {
-                        Id = input.Id,
-                        LandlordId = input.LandlordId,
-                        SmtpServer = input.SmtpServer,
-                        SmtpPort = input.SmtpPort,
-                            
-                    };
-                }
-                catch (Exception ex) 
-                {
-                    Console.WriteLine(ex.Message);
-                    return false;
-                    throw;
-                }
-            }
-            return true;
-        }
         public async Task SendEmailAsync(string toEmail, string subject, string content)
         {
             MimeMessage message = new MimeMessage();

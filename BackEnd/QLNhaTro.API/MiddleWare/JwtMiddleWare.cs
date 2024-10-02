@@ -56,10 +56,6 @@ namespace QLNhaTro.API.MiddleWare
                     context.Items[CommonConstants.JWT.Permission] = grantedPermissions;
                 }
             }
-            catch(SecurityTokenArgumentException ex)
-            {
-                context.Response.Headers["nat"] = "haha";
-            }
             catch
             {
                 // do nothing if jwt validation fails
