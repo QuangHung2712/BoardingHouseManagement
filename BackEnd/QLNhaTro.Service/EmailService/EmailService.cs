@@ -4,11 +4,12 @@ using QLNhaTro.Moddel.Moddel.RequestModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Mail;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
+using MimeKit;
+using MailKit.Net.Smtp;
 
 namespace QLNhaTro.Service.EmailService
 {
@@ -47,24 +48,24 @@ namespace QLNhaTro.Service.EmailService
         }
         public async Task SendEmailAsync(string toEmail, string subject, string content)
         {
-            var smtpClient = new SmtpClient(_EmailSettings.EmailSetting.SmtpServer)
+            MimeMessage message = new MimeMessage();
+            message.From.Add(new MailboxAddress(_EmailSettings.EmailSetting.SenderName,_EmailSettings.EmailSetting.UserName));
+            message.To.Add(MailboxAddress.Parse(toEmail));
+            message.Subject = subject;
+            message.Body = new TextPart("html") {Text = content };
+            SmtpClient client = new SmtpClient();
+            try
             {
-                Port = _EmailSettings.EmailSetting.SmtpPort,
-                Credentials = new NetworkCredential(_EmailSettings.EmailSetting.UserName, _EmailSettings.EmailSetting.Password),
-                EnableSsl = _EmailSettings.EmailSetting.EnableSsl,
-            };
-
-            var mailMessage = new MailMessage
+                client.Connect(_EmailSettings.EmailSetting.SmtpServer, _EmailSettings.EmailSetting.SmtpPort, _EmailSettings.EmailSetting.EnableSsl);
+                client.Authenticate(_EmailSettings.EmailSetting.UserName, _EmailSettings.EmailSetting.Password);
+                await client.SendAsync(message);
+                return;
+            }
+            catch (Exception ex) 
             {
-                From = new MailAddress(_EmailSettings.EmailSetting.UserName, _EmailSettings.EmailSetting.SenderName),
-                Subject = subject,
-                Body = content,
-                IsBodyHtml = true,
-            };
-
-            mailMessage.To.Add(toEmail);
-
-            await smtpClient.SendMailAsync(mailMessage);
+                Console.WriteLine("ERROR: " + ex);
+                throw;
+            }
         }
     }
 }
