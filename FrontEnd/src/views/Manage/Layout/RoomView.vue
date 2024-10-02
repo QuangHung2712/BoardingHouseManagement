@@ -66,10 +66,10 @@
                     <v-btn icon size="small" @click="btnDeleteRoom(item.id,item.Name)">
                         <v-icon >mdi-delete</v-icon>
                     </v-btn>
-                    <v-btn icon size="small" @click="btnAddCreateRoom(item.id)">
+                    <v-btn icon size="small" @click="btnAddCreateRoom(item.id,'Sửa phòng')">
                         <v-icon >mdi-pencil</v-icon>
                     </v-btn>
-                    <v-btn icon size="small" @click="btnAddCreateRoom(item.id)">
+                    <v-btn icon size="small" @click="btnAddCreateRoom(item.id,'Xem phòng')">
                         <v-icon >mdi-eye</v-icon>
                     </v-btn>
                 </v-row>
@@ -189,9 +189,9 @@
             }
         },
         methods:{
-            btnAddCreateRoom(roomId){
+            btnAddCreateRoom(roomId,title){
                 this.dialogEdit = true;
-                this.titleDialog = 'Sửa phòng'
+                this.titleDialog = title;
                 this.selectRoomId = roomId;
             },
             btnAddRoom(){
@@ -204,7 +204,13 @@
                 this.dialogPayChange = true;
             },
             btnDeleteRoom(idRoom,nameRoom){
-                var result = confirm('Bạn có chắc chắn muốn xóa phòng: ' + nameRoom)
+                var result = confirm('Bạn có chắc chắn muốn xóa phòng: ' + nameRoom);
+                if(result){
+                    alert('Xoá thành công');
+                }
+                else{
+                    alert('Xoá không thành công');
+                }
             }
         }
     }
