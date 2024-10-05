@@ -62,6 +62,7 @@
       </div>
       <div>
         <router-link 
+          :to="`/manage/${towerId}/arise`"
           @click="setActiveMenu(6)" 
           :class="{'active-menu': activeMenu === 6}" 
           class="menuitem">

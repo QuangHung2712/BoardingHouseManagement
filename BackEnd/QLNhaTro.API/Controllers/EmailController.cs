@@ -10,7 +10,7 @@ namespace QLNhaTro.API.Controllers
 
     public class EmailController : ControllerBase
     {
-        private IEmailService _emailService;
+        private readonly IEmailService _emailService;
 
         public EmailController(IEmailService emailService)
         {

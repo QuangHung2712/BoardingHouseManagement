@@ -45,6 +45,11 @@ const routes = [
             path: 'createEdit/:idcontract',
             name: 'createEdit',
             component:()=> import('../views/Manage/Layout/Contract/CreateEditContract.vue')
+          },
+          {
+            path: 'arise',
+            name: 'arise',
+            component:()=> import('../views/Manage/Layout/AriseView.vue')
           }
         ]
       },
@@ -54,6 +59,11 @@ const routes = [
     path: '/login',
     name: 'login',
     component: () => import('../views/Manage/Login/PageLogin.vue')
+  },
+  {
+    path: '/forgot',
+    name: 'forgot',
+    component: () => import('../views/Manage/Login/ForgotPassword.vue')
   },
 ]
 

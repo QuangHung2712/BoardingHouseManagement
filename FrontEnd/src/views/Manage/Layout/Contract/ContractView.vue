@@ -22,10 +22,11 @@
         <v-card>
             <v-card-item>
                 <v-row class="m0">
-                    <v-col cols="6" class="text-h5">
+                    <v-col cols="4" class="text-h5">
                         Chi tiết hợp đồng phòng {{  }}
                     </v-col>
-                    <v-col cols="6" class="d-flex justify-space-around">
+                    <v-col cols="8" class="d-flex justify-space-around">
+                        <v-btn>Xuất Word</v-btn>
                         <v-btn>Gia hạn hợp đồng</v-btn>
                         <v-btn @click="btnEditContract()">Sửa hợp đồng</v-btn>
                         <v-btn @click="btnClose()">Đóng</v-btn>
@@ -101,9 +102,7 @@
                 var resutl = confirm('Bạn có chắc chắn muốn xóa hợp đồng của phòng ' + roomName)
                 if(resutl){
                     alert('Hợp đồng đã được xóa');
-                }
-                else{
-                    alert('Xóa không thành công');
+                    return
                 }
             }
         }

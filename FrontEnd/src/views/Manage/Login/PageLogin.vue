@@ -1,5 +1,5 @@
 <template>
-      <v-sheet class="bg-deep-purple pa-12" rounded>
+  <v-sheet class="bg-deep-purple pa-12" rounded>
     <v-card class="mx-auto px-6 py-8" max-width="344">
       <h1 class="text-center mb-8">Đăng nhập</h1>
       <v-form
@@ -27,15 +27,20 @@
           @click:append-inner="visible = !visible"
           clearable
         ></v-text-field>
-
-        <a
+        <v-row class="m0 justify-space-between">
+          <router-link
           class="text-caption text-decoration-none text-blue"
-          href="#"
           rel="noopener noreferrer"
-          target="_blank"
+          to="/forgot"
         >
-          Quên mật khẩu</a>
-
+          Quên mật khẩu</router-link>
+          <router-link
+          class="text-caption text-decoration-none text-blue"
+          rel="noopener noreferrer"
+          to="/forgot"
+        >
+          Đăng ký tài khoản mới</router-link>
+        </v-row>
         <br>
 
         <v-btn
