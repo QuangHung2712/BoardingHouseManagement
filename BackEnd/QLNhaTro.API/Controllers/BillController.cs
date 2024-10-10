@@ -1,8 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using QLNhaTro.Commons;
+using QLNhaTro.Moddel.Moddel.RequestModels;
 using QLNhaTro.Service.BillService;
-using Tesseract;
-
 
 namespace QLNhaTro.API.Controllers
 {
@@ -16,12 +15,12 @@ namespace QLNhaTro.API.Controllers
         {
             _billService = billService;
         }
-
         [HttpPost]
-        public IActionResult ReadNumberPhoto()
+        public IActionResult CreatePayment([FromBody] BillPaymentRequest request)
         {
-            var result =  _billService.ReadNumberPhoto();
-            return Ok(result);
+            // Xử lý tạo URL thanh toán
+            string paymentUrl = _billService.CreatePaymentUrl(request.Amount, request.OrderId, request.OrderInfo, request.BankCode);
+            return Ok(new { url = paymentUrl });
         }
     }
 }

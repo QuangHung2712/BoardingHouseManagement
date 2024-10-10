@@ -1,21 +1,21 @@
 ﻿using QLNhaTro.Commons;
+using QLNhaTro.Moddel.Entity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace QLNhaTro.Moddel.Entity
+namespace QLNhaTro.Moddel.Moddel.RequestModels
 {
-    public class Contract : BaseEntityIsDelete
+    public class CreateEditContractReqModel : BaseEntity
     {
+        public long CustomerId { get; set; }
         public long RoomId { get; set; }
-        public virtual Room Room { get; set; }
-        public ICollection<Customers> Customers { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
-        public decimal Deposit {  get; set; }
-        public virtual ICollection<ServiceRoom> ServiceMotels { get; set; }
+        public decimal Deposit { get; set; }
+        public List<ContractServiceReqModel> Services { get; set; }
         public DateTime? TerminationDate { get; set; }
         public string? Note { get; set; }
     }

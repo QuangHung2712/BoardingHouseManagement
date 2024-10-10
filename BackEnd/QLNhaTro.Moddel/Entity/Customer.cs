@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace QLNhaTro.Moddel.Entity
 {
-    public class Customer : BaseInfoPeoPle
+    public class Customers : BaseInfoPeoPle
     {
-        public long TowerId { get; set; }
-        public virtual Tower  Tower{ get; set; }
+        public long ContractId { get; set; }
+        public virtual Contract Contract { get; set; }
     }
 }

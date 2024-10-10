@@ -18,6 +18,8 @@ namespace QLNhaTro.Moddel.Entity
         public long? NumberElectric { get; set; }
         public long? NumberCountries { get; set; }
         public string? Note { get; set; }
-        public bool IsActive { get; set; }
+
+        //trạng thái tìm khách mới
+        public bool Status { get; set; }
     }
 }

@@ -9,7 +9,7 @@ namespace QLNhaTro.Service.LandlordService
 {
     public interface ILandlordService
     {
-        Task<bool> CreateEditLandlord(CreateEditLandlordReqModels input);
-        Task<bool> DeleteLandlord(long id);
+        Task CreateEditLandlord(CreateEditLandlordReqModels input);
+        Task DeleteLandlord(long id);
     }
 }

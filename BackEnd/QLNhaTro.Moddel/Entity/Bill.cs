@@ -10,11 +10,11 @@ namespace QLNhaTro.Moddel.Entity
     public class Bill : BaseEntityIsDelete
     {
         public long CustomerId { get; set; }
-        public virtual Customer Customer { get; set; }
+        public virtual Customers Customer { get; set; }
         public long RoomId { get; set; }
         public virtual Room Room { get; set; }
-        public long NewNumber { get; set; }
-        public long? NewCountryNumber { get; set; }
+        public long? NewElectricity { get; set; }
+        public long? NewWater { get; set; }
         public DateOnly CreationDate { get; set; }
         public decimal TotalAmount { get; set; }
         public bool Status { get; set; }

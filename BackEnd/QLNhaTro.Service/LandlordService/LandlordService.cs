@@ -1,6 +1,10 @@
-﻿using QLNhaTro.Moddel;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using QLNhaTro.Commons.CustomException;
+using QLNhaTro.Moddel;
 using QLNhaTro.Moddel.Entity;
 using QLNhaTro.Moddel.Moddel.RequestModels;
+using QLNhaTro.Moddel.Moddel.ResponseModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +20,20 @@ namespace QLNhaTro.Service.LandlordService
         {
             _Context = context;
         }
-        public async Task<bool> CreateEditLandlord(CreateEditLandlordReqModels input)
+        public async Task<LandlordResModel> GetDetail(long id)
+        {
+            try
+            {
+                Landlord landlord = await GetById(id);
+                return LandlordResModel.Mapping(landlord);
+            }
+            catch (Exception ex) 
+            {
+                Console.WriteLine(ex);
+                throw;
+            }
+        }
+        public async Task CreateEditLandlord(CreateEditLandlordReqModels input)
         {
             
             if(input.LandlordId <= 0)
@@ -38,16 +55,13 @@ namespace QLNhaTro.Service.LandlordService
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex.Message);
-                    return false;
                     throw;
                 }
             }
             else
             {
                 var landlord = _Context.Landlord.Where(record => record.Id == input.LandlordId && record.IsDeleted == false).FirstOrDefault();
-                if (landlord == null)
-                {
-                    return false;                }
+                if (landlord == null) throw new NotFoundException(nameof(input.FullName));
                 try
                 {   
                     landlord = new Landlord
@@ -65,19 +79,14 @@ namespace QLNhaTro.Service.LandlordService
                 catch(Exception ex)
                 {
                     Console.WriteLine(ex.Message);
-                    return false;
                     throw;
                 }
             }
-            return true;
         }
-        public async Task<bool> DeleteLandlord(long id)
+        public async Task DeleteLandlord(long id)
         {
             var landlord = _Context.Landlord.Where(record => record.Id == id && record.IsDeleted == false).FirstOrDefault();
-            if (landlord == null) 
-            {
-                return false;
-            }
+            if (landlord == null) throw new NotFoundException(nameof(id));
             try
             {
                 landlord.IsDeleted = true;
@@ -87,10 +96,23 @@ namespace QLNhaTro.Service.LandlordService
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return false;
                 throw;
             }
-            return true;
+        }
+
+        private async Task<Landlord> GetById(long id)
+        {
+            try
+            {
+                IQueryable<Landlord> landlordQuery = _Context.Landlord.Where(e => e.Id == id).AsQueryable();
+                if (landlordQuery.IsNullOrEmpty()) throw new NotFoundException(nameof(Landlord.Id));
+                return await landlordQuery.FirstAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw;
+            }
         }
     }
 }

@@ -14,10 +14,9 @@ namespace QLNhaTro.Moddel
         {
 
         }
-        public DbSet<Account> Accounts { get; set; }
         public DbSet<Bill> Bill { get; set; }
         public DbSet<Contract> Contract { get; set; }
-        public DbSet<Customer> Customer { get; set; }
+        public DbSet<Customers> Customer { get; set; }
         public DbSet<ImgRoom> ImgRoom { get; set; }
         public DbSet<Landlord> Landlord { get; set; }
         public DbSet<Room> Room { get; set; }

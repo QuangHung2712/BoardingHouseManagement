@@ -8,6 +8,6 @@ namespace QLNhaTro.Service.BillService
 {
     public interface IBillService
     {
-        string ReadNumberPhoto();
+        string CreatePaymentUrl(decimal amount, string orderId, string orderInfo, string bankCode = "");
     }
 }

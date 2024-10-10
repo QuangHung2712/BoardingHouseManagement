@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace QLNhaTro.Moddel.Entity
 {
-    public class ImgRoom : BaseEntityIsDelete
+    public class ImgRoom : BaseEntity
     {
         public long RoomId { get; set; }
         public virtual Room Room { get; set; }
