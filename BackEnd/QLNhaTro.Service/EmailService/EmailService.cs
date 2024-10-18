@@ -43,5 +43,9 @@ namespace QLNhaTro.Service.EmailService
                 throw;
             }
         }
+        public void ScheduleEmail()
+        {
+            
+        }
     }
 }

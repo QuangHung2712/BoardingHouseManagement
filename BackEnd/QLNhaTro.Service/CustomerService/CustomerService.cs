@@ -45,7 +45,6 @@ namespace QLNhaTro.Service.CustomerService
 
                     };
                     _Context.Customer.Add(result);
-                    await _Context.SaveChangesAsync();
                 }
                 catch (Exception ex)
                 {

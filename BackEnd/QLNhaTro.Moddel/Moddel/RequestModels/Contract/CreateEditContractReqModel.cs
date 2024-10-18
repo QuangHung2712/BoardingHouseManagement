@@ -10,10 +10,9 @@ namespace QLNhaTro.Moddel.Moddel.RequestModels
 {
     public class CreateEditContractReqModel : BaseEntity
     {
-        public long CustomerId { get; set; }
+        public List<CreateEditCustomerReqModel> Customer { get; set; }
         public long RoomId { get; set; }
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
+        public int ContractPeriod { get; set; }
         public decimal Deposit { get; set; }
         public List<ContractServiceReqModel> Services { get; set; }
         public DateTime? TerminationDate { get; set; }
