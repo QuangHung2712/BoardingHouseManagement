@@ -14,14 +14,15 @@ namespace QLNhaTro.Moddel
         {
 
         }
-        public DbSet<Bill> Bill { get; set; }
-        public DbSet<Contract> Contract { get; set; }
-        public DbSet<Customers> Customer { get; set; }
-        public DbSet<ImgRoom> ImgRoom { get; set; }
-        public DbSet<Landlord> Landlord { get; set; }
-        public DbSet<Room> Room { get; set; }
-        public DbSet<Service> Service { get; set; }
-        public DbSet<ServiceRoom> ServiceRoom { get; set; }
-        public DbSet<Tower> Tower { get; set; }
+        public DbSet<Bill> Bills { get; set; }
+        public DbSet<Contract> Contracts { get; set; }
+        public DbSet<Customers> Customers { get; set; }
+        public DbSet<ImgRoom> ImgRooms { get; set; }
+        public DbSet<Landlord> Landlords { get; set; }
+        public DbSet<Room> Rooms { get; set; }
+        public DbSet<Services> Services { get; set; }
+        public DbSet<ServiceRoom> ServiceRooms { get; set; }
+        public DbSet<Tower> Towers { get; set; }
+        public DbSet<Incur> Incurs { get; set; }
     }
 }

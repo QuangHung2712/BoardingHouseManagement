@@ -10,7 +10,7 @@ namespace QLNhaTro.Service.CustomerService
 {
     public interface ICustomerService
     {
-        Task<List<CustomerResModel>> GetCustomerByContract(long contractId);
+        List<CustomerResModel> GetCustomerByContract(long contractId);
         Task CreateEditCustomer(CreateEditCustomerReqModel input, long contractId);
         Task DeteleCustomer(long iD);
     }

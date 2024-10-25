@@ -10,8 +10,7 @@ namespace QLNhaTro.Moddel.Moddel.ResponseModels
 {
     public class ContractResModel :BaseEntity
     {
-        public long CustomerId { get; set; }
-        public virtual Customers Customer { get; set; }
+        public List<CustomerResModel> Customer { get; set; }
         public long RoomId { get; set; }
         public string RoomName { get; set; }
         public DateTime StartDate { get; set; }

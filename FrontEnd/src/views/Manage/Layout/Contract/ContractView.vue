@@ -12,10 +12,14 @@
     :items="dataContract"
     :items-per-page="6"
     class="border-sm rounded-xl">
+        <template v-slot:[`item.stt`]="{ index }">
+                <!-- Hiển thị số thứ tự, cộng thêm 1 vì index bắt đầu từ 0 -->
+            {{ index + 1 }}
+        </template>
         <template v-slot:[`item.actions`]="{ item }">
-        <v-icon small @click="viewDetails(item.id)">mdi-eye</v-icon>
-        <v-icon class="ml-5" small @click="goToContractEdit(item.id)">mdi-pencil-circle </v-icon>
-        <v-icon class="ml-5" small @click="btnDeleteContract(item.id,item.RoomName)">mdi-delete-empty </v-icon>
+            <v-icon small @click="viewDetails(item.id)">mdi-eye</v-icon>
+            <v-icon class="ml-5" small @click="goToContractEdit(item.id)">mdi-pencil-circle </v-icon>
+            <v-icon class="ml-5" small @click="btnDeleteContract(item.id,item.RoomName)">mdi-delete-empty </v-icon>
         </template>
     </v-data-table>'
     <v-dialog v-model="dialogDetailContract">
@@ -48,6 +52,7 @@
                 SelectIdContract: 0,
                 dialogDetailContract: false,
                 headers:[
+                    {title: 'STT', value: 'stt'},
                     {title: 'Tên khách thuê',value: 'customerName'},
                     {title: 'Số phòng', value: 'RoomName'},
                     {title: 'Ngày thuê',value: 'startDate'},

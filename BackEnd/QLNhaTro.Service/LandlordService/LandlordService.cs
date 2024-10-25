@@ -49,7 +49,7 @@ namespace QLNhaTro.Service.LandlordService
                         CCCD = input.CCCD,
                         Address = input.Address,
                     };
-                    _Context.Landlord.Add(landlord);
+                    _Context.Landlords.Add(landlord);
                     await _Context.SaveChangesAsync();
                 }
                 catch (Exception ex)
@@ -60,7 +60,7 @@ namespace QLNhaTro.Service.LandlordService
             }
             else
             {
-                var landlord = _Context.Landlord.Where(record => record.Id == input.LandlordId && record.IsDeleted == false).FirstOrDefault();
+                var landlord = _Context.Landlords.Where(record => record.Id == input.LandlordId && record.IsDeleted == false).FirstOrDefault();
                 if (landlord == null) throw new NotFoundException(nameof(input.FullName));
                 try
                 {   
@@ -73,7 +73,7 @@ namespace QLNhaTro.Service.LandlordService
                         CCCD = input.CCCD,
                         Address = input.Address,
                     };
-                    _Context.Landlord.Update(landlord);
+                    _Context.Landlords.Update(landlord);
                     await _Context.SaveChangesAsync();
                 }
                 catch(Exception ex)
@@ -85,12 +85,12 @@ namespace QLNhaTro.Service.LandlordService
         }
         public async Task DeleteLandlord(long id)
         {
-            var landlord = _Context.Landlord.Where(record => record.Id == id && record.IsDeleted == false).FirstOrDefault();
+            var landlord = _Context.Landlords.Where(record => record.Id == id && record.IsDeleted == false).FirstOrDefault();
             if (landlord == null) throw new NotFoundException(nameof(id));
             try
             {
                 landlord.IsDeleted = true;
-                _Context.Landlord.Update(landlord);
+                _Context.Landlords.Update(landlord);
                 await _Context.SaveChangesAsync();
             }
             catch (Exception ex)
@@ -104,7 +104,7 @@ namespace QLNhaTro.Service.LandlordService
         {
             try
             {
-                IQueryable<Landlord> landlordQuery = _Context.Landlord.Where(e => e.Id == id).AsQueryable();
+                IQueryable<Landlord> landlordQuery = _Context.Landlords.Where(e => e.Id == id).AsQueryable();
                 if (landlordQuery.IsNullOrEmpty()) throw new NotFoundException(nameof(Landlord.Id));
                 return await landlordQuery.FirstAsync();
             }

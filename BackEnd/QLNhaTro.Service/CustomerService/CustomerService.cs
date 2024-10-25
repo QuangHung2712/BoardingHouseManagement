@@ -1,4 +1,5 @@
-﻿using QLNhaTro.Commons.CustomException;
+﻿using QLNhaTro.Commons;
+using QLNhaTro.Commons.CustomException;
 using QLNhaTro.Moddel;
 using QLNhaTro.Moddel.Entity;
 using QLNhaTro.Moddel.Moddel.RequestModels;
@@ -20,9 +21,9 @@ namespace QLNhaTro.Service.CustomerService
         {
             _Context = context;
         }
-        public async Task<List<CustomerResModel>> GetCustomerByContract(long contractId)
+        public List<CustomerResModel> GetCustomerByContract(long contractId)
         {
-            var customerData = _Context.Customer.Where(c=>c.ContractId == contractId && !c.IsDeleted).Select(c=> CustomerResModel.Mapping(c)).ToList();
+            var customerData = _Context.Customers.Where(c=>c.ContractId == contractId && !c.IsDeleted).Select(c=> CustomerResModel.Mapping(c)).ToList();
             if (customerData.Count == 0) throw new NotFoundException(nameof(contractId));
             return customerData;
         }
@@ -44,7 +45,7 @@ namespace QLNhaTro.Service.CustomerService
                         ContractId = contractId,
 
                     };
-                    _Context.Customer.Add(result);
+                    _Context.Customers.Add(result);
                 }
                 catch (Exception ex)
                 {
@@ -54,7 +55,7 @@ namespace QLNhaTro.Service.CustomerService
             }
             else 
             {
-                var customer = _Context.Customer.Where(c=>c.Id == input.Id && !c.IsDeleted).FirstOrDefault();
+                var customer = _Context.Customers.Where(c=>c.Id == input.Id && !c.IsDeleted).FirstOrDefault();
                 if (customer == null) 
                 {
                     throw new NotFoundException(nameof(input.FullName));
@@ -69,17 +70,12 @@ namespace QLNhaTro.Service.CustomerService
                     CCCD = input.CCCD,
                     ContractId = contractId,
                 };
-                _Context.Customer.Update(customer);
-                await _Context.SaveChangesAsync();
+                _Context.Customers.Update(customer);
             }
         }
         public async Task DeteleCustomer(long iD)
         {
-            var customerData = _Context.Customer.Where(c=>c.Id == iD && !c.IsDeleted).FirstOrDefault();
-            if (customerData == null) throw new NotFoundException(nameof(iD));
-            customerData.IsDeleted = true;
-            _Context.Customer.Update(customerData);
-            await _Context.SaveChangesAsync();
+            _Context.Customers.Delete(iD,true);
         }
     }
 }

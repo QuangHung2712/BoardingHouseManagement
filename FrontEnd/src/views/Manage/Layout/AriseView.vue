@@ -22,6 +22,10 @@
     </v-row>
     <v-data-table
         :headers = "headersTable">
+        <template v-slot:[`item.stt`]="{ index }">
+            <!-- Hiển thị số thứ tự, cộng thêm 1 vì index bắt đầu từ 0 -->
+            {{ index + 1 }}
+        </template>
         <template v-slot:[`item.actions`]="{ item }">
           <v-icon small @click="viewDetails(item)">mdi-eye</v-icon>
         </template>
@@ -59,6 +63,7 @@
                 titleDialog: '',
                 selectAriseId: 0,
                 headersTable:[
+                    {title: 'STT', value: 'stt'},
                     {title: 'Số phòng',value:'RoomName'},
                     {title: 'Số Tiền',value: 'Amount'},
                     {title: 'Ngày tạo', value: 'CreationDate'},

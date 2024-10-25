@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace QLNhaTro.Moddel.Entity
 {
-    public class Service : BaseMasterData
+    public class Services : BaseMasterData
     {
         public long TowerId { get; set; }
         public virtual Tower Tower { get; set; }

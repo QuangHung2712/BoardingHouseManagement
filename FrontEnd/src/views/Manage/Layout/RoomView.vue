@@ -78,7 +78,52 @@
     </div>
     <v-dialog v-model="dialogEdit" class="dialog">
             <v-card>
-                <v-card-title>{{titleDialog}}</v-card-title>
+                <v-card-title class="text-h4">{{titleDialog}}</v-card-title>
+                <v-row class="m0 text-center">
+                    <v-col cols="6" class="p0">
+                        <v-row class="m0">
+                            <v-col cols="4">Số phòng</v-col>
+                            <v-col cols="8"><v-text-field clearable></v-text-field></v-col>
+                        </v-row>
+                    </v-col>
+                    <v-col cols="6" class="p0">
+                        <v-row class="m0">
+                            <v-col cols="4">Tầng</v-col>
+                            <v-col cols="8"><v-text-field clearable></v-text-field></v-col>
+                        </v-row>
+                    </v-col>
+                    <v-col cols="6" class="p0">
+                        <v-row class="m0">
+                            <v-col cols="4">Thiết bị</v-col>
+                            <v-col cols="8"><v-text-field clearable></v-text-field></v-col>
+                        </v-row>
+                    </v-col>
+                    <v-col cols="6" class="p0">
+                        <v-row class="m0">
+                            <v-col cols="4">Số người ở</v-col>
+                            <v-col cols="8"><v-text-field clearable type="number" ></v-text-field></v-col>
+                        </v-row>
+                    </v-col>
+                    <v-col cols="6" class="p0">
+                        <v-row class="m0">
+                            <v-col cols="4">Giá Phòng</v-col>
+                            <v-col cols="8">
+                                <v-text-field 
+                                clearable 
+                                v-model="selectRoom.PriceRoom" 
+                                @input="formatCurrency" 
+                                append-inner="VND">
+                                </v-text-field>
+                            </v-col>
+                        </v-row>
+                    </v-col>
+                    <v-col cols="6" class="p0">
+                        <v-row class="m0">
+                            <v-col cols="4">Ghi chú</v-col>
+                            <v-col cols="8"><v-textarea clearable></v-textarea></v-col>
+                        </v-row>
+                    </v-col>
+                </v-row>
                 <v-card-actions class="justify-space-between">
                     <v-btn @click="dialogEdit=false">Hủy</v-btn>
                     <v-btn >Lưu</v-btn>
@@ -169,7 +214,7 @@
                     {id: 8,floor:4, Name: '402', PriceRoom: '5.000.000', customer:'Phạm Quang Hưng, Phạm Thị Minh Trang'},
                     {id: 9,floor:1, Name: '103', PriceRoom: '1.000.000', customer:null},
                 ],
-                selectRoom:{id: 8,floor:4, Name: '402', PriceRoom: '5.000.000', customer:'Phạm Quang Hưng, Phạm Thị Minh Trang'},
+                selectRoom:{id: 0,floor:0, Name: '', PriceRoom: '', customer:''},
 
             }
         },
@@ -193,6 +238,7 @@
                 this.dialogEdit = true;
                 this.titleDialog = title;
                 this.selectRoomId = roomId;
+                
             },
             btnAddRoom(){
                 this.titleDialog = 'Thêm phòng';
@@ -211,7 +257,17 @@
                 else{
                     alert('Xoá không thành công');
                 }
+            },
+            formatCurrency() {
+            let numberValue = this.selectRoom.PriceRoom.replace(/[^\d]/g, '');
+            if (numberValue) {
+                numberValue = new Intl.NumberFormat('vi-VN', {
+                    style: 'currency',
+                    currency: 'VND',
+                }).format(numberValue);
             }
+            this.selectRoom.PriceRoom = numberValue;
+            },
         }
     }
 </script>
