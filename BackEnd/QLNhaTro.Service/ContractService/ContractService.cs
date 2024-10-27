@@ -36,13 +36,26 @@ namespace QLNhaTro.Service.ContractService
             _Context = context;
             _Customer = customer;
         }
-        public async Task<ContractResModel> GetDetail(long id)
+        public Task<List<GetAllContractByTowerId>> GetAllContractByTowerId(long towerId) 
+        {
+            var contract = _Context.Contracts.Where(record => record.Room.TowerId == towerId).Select(item => new GetAllContractByTowerId
+            {
+                Id = item.Id,
+                NumberOfRoom = item.Room.Name,
+                CustomerName = item.Customers.Where(c=>c.ContractId == item.Id).Select(c=> c.FullName).ToString(),
+                StartDate = item.StartDate,
+                Deposit = item.Deposit,
+            }).ToListAsync();
+            if (contract == null) throw new NotFoundException(nameof(towerId));
+            return contract;
+        }
+        public async Task<GetDetailContractResModel> GetDetail(long id)
         {
             try
             {
                 var contractData = _Context.Contracts
                     .Where(x => x.Id == id && !x.IsDeleted)
-                    .Select(record => new ContractResModel
+                    .Select(record => new GetDetailContractResModel
                     {
                         Id = record.Id,
                         RoomId = record.RoomId,
@@ -61,7 +74,7 @@ namespace QLNhaTro.Service.ContractService
                         }).ToList(),
                         Customer = _Customer.GetCustomerByContract(record.Id),
                     }).FirstOrDefault();
-                if (contractData == null) throw new NotFoundException(nameof(ContractResModel.Id));
+                if (contractData == null) throw new NotFoundException(nameof(id));
                 return contractData;
             }
             catch (Exception ex)

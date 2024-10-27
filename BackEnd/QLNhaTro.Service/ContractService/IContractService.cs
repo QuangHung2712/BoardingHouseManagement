@@ -10,10 +10,11 @@ namespace QLNhaTro.Service.ContractService
 {
     public interface IContractService
     {
-        Task<ContractResModel> GetDetail(long id);
+        Task<GetDetailContractResModel> GetDetail(long id);
         Task CreateEditContract(CreateEditContractReqModel input);
         Task DeleteContract(long Id);
         Task ContractExtension(ContractExtensionReqModel input);
-
+        Task<List<GetAllContractByTowerId>> GetAllContractByTowerId(long towerId);
+        string ExportWord(long contractId);
     }
 }

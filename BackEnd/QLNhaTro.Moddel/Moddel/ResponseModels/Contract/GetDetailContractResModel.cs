@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace QLNhaTro.Moddel.Moddel.ResponseModels
 {
-    public class ContractResModel :BaseEntity
+    public class GetDetailContractResModel :BaseEntity
     {
         public List<CustomerResModel> Customer { get; set; }
         public long RoomId { get; set; }

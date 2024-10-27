@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace QLNhaTro.Moddel.Moddel.ResponseModels
 {
-    public class GetAllRoomResModel : BaseEntity
+    public class GetAllContractByTowerId : BaseEntity
     {
+        public string CustomerName { get; set; }
         public string NumberOfRoom { get; set; }
-        public string? CustomerName { get; set; }
-        public decimal PriceRoom { get; set; }
-        //trạng thái tìm khách mới
-        public bool Status { get; set; }
+        public DateTime StartDate { get; set; }
+        public string PhoneCustomer { get; set; }
+        public decimal Deposit { get; set; }
     }
 }
