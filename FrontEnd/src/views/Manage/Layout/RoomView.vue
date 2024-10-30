@@ -30,7 +30,7 @@
             <p>Còn trống: {{ RoomAvailable }} | Đã cho thuê: {{ RoomRented }} | Chưa thu phí: {{ RoomNoFee }}</p>
             <div>
                 <v-btn class="mr-6 rounded-xl">Giảm Giá phòng</v-btn>
-                <v-btn class="mr-6 rounded-xl">Khách thuê</v-btn>
+                <v-btn class="mr-6 rounded-xl">Tính tiền phòng</v-btn>
                 <v-btn class="mr-6 rounded-xl" @click="btnAddRoom()">Thêm phòng</v-btn>
             </div>
         </v-row>
@@ -54,7 +54,7 @@
                 </v-row>
                 <v-row class="justify-space-between">
                     <router-link class="link" v-show="item.customer==null">Thêm khách</router-link>
-                    <v-btn v-show="item.customer!=null">Tìm khách mới</v-btn>
+                    <v-btn v-show="item.customer!=null" @click="BtnTimKhachMoi(item.id,item.Name)">Tìm khách mới</v-btn>
                 </v-row>
                 <v-row justify="space-around" class="mt-4">
                     <v-btn v-show="item.customer !== null" icon size="small" @click="ViewdialogPayChange(item.id,'Trả Phòng')">
@@ -259,15 +259,21 @@
                 }
             },
             formatCurrency() {
-            let numberValue = this.selectRoom.PriceRoom.replace(/[^\d]/g, '');
-            if (numberValue) {
-                numberValue = new Intl.NumberFormat('vi-VN', {
-                    style: 'currency',
-                    currency: 'VND',
-                }).format(numberValue);
-            }
-            this.selectRoom.PriceRoom = numberValue;
+                let numberValue = this.selectRoom.PriceRoom.replace(/[^\d]/g, '');
+                if (numberValue) {
+                    numberValue = new Intl.NumberFormat('vi-VN', {
+                        style: 'currency',
+                        currency: 'VND',
+                    }).format(numberValue);
+                }
+                this.selectRoom.PriceRoom = numberValue;
             },
+            BtnTimKhachMoi(roomId,roomName){
+                var result = confirm('Bạn có chắc chắn muốn tìm khách mới cho phòng: ' + roomName);
+                if(result){
+                    alert('Thành công');
+                }
+            }
         }
     }
 </script>

@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using DocumentFormat.OpenXml.InkML;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using MimeKit.Encodings;
 using QLNhaTro.Commons;
 using QLNhaTro.Commons.CustomException;
@@ -8,9 +10,11 @@ using QLNhaTro.Moddel.Moddel.RequestModels;
 using QLNhaTro.Moddel.Moddel.ResponseModels;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace QLNhaTro.Service.RoomService
 {
@@ -50,7 +54,7 @@ namespace QLNhaTro.Service.RoomService
             if (roomdata == null) throw new NotFoundException(nameof(roomId));
             return roomdata;
         }
-        public async Task CreateEditRoom(CreateEditRoomReqModel input)
+        public async Task CreateEditRoom(CreateEditRoomReqModel input, List<IFormFile> imgs)
         {
             if (input.Id <= 0)
             {
@@ -69,6 +73,8 @@ namespace QLNhaTro.Service.RoomService
                         Status = false,
                     };
                     _Context.Rooms.Add(newRoom);
+
+                    SaveImgToDB(imgs, newRoom.Id, input.TowerId);
                     await _Context.SaveChangesAsync();
                 }
                 catch (Exception ex)
@@ -90,6 +96,8 @@ namespace QLNhaTro.Service.RoomService
                     room.NumberCountries = input.NumberCountries;
                     room.Note = input.Note;
                     _Context.Rooms.Update(room);
+                    DeleteImgRoomByRoomId(input.Id, input.TowerId);
+                    SaveImgToDB(imgs, input.Id, input.TowerId);
                     await _Context.SaveChangesAsync();
                 }
                 catch (Exception ex)
@@ -99,14 +107,83 @@ namespace QLNhaTro.Service.RoomService
                 }
             }
         }
-        public async Task DeleteRoom(long roomId)
+        private async void SaveImgToDB(List<IFormFile> Imgs, long roomId, long towerId)
+        {
+            // Tạo thư mục lưu ảnh dựa trên TowerId và RoomId
+            var folderPath = Path.Combine("D:/QuanLyNhaTro", towerId.ToString(), roomId.ToString());
+            try
+            {
+                if (Imgs != null && Imgs.Count > 0)
+                {
+                    // Kiểm tra và tạo thư mục nếu chưa tồn tại
+                    if (!Directory.Exists(folderPath))
+                    {
+                        Directory.CreateDirectory(folderPath);
+                    }
+                    foreach (var img in Imgs)
+                    {
+                        if (img.Length > 0)
+                        {
+                            // Đặt tên file duy nhất
+                            var fileName = Guid.NewGuid() + Path.GetExtension(img.FileName);
+                            var filePath = Path.Combine(folderPath, fileName);
+
+                            // Lưu ảnh vào thư mục
+                            using (var stream = new FileStream(filePath, FileMode.Create))
+                            {
+                                await img.CopyToAsync(stream);
+                            }
+
+                            // Lưu đường dẫn ảnh vào database
+                            var contractImage = new ImgRoom
+                            {
+                                RoomId = roomId,
+                                Path = "images/" + fileName
+                            };
+
+                            //Lưu đường dẫn vào database
+                            _Context.ImgRooms.Add(contractImage);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                throw;
+            }
+        }
+        public async Task DeleteRoom(long roomId,long towerId)
         {
             _Context.Rooms.Delete(roomId);
-            DeleteImgRoomByRoomId(roomId);
+            DeleteImgRoomByRoomId(roomId, towerId);
             await _Context.SaveChangesAsync();
         }
-        private void DeleteImgRoomByRoomId(long roomId)
+        private void DeleteImgRoomByRoomId(long roomId,long towerId)
         {
+            // Tạo thư mục lưu ảnh dựa trên TowerId và RoomId
+            var folderPath = Path.Combine("D:/QuanLyNhaTro", towerId.ToString(), roomId.ToString());
+            try
+            {
+                // Kiểm tra xem thư mục có tồn tại không
+                if (Directory.Exists(folderPath))
+                {
+                    // Lấy tất cả các file trong thư mục
+                    var files = Directory.GetFiles(folderPath);
+
+                    Directory.Delete(folderPath, true);
+                    Console.WriteLine("Đã xóa thư mục và tất cả nội dung trong: " + folderPath);
+                }
+                else
+                {
+                    throw new NotFoundException(nameof(roomId.ToString));
+                }
+            }
+            catch (Exception ex) 
+            {
+                Console.WriteLine(ex.ToString());
+                throw;
+            }
             var imgRoom = _Context.ImgRooms.Where(record => record.RoomId == roomId).ToList();
             _Context.ImgRooms.RemoveRange(imgRoom);            
         }

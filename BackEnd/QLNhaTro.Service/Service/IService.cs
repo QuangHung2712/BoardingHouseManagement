@@ -1,4 +1,5 @@
-﻿using QLNhaTro.Moddel.Moddel.RequestModels;
+﻿using Microsoft.AspNetCore.Http;
+using QLNhaTro.Moddel.Moddel.RequestModels;
 using QLNhaTro.Moddel.Moddel.ResponseModels;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,8 @@ namespace QLNhaTro.Service.Service
     {
         Task DeleteService(long Id);
         Task CreateEditService(CreateEditServiceReqModel input);
-        Task<List<GetAllServiceResModel>> GetAllEntity();
+        Task<List<GetAllServiceResModel>> GetAllEntity(long towerId);
+        byte[] ExportServiceToExcel(long towerId);
+        Task ImportServiceToExcel(IFormFile fileInput);
     }
 }

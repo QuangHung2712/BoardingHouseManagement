@@ -48,7 +48,7 @@
           :class="{'active-menu': activeMenu === 4}" 
           class="menuitem">
           <v-icon icon="mdi-water"></v-icon>
-          <span>Số nước</span>
+          <span>Hóa đơn</span>
         </router-link>
       </div>
       <div>
