@@ -32,25 +32,36 @@ namespace QLNhaTro.Service.RoomService
             {
                 Id = r.Id,
                 NumberOfRoom = r.Name,
+                CustomerName = GetCustomerByRoom(r.Id),
                 PriceRoom = r.PriceRoom,
                 Status = r.Status,
             }).ToListAsync();
             return roomData;
         }
+        private string GetCustomerByRoom(long roomId)
+        {
+            var data = _Context.Contracts.Where(record=> record.RoomId == roomId)
+                                .SelectMany(record=> record.Customers)
+                                .Select(item=> item.FullName).ToList();
+            return string.Join(", ", data);
+        }
         public async Task<GetRoomDetailByIdResModel> GetDetailRoomById(long roomId)
         {
-            var roomdata = _Context.Rooms.Where(record => record.Id == roomId && !record.IsDeleted).Select(item => new GetRoomDetailByIdResModel 
+            var roomdata = await _Context.Rooms.Where(record => record.Id == roomId && !record.IsDeleted).Select(item => new GetRoomDetailByIdResModel 
             {
                 Id = item.Id,
                 NumberOfRoom = item.Name,
-                //khách hàng
+                CustomerName = _Context.Contracts.Where(c=> c.RoomId == roomId)
+                                                .SelectMany(c=> c.Customers)
+                                                .Select(c=> CustomerResModel.Mapping(c))
+                                                .ToList(),
                 NoPStaying = item.NoPStaying,
                 PriceRoom  = item.PriceRoom,
                 NumberElectric = item.NumberElectric,
                 NumberCountries = item.NumberCountries,
                 Note = item.Note,
                 Status = item.Status,
-            }).FirstOrDefault();
+            }).FirstOrDefaultAsync();
             if (roomdata == null) throw new NotFoundException(nameof(roomId));
             return roomdata;
         }

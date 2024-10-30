@@ -10,7 +10,7 @@ namespace QLNhaTro.Moddel.Moddel.ResponseModels
     public class GetRoomDetailByIdResModel : BaseEntity
     {
         public string NumberOfRoom { get; set; }
-        public string CustomerName { get; set; }
+        public List<CustomerResModel> CustomerName { get; set; }
         public string Equipment { get; set; }
         //Số người ở
         public int NoPStaying { get; set; }
