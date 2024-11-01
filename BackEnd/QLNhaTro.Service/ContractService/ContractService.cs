@@ -42,7 +42,8 @@ namespace QLNhaTro.Service.ContractService
             {
                 Id = item.Id,
                 NumberOfRoom = item.Room.Name,
-                CustomerName = item.Customers.Where(c=>c.ContractId == item.Id).Select(c=> c.FullName).ToString(),
+                CustomerName = string.Join(",",_Customer.GetCustomerByContract(item.Id).Select(c=> c.FullName)),
+                PhoneCustomer = string.Join(",", _Customer.GetCustomerByContract(item.Id).Select(c => c.PhoneNumber)),
                 StartDate = item.StartDate,
                 Deposit = item.Deposit,
             }).ToListAsync();
@@ -53,8 +54,9 @@ namespace QLNhaTro.Service.ContractService
         {
             try
             {
-                var contractData = _Context.Contracts
+                var contractData = await _Context.Contracts
                     .Where(x => x.Id == id && !x.IsDeleted)
+                    .Include(s=>s.ServiceMotels)
                     .Select(record => new GetDetailContractResModel
                     {
                         Id = record.Id,
@@ -65,7 +67,7 @@ namespace QLNhaTro.Service.ContractService
                         Deposit = record.Deposit,
                         TerminationDate = record.TerminationDate,
                         Note = record.Note,
-                        ServiceMotels = _Context.ServiceRooms.Where(s=>s.ContractId == record.Id).Select(x => new ContractServiceResModel
+                        ServiceMotels = record.ServiceMotels.Select(x => new ContractServiceResModel
                         {
                             ServiceId = x.ServiceId,
                             ServiceName = x.Service.Name,
@@ -73,7 +75,7 @@ namespace QLNhaTro.Service.ContractService
                             Number = x.Number
                         }).ToList(),
                         Customer = _Customer.GetCustomerByContract(record.Id),
-                    }).FirstOrDefault();
+                    }).FirstOrDefaultAsync();
                 if (contractData == null) throw new NotFoundException(nameof(id));
                 return contractData;
             }
@@ -137,8 +139,8 @@ namespace QLNhaTro.Service.ContractService
                     contractUpdate.Note = input.Note;
                     _Context.Update(contractUpdate);
 
-
-                    var service = _Context.ServiceRooms.Where(item=> input.Services.Any(data=> data.ServiceId == item.ServiceId)).ToList();
+                    //Thực hiện xóa các dịch vụ của phòng đó và add lại
+                    var service = _Context.ServiceRooms.Where(item=>item.ContractId == input.Id).ToList();
                     _Context.ServiceRooms.RemoveRange(service);
                     var serviceRoom = input.Services.Select(s => new ServiceRoom
                     {
@@ -170,6 +172,7 @@ namespace QLNhaTro.Service.ContractService
         public async Task DeleteContract(long Id)
         {
             _Context.Contracts.Delete(Id);
+            _Customer.DeteleCustomer(Id);
             await _Context.SaveChangesAsync();
         }
         public async Task ContractExtension(ContractExtensionReqModel input)

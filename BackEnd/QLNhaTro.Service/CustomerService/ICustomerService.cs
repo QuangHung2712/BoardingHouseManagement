@@ -12,6 +12,6 @@ namespace QLNhaTro.Service.CustomerService
     {
         List<CustomerResModel> GetCustomerByContract(long contractId);
         Task CreateEditCustomer(CreateEditCustomerReqModel input, long contractId);
-        Task DeteleCustomer(long iD);
+        void DeteleCustomer(long contractId);
     }
 }

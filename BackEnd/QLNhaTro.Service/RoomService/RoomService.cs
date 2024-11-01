@@ -7,6 +7,7 @@ using QLNhaTro.Commons.CustomException;
 using QLNhaTro.Moddel;
 using QLNhaTro.Moddel.Entity;
 using QLNhaTro.Moddel.Moddel.RequestModels;
+using QLNhaTro.Moddel.Moddel.RequestModels.Room;
 using QLNhaTro.Moddel.Moddel.ResponseModels;
 using System;
 using System.Collections.Generic;
@@ -34,13 +35,13 @@ namespace QLNhaTro.Service.RoomService
                 NumberOfRoom = r.Name,
                 CustomerName = GetCustomerByRoom(r.Id),
                 PriceRoom = r.PriceRoom,
-                Status = r.Status,
+                Status = r.StatusNewCustomer,
             }).ToListAsync();
             return roomData;
         }
         private string GetCustomerByRoom(long roomId)
         {
-            var data = _Context.Contracts.Where(record=> record.RoomId == roomId)
+            var data = _Context.Contracts.Where(record=> record.RoomId == roomId && record.TerminationDate ==null)
                                 .SelectMany(record=> record.Customers)
                                 .Select(item=> item.FullName).ToList();
             return string.Join(", ", data);
@@ -51,7 +52,7 @@ namespace QLNhaTro.Service.RoomService
             {
                 Id = item.Id,
                 NumberOfRoom = item.Name,
-                CustomerName = _Context.Contracts.Where(c=> c.RoomId == roomId)
+                CustomerName = _Context.Contracts.Where(c=> c.RoomId == roomId && c.TerminationDate == null)
                                                 .SelectMany(c=> c.Customers)
                                                 .Select(c=> CustomerResModel.Mapping(c))
                                                 .ToList(),
@@ -60,7 +61,7 @@ namespace QLNhaTro.Service.RoomService
                 NumberElectric = item.NumberElectric,
                 NumberCountries = item.NumberCountries,
                 Note = item.Note,
-                Status = item.Status,
+                Status = item.StatusNewCustomer,
             }).FirstOrDefaultAsync();
             if (roomdata == null) throw new NotFoundException(nameof(roomId));
             return roomdata;
@@ -81,7 +82,7 @@ namespace QLNhaTro.Service.RoomService
                         NumberElectric = input.NumberElectric,
                         NumberCountries = input.NumberCountries,
                         Note = input.Note,
-                        Status = false,
+                        StatusNewCustomer = false,
                     };
                     _Context.Rooms.Add(newRoom);
 
@@ -201,9 +202,24 @@ namespace QLNhaTro.Service.RoomService
         public async Task FineNewCustomers(long roomId)
         {
             var room = _Context.Rooms.GetAvailableById(roomId);
-            room.Status = true;
+            room.StatusNewCustomer = true;
             _Context.Rooms.Update(room);
             await _Context.SaveChangesAsync();
+        }
+        public async Task CheckOut(CheckOutRoomReqModel input)
+        {
+            var contract =  _Context.Contracts.Where(record=> record.RoomId == input.Id && record.TerminationDate == null).FirstOrDefault();
+            var room = _Context.Rooms.GetAvailableById(input.Id);
+            if(contract == null) throw new NotFoundException(nameof(contract));
+            contract.TerminationDate = DateTime.Now;
+            room.StatusNewCustomer = true;
+            _Context.Contracts.Update(contract);
+            _Context.Rooms.Update(room);
+            await _Context.SaveChangesAsync();
+        }
+        public async Task ChangeRoom(ChangeRoomReqModel input)
+        {
+            
         }
     }
 }

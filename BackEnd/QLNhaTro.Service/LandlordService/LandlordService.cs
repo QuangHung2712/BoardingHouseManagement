@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using QLNhaTro.Commons;
 using QLNhaTro.Commons.CustomException;
 using QLNhaTro.Moddel;
 using QLNhaTro.Moddel.Entity;
@@ -33,54 +34,49 @@ namespace QLNhaTro.Service.LandlordService
                 throw;
             }
         }
-        public async Task CreateEditLandlord(CreateEditLandlordReqModels input)
+        public async Task CreateLandlord(CreateEditLandlordReqModels input)
         {
-            
-            if(input.LandlordId <= 0)
+            try
             {
-                try
+                var landlord = new Landlord
                 {
-                    var landlord = new Landlord
-                    {
-                        FullName = input.FullName,
-                        DoB = input.DoB,
-                        PhoneNumber = input.PhoneNumber,
-                        Email = input.Email,
-                        CCCD = input.CCCD,
-                        Address = input.Address,
-                    };
-                    _Context.Landlords.Add(landlord);
-                    await _Context.SaveChangesAsync();
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.Message);
-                    throw;
-                }
+                    FullName = input.FullName,
+                    DoB = input.DoB,
+                    PhoneNumber = input.PhoneNumber,
+                    Email = input.Email,
+                    CCCD = input.CCCD,
+                    Address = input.Address,
+                };
+                _Context.Landlords.Add(landlord);
+                await _Context.SaveChangesAsync();
             }
-            else
+            catch (Exception ex)
             {
-                var landlord = _Context.Landlords.Where(record => record.Id == input.LandlordId && record.IsDeleted == false).FirstOrDefault();
-                if (landlord == null) throw new NotFoundException(nameof(input.FullName));
-                try
-                {   
-                    landlord = new Landlord
-                    {
-                        FullName = input.FullName,
-                        DoB = input.DoB,
-                        PhoneNumber = input.PhoneNumber,
-                        Email = input.Email,
-                        CCCD = input.CCCD,
-                        Address = input.Address,
-                    };
-                    _Context.Landlords.Update(landlord);
-                    await _Context.SaveChangesAsync();
-                }
-                catch(Exception ex)
+                Console.WriteLine(ex.Message);
+                throw;
+            }
+        }
+        public async Task UpdateLandlord(CreateEditLandlordReqModels input)
+        {
+            var landlord = _Context.Landlords.GetAvailableById(input.LandlordId);
+            try
+            {
+                landlord = new Landlord
                 {
-                    Console.WriteLine(ex.Message);
-                    throw;
-                }
+                    FullName = input.FullName,
+                    DoB = input.DoB,
+                    PhoneNumber = input.PhoneNumber,
+                    Email = input.Email,
+                    CCCD = input.CCCD,
+                    Address = input.Address,
+                };
+                _Context.Landlords.Update(landlord);
+                await _Context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw;
             }
         }
         public async Task DeleteLandlord(long id)

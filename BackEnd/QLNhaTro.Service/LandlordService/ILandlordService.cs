@@ -1,4 +1,5 @@
 ﻿using QLNhaTro.Moddel.Moddel.RequestModels;
+using QLNhaTro.Moddel.Moddel.ResponseModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,9 @@ namespace QLNhaTro.Service.LandlordService
 {
     public interface ILandlordService
     {
-        Task CreateEditLandlord(CreateEditLandlordReqModels input);
+        Task<LandlordResModel> GetDetail(long id);
+        Task CreateLandlord(CreateEditLandlordReqModels input);
+        Task UpdateLandlord(CreateEditLandlordReqModels input);
         Task DeleteLandlord(long id);
     }
 }

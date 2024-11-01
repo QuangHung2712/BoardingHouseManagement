@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using QLNhaTro.Commons;
+using QLNhaTro.Moddel.Moddel.RequestModels;
 using QLNhaTro.Moddel.Moddel.ResponseModels;
 using QLNhaTro.Service.RoomService;
 
@@ -22,5 +23,33 @@ namespace QLNhaTro.API.Controllers
         {
             return await roomService.GellAllRoomByTower(towerId);
         }
+
+        [HttpGet]
+        public async Task<GetRoomDetailByIdResModel> GetDetail([FromQuery] long roomId)
+        {
+            return await roomService.GetDetailRoomById(roomId);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateEditRoom([FromForm] CreateEditRoomReqModel data, [FromForm] List<IFormFile> fileData)
+        {
+            await roomService.CreateEditRoom(data, fileData);
+            return Ok();
+        }
+
+        [HttpPut("{roomId}")]
+        public async Task<IActionResult> FineNewCustomers(long roomId)
+        {
+            await roomService.FineNewCustomers(roomId);
+            return Ok();
+        }
+
+        [HttpDelete("{iD}")]
+        public IActionResult DeleteRoom(long iD, [FromQuery] long towerID) 
+        {
+            roomService.DeleteRoom(iD, towerID);
+            return Ok();
+        }
+
     }
 }

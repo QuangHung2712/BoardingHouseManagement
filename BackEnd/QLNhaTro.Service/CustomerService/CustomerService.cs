@@ -73,9 +73,13 @@ namespace QLNhaTro.Service.CustomerService
                 _Context.Customers.Update(customer);
             }
         }
-        public async Task DeteleCustomer(long iD)
+        public void DeteleCustomer(long contractId)
         {
-            _Context.Customers.Delete(iD,true);
+            var customerData = _Context.Customers.Where(c => c.ContractId == contractId && !c.IsDeleted).ToList();
+            foreach (var customer in customerData) 
+            {
+                _Context.Customers.Delete(customer.Id);
+            }
         }
     }
 }

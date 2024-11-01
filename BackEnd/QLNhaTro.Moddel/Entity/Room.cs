@@ -20,6 +20,6 @@ namespace QLNhaTro.Moddel.Entity
         public string? Note { get; set; }
 
         //trạng thái tìm khách mới
-        public bool Status { get; set; }
+        public bool StatusNewCustomer { get; set; }
     }
 }
