@@ -7,7 +7,6 @@ using QLNhaTro.Commons.CustomException;
 using QLNhaTro.Moddel;
 using QLNhaTro.Moddel.Entity;
 using QLNhaTro.Moddel.Moddel.RequestModels;
-using QLNhaTro.Moddel.Moddel.RequestModels.Room;
 using QLNhaTro.Moddel.Moddel.ResponseModels;
 using System;
 using System.Collections.Generic;
@@ -16,6 +15,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using static System.Net.Mime.MediaTypeNames;
+using Contract = QLNhaTro.Moddel.Entity.Contract;
 
 namespace QLNhaTro.Service.RoomService
 {
@@ -219,7 +219,28 @@ namespace QLNhaTro.Service.RoomService
         }
         public async Task ChangeRoom(ChangeRoomReqModel input)
         {
-            
+            var contractOld = _Context.Contracts
+            .SingleOrDefault(record => record.RoomId == input.RoomIdOld && !record.IsDeleted && record.TerminationDate == null)
+            ?? throw new NotFoundException(nameof(input.RoomIdOld));
+            Contract contractNew = new Contract
+            {
+                RoomId = input.RoomIdNew,
+                Customers = contractOld.Customers,
+                StartDate = input.TimesChange,
+                EndDate = input.TimesChange.AddMonths(input.ContractPeriod),
+                Deposit = contractOld.Deposit,
+                ServiceMotels = contractOld.ServiceMotels,
+            };
+            contractOld.TerminationDate = input.TimesChange;
+            _Context.Contracts.Update(contractOld);
+            _Context.Contracts.Add(contractNew);
+            var roomOld = _Context.Rooms.GetAvailableById(input.RoomIdOld);
+            var roomNew = _Context.Rooms.GetAvailableById(input.RoomIdNew);
+            roomOld.StatusNewCustomer = true;
+            roomNew.StatusNewCustomer = false;
+            _Context.Rooms.UpdateRange(roomOld, roomNew);
+
+            await _Context.SaveChangesAsync();
         }
     }
 }

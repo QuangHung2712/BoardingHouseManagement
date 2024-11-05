@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using QLNhaTro.Commons;
 using QLNhaTro.Moddel.Moddel.RequestModels;
 using QLNhaTro.Moddel.Moddel.ResponseModels;
@@ -51,5 +52,20 @@ namespace QLNhaTro.API.Controllers
             return Ok();
         }
 
+        [HttpPut]
+        public async Task<IActionResult> CheckOutRoom([FromBody] CheckOutRoomReqModel data)
+        {
+            await roomService.CheckOut(data);
+            //Thực hiện việc quyết toán tiền cho khách
+            return Ok();
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> ChangeRoom([FromBody] ChangeRoomReqModel data)
+        {
+            await roomService.ChangeRoom(data);
+            //Xử lý việc chênh tiền trọ
+            return Ok();
+        }
     }
 }

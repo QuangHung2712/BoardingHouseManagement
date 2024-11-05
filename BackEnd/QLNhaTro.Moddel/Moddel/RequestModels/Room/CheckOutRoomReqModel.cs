@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace QLNhaTro.Moddel.Moddel.RequestModels.Room
+namespace QLNhaTro.Moddel.Moddel.RequestModels
 {
     public class CheckOutRoomReqModel : BaseEntity
     {
