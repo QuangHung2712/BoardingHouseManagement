@@ -182,6 +182,7 @@
     </v-dialog>
 </template>
 <script>
+    import CryptoJS from 'crypto-js';
     export default{
         data(){
             return{
@@ -220,7 +221,9 @@
         },
         mounted() {
           const idtower = this.$route.params.idtower;
-          this.towerId = idtower
+          //Giải mã
+          const DecodingIdTower = CryptoJS.enc.Utf8.stringify(CryptoJS.enc.Base64.parse(idtower));
+          this.towerId = DecodingIdTower
         },
         computed:{
             floor(){

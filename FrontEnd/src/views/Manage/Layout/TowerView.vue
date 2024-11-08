@@ -35,6 +35,7 @@
         </v-dialog>
 </template>
 <script>
+    import CryptoJS from 'crypto-js';
     export default {
         data(){
             return{
@@ -60,7 +61,9 @@
                 this.titleDialog='Sửa nhà trọ'
             },
             goToTowerDetails(idtower) {
-                this.$router.push({ name: 'towerDetails', params: { idtower } });
+                //Mã hóa Id của tower
+                const encryptedId = CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(idtower));
+                this.$router.push({ name: 'towerDetails', params: { idtower: encryptedId } });
             }
         }
     }

@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
+
 const routes = [
   {
     path: '/',
@@ -50,6 +51,11 @@ const routes = [
             path: 'arise',
             name: 'arise',
             component:()=> import('../views/Manage/Layout/AriseView.vue')
+          },
+          {
+            path: 'bill',
+            name: 'bill',
+            component:()=> import('../views/Manage/Layout/BillView.vue')
           }
         ]
       },
