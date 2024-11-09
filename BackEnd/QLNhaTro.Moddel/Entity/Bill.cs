@@ -1,4 +1,5 @@
-﻿using QLNhaTro.Commons;
+﻿using Microsoft.EntityFrameworkCore;
+using QLNhaTro.Commons;
 using System;
 using System.Collections.Generic;
 using System.Linq;

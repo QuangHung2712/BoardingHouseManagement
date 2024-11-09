@@ -31,7 +31,7 @@ namespace QLNhaTro.Commons
             var record = entity.GetAvailableById(id);
             if (isPermanent) 
             {
-                entity.Remove(record);
+                
             }
             else
             {
