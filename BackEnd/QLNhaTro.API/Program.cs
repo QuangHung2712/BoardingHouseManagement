@@ -69,6 +69,7 @@ if (app.Environment.IsDevelopment())
 app.UseMiddleware<JwtMiddleWare>(); //set file chạy jwt
 
 app.UseCors(x=> x
+    .WithOrigins("http://localhost:8080/")
     .AllowAnyMethod() //
     .AllowAnyHeader() //
     .SetIsOriginAllowed(origin=>true) //

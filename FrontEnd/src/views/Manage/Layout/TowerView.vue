@@ -36,6 +36,7 @@
 </template>
 <script>
     import CryptoJS from 'crypto-js';
+    import apiClient from '@/plugins/axiosConfig';
     export default {
         data(){
             return{
@@ -64,6 +65,13 @@
                 //Mã hóa Id của tower
                 const encryptedId = CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(idtower));
                 this.$router.push({ name: 'towerDetails', params: { idtower: encryptedId } });
+                apiClient.get(`/Tower/GetAllTowerByLandlordId/${idtower}`)
+                    .then(reponse =>{
+                        console.log(reponse.data)
+                    })
+                    .catch(error => {
+                        console.error('Lấy thông tin của tòa nhà bị lỗi: ',error);
+                    })
             }
         }
     }

@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Cấu hình axios với base URL
 const apiClient = axios.create({
-  baseURL: "http://localhost:8080", // URL gốc
+  baseURL: "https://localhost:7078/api", // URL gốc
   headers: {
     "Content-Type": "application/json",
     // Các headers khác nếu cần

@@ -106,6 +106,7 @@
       }
     },
     methods: {
+
       setActiveMenu(menuIndex) {
       this.activeMenu = menuIndex;
       this.Menu = menuIndex

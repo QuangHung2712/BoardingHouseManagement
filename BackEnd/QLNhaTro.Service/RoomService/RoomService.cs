@@ -27,16 +27,20 @@ namespace QLNhaTro.Service.RoomService
         {
             _Context = context;
         }
-        public Task<List<GetAllRoomResModel>> GellAllRoomByTower(long toweId)
+        public async Task<List<GetAllRoomResModel>> GellAllRoomByTower(long toweId)
         {
-            var roomData = _Context.Rooms.Where(r => !r.IsDeleted && r.TowerId == toweId).Select(r => new GetAllRoomResModel
+            var roomData = await _Context.Rooms.Where(r => !r.IsDeleted && r.TowerId == toweId).Select(r => new GetAllRoomResModel
             {
                 Id = r.Id,
                 NumberOfRoom = r.Name,
-                CustomerName = GetCustomerByRoom(r.Id),
+                floor = 1,
                 PriceRoom = r.PriceRoom,
                 Status = r.StatusNewCustomer,
             }).ToListAsync();
+            foreach (var room in roomData)
+            {
+                room.CustomerName = GetCustomerByRoom(room.Id); // Gọi phương thức GetCustomerByRoom bên ngoài LINQ
+            }
             return roomData;
         }
         private string GetCustomerByRoom(long roomId)
@@ -44,7 +48,11 @@ namespace QLNhaTro.Service.RoomService
             var data = _Context.Contracts.Where(record=> record.RoomId == roomId && record.TerminationDate ==null)
                                 .SelectMany(record=> record.Customers)
                                 .Select(item=> item.FullName).ToList();
-            return string.Join(", ", data);
+            if(data.Count > 0)
+            {
+                return string.Join(",", data);
+            }
+            return "";
         }
         public async Task<GetRoomDetailByIdResModel> GetDetailRoomById(long roomId)
         {

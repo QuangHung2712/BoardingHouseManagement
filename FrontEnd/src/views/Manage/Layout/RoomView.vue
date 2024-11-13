@@ -41,15 +41,15 @@
             <v-card class="pa-4 itemRoom" color="peach" dark v-for="item in Roomfilter" :key="item.id" :class="item.customer ===null ? 'itemRoomEmpty':'' ">
                 <v-row justify="space-between pa-2">
                     <v-icon>mdi-home</v-icon>
-                    <span>{{ item.Name }}</span>
+                    <span>{{ item.numberOfRoom }}</span>
                     <v-spacer></v-spacer>
                     <v-icon>mdi-currency-usd</v-icon>
-                    <span>{{ item.PriceRoom }}</span>
+                    <span>{{ item.priceRoom }}</span>
                 </v-row>
                 <v-row class="mt-4">
                     <v-col>
                         <v-icon>mdi-account-circle</v-icon>
-                        {{ item.customer }}
+                        {{ item.CustomerName }}
                     </v-col>
                 </v-row>
                 <v-row class="justify-space-between">
@@ -110,7 +110,7 @@
                             <v-col cols="8">
                                 <v-text-field 
                                 clearable 
-                                v-model="selectRoom.PriceRoom" 
+                                v-model="selectRoom.priceRoom" 
                                 @input="formatCurrency" 
                                 append-inner="VND">
                                 </v-text-field>
@@ -183,6 +183,7 @@
 </template>
 <script>
     import CryptoJS from 'crypto-js';
+    import apiClient from '@/plugins/axiosConfig';
     export default{
         data(){
             return{
@@ -215,15 +216,19 @@
                     {id: 8,floor:4, Name: '402', PriceRoom: '5.000.000', customer:'Phạm Quang Hưng, Phạm Thị Minh Trang'},
                     {id: 9,floor:1, Name: '103', PriceRoom: '1.000.000', customer:null},
                 ],
-                selectRoom:{id: 0,floor:0, Name: '', PriceRoom: '', customer:''},
+                selectRoom:null,
 
             }
         },
+        created(){
+            const idtower = this.$route.params.idtower;
+            //Giải mã
+            const DecodingIdTower = CryptoJS.enc.Utf8.stringify(CryptoJS.enc.Base64.parse(idtower));
+            this.towerId = DecodingIdTower
+            this.getAllRoom();
+        },
         mounted() {
-          const idtower = this.$route.params.idtower;
-          //Giải mã
-          const DecodingIdTower = CryptoJS.enc.Utf8.stringify(CryptoJS.enc.Base64.parse(idtower));
-          this.towerId = DecodingIdTower
+            
         },
         computed:{
             floor(){
@@ -237,6 +242,17 @@
             }
         },
         methods:{
+            async getAllRoom(){
+                await apiClient.get(`/Room/GetAllRoom/${this.towerId}`)
+                    .then(reponse =>{
+                        console.log(reponse.data)
+                        this.RoomData = reponse.data
+                        console.log(this.RoomData)
+                    })
+                    .catch(error => {
+                        console.error('Lấy thông tin của tòa nhà bị lỗi: ',error);
+                    })
+            },
             btnAddCreateRoom(roomId,title){
                 this.dialogEdit = true;
                 this.titleDialog = title;
@@ -262,14 +278,14 @@
                 }
             },
             formatCurrency() {
-                let numberValue = this.selectRoom.PriceRoom.replace(/[^\d]/g, '');
+                let numberValue = this.selectRoom.priceRoom.replace(/[^\d]/g, '');
                 if (numberValue) {
                     numberValue = new Intl.NumberFormat('vi-VN', {
                         style: 'currency',
                         currency: 'VND',
                     }).format(numberValue);
                 }
-                this.selectRoom.PriceRoom = numberValue;
+                this.selectRoom.priceRoom = numberValue;
             },
             BtnTimKhachMoi(roomId,roomName){
                 var result = confirm('Bạn có chắc chắn muốn tìm khách mới cho phòng: ' + roomName);

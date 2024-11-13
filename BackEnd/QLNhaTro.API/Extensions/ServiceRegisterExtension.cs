@@ -7,6 +7,7 @@ using QLNhaTro.Service.IncurService;
 using QLNhaTro.Service.LandlordService;
 using QLNhaTro.Service.RoomService;
 using QLNhaTro.Service.Service;
+using QLNhaTro.Service.TowerService;
 
 namespace QLNhaTro.API.Extensions
 {
@@ -23,6 +24,7 @@ namespace QLNhaTro.API.Extensions
             services.AddScoped<IIncurService, IncurService>();
             services.AddScoped<ILandlordService, LandlordService>();
             services.AddScoped<IRoomService, RoomService>();
+            services.AddScoped<ITowerService,TowerService>();
         }
     }
 }
