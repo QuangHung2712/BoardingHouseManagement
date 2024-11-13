@@ -63,7 +63,7 @@
                     <v-btn v-show="item.customer !== null" icon size="small" @click="ViewdialogPayChange(item.id,'Đổi phòng')">
                         <v-icon>mdi-phone</v-icon>
                     </v-btn>
-                    <v-btn icon size="small" @click="btnDeleteRoom(item.id,item.Name)">
+                    <v-btn icon size="small" @click="btnDeleteRoom(item.id,item.numberOfRoom)">
                         <v-icon >mdi-delete</v-icon>
                     </v-btn>
                     <v-btn icon size="small" @click="btnAddCreateRoom(item.id,'Sửa phòng')">
@@ -245,7 +245,6 @@
             async getAllRoom(){
                 await apiClient.get(`/Room/GetAllRoom/${this.towerId}`)
                     .then(reponse =>{
-                        console.log(reponse.data)
                         this.RoomData = reponse.data
                         console.log(this.RoomData)
                     })
@@ -271,7 +270,14 @@
             btnDeleteRoom(idRoom,nameRoom){
                 var result = confirm('Bạn có chắc chắn muốn xóa phòng: ' + nameRoom);
                 if(result){
-                    alert('Xoá thành công');
+                    apiClient.delete(`/Room/DeleteRoom/${idRoom}?towerID=${this.towerId}`)
+                    .then(()=>{
+                        this.getAllRoom()
+                        alert('Xoá thành công')
+                    })
+                    .catch(error =>{
+                        console.error('Xoá phòng bị lỗi: ',error);
+                    })
                 }
                 else{
                     alert('Xoá không thành công');

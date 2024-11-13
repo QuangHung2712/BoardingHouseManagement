@@ -176,8 +176,8 @@ namespace QLNhaTro.Service.RoomService
         public async Task DeleteRoom(long roomId,long towerId)
         {
             _Context.Rooms.Delete(roomId);
-            DeleteImgRoomByRoomId(roomId, towerId);
             await _Context.SaveChangesAsync();
+            DeleteImgRoomByRoomId(roomId, towerId);
         }
         private void DeleteImgRoomByRoomId(long roomId,long towerId)
         {
@@ -205,7 +205,8 @@ namespace QLNhaTro.Service.RoomService
                 throw;
             }
             var imgRoom = _Context.ImgRooms.Where(record => record.RoomId == roomId).ToList();
-            _Context.ImgRooms.RemoveRange(imgRoom);            
+            _Context.ImgRooms.RemoveRange(imgRoom);    
+            _Context.SaveChangesAsync();
         }
         public async Task FineNewCustomers(long roomId)
         {

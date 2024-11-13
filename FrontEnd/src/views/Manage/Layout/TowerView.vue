@@ -7,10 +7,10 @@
     <div class="d-flex flex-wrap item">
             <v-card class="pa-4 itemTower" color="peach" dark v-for="item in towerData" :key="item.id">
                     <v-icon>mdi-map-marker</v-icon>
-                    <span>{{ item.name }}</span>
-                    <p class="mt-2">Số phòng: {{item.roomnumber}}</p>
-                    <p class="mt-2">Đã cho thuê: {{ item.Rented }}</p>
-                    <p  class="mt-2">Còn trống: {{ item.stillEmpty }}</p>
+                    <span>{{ item.address }}</span>
+                    <p class="mt-2">Số phòng: {{item.sumRoom}}</p>
+                    <p class="mt-2">Đã cho thuê: {{ item.roomRented }}</p>
+                    <p  class="mt-2">Còn trống: {{ item.roomStillEmpty }}</p>
                 <v-row justify="space-around" class="mt-2">
                     <v-btn icon size="small">
                         <v-icon>mdi-delete</v-icon>
@@ -41,16 +41,14 @@
         data(){
             return{
                 towerData: [
-                    {id: 1, name: 'Nhà 11 Cầu Diễn', address: 'Số 11 ngõ 91 Cầu Diễn Bắc Từ Liêm Hà Nội',roomnumber: 3,Rented: 2,stillEmpty: 1},
-                    {id: 2, name: 'Nhà 11 Cầu Diễn', address: 'Số 11 ngõ 91 Cầu Diễn Bắc Từ Liêm Hà Nội',roomnumber: 3,Rented: 2,stillEmpty: 1},
-                    {id: 3, name: 'Nhà 11 Cầu Diễn', address: 'Số 11 ngõ 91 Cầu Diễn Bắc Từ Liêm Hà Nội',roomnumber: 3,Rented: 2,stillEmpty: 1},
-                    {id: 4, name: 'Nhà 11 Cầu Diễn', address: 'Số 11 ngõ 91 Cầu Diễn Bắc Từ Liêm Hà Nội',roomnumber: 3,Rented: 2,stillEmpty: 1},
-                    {id: 5, name: 'Nhà 11 Cầu Diễn', address: 'Số 11 ngõ 91 Cầu Diễn Bắc Từ Liêm Hà Nội',roomnumber: 3,Rented: 2,stillEmpty: 1},
-                    {id: 6, name: 'Nhà 11 Cầu Diễn', address: 'Số 11 ngõ 91 Cầu Diễn Bắc Từ Liêm Hà Nội',roomnumber: 3,Rented: 2,stillEmpty: 1},
+
                 ],
                 dialogEdit: false,
                 titleDialog: ''
             }
+        },
+        created(){
+            this.GetAllTower();
         },
         methods:{
             btnAdd(){
@@ -65,9 +63,12 @@
                 //Mã hóa Id của tower
                 const encryptedId = CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(idtower));
                 this.$router.push({ name: 'towerDetails', params: { idtower: encryptedId } });
-                apiClient.get(`/Tower/GetAllTowerByLandlordId/${idtower}`)
+            },
+            GetAllTower(){
+                apiClient.get(`/Tower/GetAllTowerByLandlordId/${1}`)
                     .then(reponse =>{
-                        console.log(reponse.data)
+                        this.towerData =reponse.data
+                        console.log(this.towerData)
                     })
                     .catch(error => {
                         console.error('Lấy thông tin của tòa nhà bị lỗi: ',error);

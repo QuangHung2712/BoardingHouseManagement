@@ -27,7 +27,7 @@ namespace QLNhaTro.Service.TowerService
             {
                 Id = t.Id,
                 Address = t.Address,
-                SumRoom = 10, //_Context.Rooms.ToDictionary(r => r.TowerId == t.Id).Count(),
+                SumRoom = _Context.Rooms.Count(r=> r.TowerId == t.Id),
                 RoomRented = 10,
                 RoomStillEmpty = 10
             }).ToListAsync();

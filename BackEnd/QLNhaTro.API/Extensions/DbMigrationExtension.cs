@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using QLNhaTro.Moddel;
+using QLNhaTro.Moddel.SeedData;
 
 namespace QLNhaTro.API.Extensions
 {
@@ -11,6 +12,7 @@ namespace QLNhaTro.API.Extensions
             {
                 var context = serviceScope.ServiceProvider.GetRequiredService<AppDbContext>();
                 context.Database.Migrate();
+                SeedDataV1.SeedData(context);
                 /*if (isDevelopment)
                 {
                     DataSeeding.DevelopmentSeeding(context);
