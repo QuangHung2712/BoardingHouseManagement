@@ -45,7 +45,7 @@ namespace QLNhaTro.API.Controllers
             return Ok();
         }
 
-        [HttpDelete("{iD}")]
+        [HttpPatch("{iD}")]
         public IActionResult DeleteRoom(long iD, [FromQuery] long towerID) 
         {
             roomService.DeleteRoom(iD, towerID);

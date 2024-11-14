@@ -60,6 +60,7 @@ namespace QLNhaTro.Service.RoomService
             {
                 Id = item.Id,
                 NumberOfRoom = item.Name,
+                Equipment = item.Equipment,
                 CustomerName = _Context.Contracts.Where(c=> c.RoomId == roomId && c.TerminationDate == null)
                                                 .SelectMany(c=> c.Customers)
                                                 .Select(c=> CustomerResModel.Mapping(c))
@@ -177,7 +178,7 @@ namespace QLNhaTro.Service.RoomService
         {
             _Context.Rooms.Delete(roomId);
             await _Context.SaveChangesAsync();
-            DeleteImgRoomByRoomId(roomId, towerId);
+            //DeleteImgRoomByRoomId(roomId, towerId);
         }
         private void DeleteImgRoomByRoomId(long roomId,long towerId)
         {

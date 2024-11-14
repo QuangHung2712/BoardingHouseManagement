@@ -31,14 +31,14 @@
             <div>
                 <v-btn class="mr-6 rounded-xl">Giảm Giá phòng</v-btn>
                 <v-btn class="mr-6 rounded-xl">Tính tiền phòng</v-btn>
-                <v-btn class="mr-6 rounded-xl" @click="btnAddRoom()">Thêm phòng</v-btn>
+                <v-btn class="mr-6 rounded-xl" @click="btnAddCreateRoom(0,'Thêm phòng')">Thêm phòng</v-btn>
             </div>
         </v-row>
-        <v-tabs class="m0">
+        <!-- <v-tabs class="m0">
             <v-tab v-for="(item,index) in floor" :key="index" class="ml-10" @click="selectFloor =item">Tầng {{ item }}</v-tab>
-        </v-tabs>
+        </v-tabs> -->
         <div class="d-flex flex-wrap item">
-            <v-card class="pa-4 itemRoom" color="peach" dark v-for="item in Roomfilter" :key="item.id" :class="item.customer ===null ? 'itemRoomEmpty':'' ">
+            <v-card class="pa-4 itemRoom" color="peach" dark v-for="item in RoomData" :key="item.id" :class="item.customer ===null ? 'itemRoomEmpty':'' ">
                 <v-row justify="space-between pa-2">
                     <v-icon>mdi-home</v-icon>
                     <span>{{ item.numberOfRoom }}</span>
@@ -82,8 +82,8 @@
                 <v-row class="m0 text-center">
                     <v-col cols="6" class="p0">
                         <v-row class="m0">
-                            <v-col cols="4">Số phòng</v-col>
-                            <v-col cols="8"><v-text-field clearable></v-text-field></v-col>
+                            <v-col cols="4" >Số phòng</v-col>
+                            <v-col cols="8"><v-text-field v-model="selectRoom.numberOfRoom" clearable></v-text-field></v-col>
                         </v-row>
                     </v-col>
                     <v-col cols="6" class="p0">
@@ -95,13 +95,13 @@
                     <v-col cols="6" class="p0">
                         <v-row class="m0">
                             <v-col cols="4">Thiết bị</v-col>
-                            <v-col cols="8"><v-text-field clearable></v-text-field></v-col>
+                            <v-col cols="8"><v-text-field v-model="selectRoom.equipment" clearable></v-text-field></v-col>
                         </v-row>
                     </v-col>
                     <v-col cols="6" class="p0">
                         <v-row class="m0">
                             <v-col cols="4">Số người ở</v-col>
-                            <v-col cols="8"><v-text-field clearable type="number" ></v-text-field></v-col>
+                            <v-col cols="8"><v-text-field clearable type="number" v-model="selectRoom.noPStaying" disabled ></v-text-field></v-col>
                         </v-row>
                     </v-col>
                     <v-col cols="6" class="p0">
@@ -120,7 +120,7 @@
                     <v-col cols="6" class="p0">
                         <v-row class="m0">
                             <v-col cols="4">Ghi chú</v-col>
-                            <v-col cols="8"><v-textarea clearable></v-textarea></v-col>
+                            <v-col cols="8"><v-textarea clearable v-model="selectRoom.note"></v-textarea></v-col>
                         </v-row>
                     </v-col>
                 </v-row>
@@ -205,18 +205,8 @@
                 RoomNoFee: 0, //Phòng chưa trả phí
                 selectFloor:1,
                 towerId : 0, // Id của khu trọ đã được chọn
-                RoomData:[
-                    {id: 1,floor:1, Name: '101', PriceRoom: '3.000.000', customer:'Phạm Quang Hưng, Phạm Thị Minh Trang'},
-                    {id: 2,floor:1, Name: '102', PriceRoom: '2.500.000', customer:'Phạm Quang Hưng, Phạm Thị Minh Trang'},
-                    {id: 3,floor:2, Name: '201', PriceRoom: '3.000.000', customer:'Phạm Quang Hưng, Phạm Thị Minh Trang'},
-                    {id: 4,floor:2, Name: '202', PriceRoom: '3.500.000', customer:'Phạm Quang Hưng, Phạm Thị Minh Trang'},
-                    {id: 5,floor:3, Name: '301', PriceRoom: '3.000.000', customer:'Phạm Quang Hưng, Phạm Thị Minh Trang'},
-                    {id: 6,floor:3, Name: '302', PriceRoom: '4.000.000', customer:'Phạm Quang Hưng, Phạm Thị Minh Trang'},
-                    {id: 7,floor:4, Name: '401', PriceRoom: '3.000.000', customer:'Phạm Quang Hưng, Phạm Thị Minh Trang'},
-                    {id: 8,floor:4, Name: '402', PriceRoom: '5.000.000', customer:'Phạm Quang Hưng, Phạm Thị Minh Trang'},
-                    {id: 9,floor:1, Name: '103', PriceRoom: '1.000.000', customer:null},
-                ],
-                selectRoom:null,
+                RoomData:[],
+                selectRoom:{},
 
             }
         },
@@ -253,9 +243,20 @@
                     })
             },
             btnAddCreateRoom(roomId,title){
+                if(title ==="Thêm phòng"){
+                    this.selectRoom = {};
+                }
+                apiClient.get(`/Room/GetDetail?roomId=${roomId}`)
+                .then(reponse =>{
+                    this.selectRoom = reponse.data
+                    console.log(this.selectRoom)
+                })
+                .catch(error => {
+                        console.error('Lấy thông tin của phòng nhà bị lỗi: ',error);
+                })
                 this.dialogEdit = true;
                 this.titleDialog = title;
-                this.selectRoomId = roomId;
+                //this.selectRoomId = roomId;
                 
             },
             btnAddRoom(){
@@ -270,14 +271,21 @@
             btnDeleteRoom(idRoom,nameRoom){
                 var result = confirm('Bạn có chắc chắn muốn xóa phòng: ' + nameRoom);
                 if(result){
-                    apiClient.delete(`/Room/DeleteRoom/${idRoom}?towerID=${this.towerId}`)
-                    .then(()=>{
-                        this.getAllRoom()
-                        alert('Xoá thành công')
-                    })
-                    .catch(error =>{
-                        console.error('Xoá phòng bị lỗi: ',error);
-                    })
+                    try{
+                        const response =  apiClient.patch(`/Room/DeleteRoom/${idRoom}?towerID=${this.towerId}`)
+                        console.log(response)
+                        if(response.status == 200){
+                            this.getAllRoom();
+                            alert("Xóa thành công")
+                        }
+                        else{
+                            alert("Xóa không thành công")
+                        }
+                    }
+                    catch(error){
+                        console.error('Lỗi khi xóa hợp đồng:', error);
+                        alert('Xóa không thành công');
+                    }
                 }
                 else{
                     alert('Xoá không thành công');
