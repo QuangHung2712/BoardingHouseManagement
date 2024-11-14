@@ -4,7 +4,7 @@
       <div >
         <router-link 
           @click="setActiveMenu(0)"
-          :to="`/manage/${towerId}/home`" 
+          :to="`/manage/${towerId}/hometower`" 
           class="menuitem"
           :class="{'active-menu': activeMenu === 0}"
         >

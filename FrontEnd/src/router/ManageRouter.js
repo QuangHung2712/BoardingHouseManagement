@@ -15,8 +15,8 @@ export default [
         component: () => import('../views/Manage/Layout/TowerDetail.vue'),
         children:[
           {
-            path: 'home',
-            name: 'home',
+            path: 'hometower',
+            name: 'hometower',
             component: () => import('../views/Manage/Layout/HomePageView.vue')
           },
           {
