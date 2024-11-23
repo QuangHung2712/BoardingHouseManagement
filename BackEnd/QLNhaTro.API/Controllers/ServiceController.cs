@@ -22,7 +22,8 @@ namespace QLNhaTro.API.Controllers
         [HttpGet]
         public async Task<ActionResult<List<GetAllServiceResModel>>> GetAll([FromQuery] long towerId)
         {
-            return await _service.GetAllEntity(towerId);
+            var result = await _service.GetAllEntity(towerId);
+            return Ok(result);
         }
 
         [HttpPost]
@@ -32,10 +33,11 @@ namespace QLNhaTro.API.Controllers
             return Ok();
         }
 
-        [HttpDelete]
-        public async void DeleteService([FromQuery] long serviceId)
+        [HttpDelete("{serviceId}")]
+        public async Task<IActionResult> DeleteService(long serviceId)
         {
             await _service.DeleteService(serviceId);
+            return Ok();
         }
 
         [HttpGet("{towerId}")]

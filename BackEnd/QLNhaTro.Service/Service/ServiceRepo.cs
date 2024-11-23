@@ -27,14 +27,18 @@ namespace QLNhaTro.Service.Service
         {
             _Context = context;
         }
-        public Task<List<GetAllServiceResModel>> GetAllEntity(long towerId)
+        public async Task<List<GetAllServiceResModel>> GetAllEntity(long towerId)
         {
-            var ServiceData = _Context.Services.Where(item => !item.IsActive && item.TowerId == towerId).Select(s => new GetAllServiceResModel
+            var ServiceData = await _Context.Services.Where(item => item.IsActive && item.TowerId == towerId).Select(s => new GetAllServiceResModel
             {
                 Id = s.Id,
                 Name = s.Name,
                 Price = s.UnitPrice,
             }).ToListAsync();
+            if(ServiceData.Count <= 0)
+            {
+                throw new NotFoundException(nameof(towerId));
+            }
             return ServiceData;
         }
         public async Task CreateEditService(CreateEditServiceReqModel input)

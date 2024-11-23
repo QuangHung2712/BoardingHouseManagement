@@ -122,6 +122,39 @@ namespace QLNhaTro.Moddel.SeedData
                     }
                 }
             }
+            if (!context.Services.Any())
+            {
+                using (var transaction = context.Database.BeginTransaction())
+                {
+                    try
+                    {
+                        var newService = new List<Services>
+                        {
+                            new Services { Id = 1, TowerId = 1, Name = "Điện", UnitPrice = 3000, IsActive = true, IsDeleted = false },
+                            new Services { Id = 2, TowerId = 1, Name = "Nước", UnitPrice = 30000, IsActive = true, IsDeleted = false },
+                            new Services { Id = 3, TowerId = 1, Name = "Máy giặt", UnitPrice = 100000, IsActive = true, IsDeleted = false },
+                            new Services { Id = 4, TowerId = 1, Name = "Mạng", UnitPrice = 100000, IsActive = true, IsDeleted = false },
+                            new Services { Id = 5, TowerId = 1, Name = "Thang máy", UnitPrice = 100000, IsActive = true, IsDeleted = false },
+                            new Services { Id = 6, TowerId = 2, Name = "Điện", UnitPrice = 3500, IsActive = true, IsDeleted = false },
+                            new Services { Id = 7, TowerId = 2, Name = "Nước", UnitPrice = 35000, IsActive = true, IsDeleted = false },
+                            new Services { Id = 8, TowerId = 2, Name = "Máy giặt", UnitPrice = 100000, IsActive = true, IsDeleted = false },
+                            new Services { Id = 9, TowerId = 2, Name = "Mạng", UnitPrice = 100000, IsActive = true, IsDeleted = false },
+                            new Services { Id = 10, TowerId = 2, Name = "Thang máy", UnitPrice = 100000, IsActive = true, IsDeleted = false },
+
+                        };
+                        context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT [dbo].[Services] ON");
+                        context.Services.AddRange(newService);
+                        context.SaveChanges();
+                        context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT [dbo].[Services] OFF");
+                        transaction.Commit();
+                    }
+                    catch (Exception)
+                    {
+                        transaction.Rollback();
+                        throw;
+                    }
+                }
+            }
         }
     }
 }
