@@ -27,18 +27,14 @@ namespace QLNhaTro.Service.Service
         {
             _Context = context;
         }
-        public async Task<List<GetAllServiceResModel>> GetAllEntity(long towerId)
+        public Task<List<GetAllServiceResModel>> GetAllEntity(long towerId)
         {
-            var ServiceData = await _Context.Services.Where(item => item.IsActive && item.TowerId == towerId).Select(s => new GetAllServiceResModel
+            var ServiceData =  _Context.Services.Where(item => item.IsActive && item.TowerId == towerId && !item.IsDeleted).Select(s => new GetAllServiceResModel
             {
                 Id = s.Id,
                 Name = s.Name,
                 Price = s.UnitPrice,
             }).ToListAsync();
-            if(ServiceData.Count <= 0)
-            {
-                throw new NotFoundException(nameof(towerId));
-            }
             return ServiceData;
         }
         public async Task CreateEditService(CreateEditServiceReqModel input)
@@ -53,6 +49,8 @@ namespace QLNhaTro.Service.Service
                         Id = input.Id,
                         Name = input.Name,
                         UnitPrice = input.Price,
+                        TowerId = input.TowerId,
+                        IsActive = true,
                     };
                     _Context.Services.Add(newService);
                     await _Context.SaveChangesAsync();
@@ -70,11 +68,11 @@ namespace QLNhaTro.Service.Service
                     var service = _Context.Services.GetAvailableById(input.Id);
                     service.Name = input.Name;
                     service.UnitPrice = input.Price;
+                    _Context.Services.Update(service);
                     if (input.ApplyPriceServiceAllRoom)
                     {
                         ApplyPriceServiceAllRoom(input.Id, input.TowerId, input.Price);
                     }
-                    _Context.Services.Update(service);
                     await _Context.SaveChangesAsync();
                 }
                 catch (Exception ex)

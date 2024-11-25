@@ -22,8 +22,7 @@ namespace QLNhaTro.API.Controllers
         [HttpGet]
         public async Task<ActionResult<List<GetAllServiceResModel>>> GetAll([FromQuery] long towerId)
         {
-            var result = await _service.GetAllEntity(towerId);
-            return Ok(result);
+            return await _service.GetAllEntity(towerId);
         }
 
         [HttpPost]
