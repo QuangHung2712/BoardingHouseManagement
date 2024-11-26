@@ -18,5 +18,6 @@ namespace QLNhaTro.Service.RoomService
         Task FineNewCustomers(long roomId);
         Task CheckOut(CheckOutRoomReqModel input);
         Task ChangeRoom(ChangeRoomReqModel input);
+        Task<List<GetDropDownRoom>> GetDropDownRooms(long towerId);
     }
 }

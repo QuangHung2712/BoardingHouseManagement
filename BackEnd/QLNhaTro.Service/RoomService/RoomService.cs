@@ -75,6 +75,15 @@ namespace QLNhaTro.Service.RoomService
             if (roomdata == null) throw new NotFoundException(nameof(roomId));
             return roomdata;
         }
+        public Task<List<GetDropDownRoom>> GetDropDownRooms(long towerId)
+        {
+            var roomdata = _Context.Rooms.Where(record=> record.TowerId == towerId && !record.IsDeleted).Select(item => new GetDropDownRoom
+            {
+                Id= item.Id,
+                Name = item.Name,
+            }).ToListAsync();
+            return roomdata;
+        }
         public async Task CreateEditRoom(CreateEditRoomReqModel input, List<IFormFile> imgs)
         {
             if (input.Id <= 0)

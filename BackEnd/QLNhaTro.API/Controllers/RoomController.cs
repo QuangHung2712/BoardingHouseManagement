@@ -31,6 +31,12 @@ namespace QLNhaTro.API.Controllers
             return await roomService.GetDetailRoomById(roomId);
         }
 
+        [HttpGet]
+        public async Task<ActionResult<List<GetDropDownRoom>>> GetDropDown([FromQuery] long towerId)
+        {
+            return await roomService.GetDropDownRooms(towerId);
+        }
+
         [HttpPost]
         public async Task<IActionResult> CreateEditRoom([FromForm] CreateEditRoomReqModel data, [FromForm] List<IFormFile> fileData)
         {
