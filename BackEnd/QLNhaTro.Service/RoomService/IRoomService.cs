@@ -14,7 +14,7 @@ namespace QLNhaTro.Service.RoomService
         Task<List<GetAllRoomResModel>> GellAllRoomByTower(long toweId);
         Task<GetRoomDetailByIdResModel> GetDetailRoomById(long roomId);
         Task CreateEditRoom(CreateEditRoomReqModel input, List<IFormFile> imgs);
-        Task DeleteRoom(long roomId, long towerId);
+        void DeleteRoom(long roomId);
         Task FineNewCustomers(long roomId);
         Task CheckOut(CheckOutRoomReqModel input);
         Task ChangeRoom(ChangeRoomReqModel input);

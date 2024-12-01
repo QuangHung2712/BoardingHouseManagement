@@ -183,10 +183,12 @@ namespace QLNhaTro.Service.RoomService
                 throw;
             }
         }
-        public async Task DeleteRoom(long roomId,long towerId)
+        public void DeleteRoom(long roomId)
         {
-            _Context.Rooms.Delete(roomId);
-            await _Context.SaveChangesAsync();
+            var roomData = _Context.Rooms.GetAvailableById(roomId);
+            roomData.IsDeleted = true;
+            _Context.Rooms.Update(roomData);
+            _Context.SaveChanges();
             //DeleteImgRoomByRoomId(roomId, towerId);
         }
         private void DeleteImgRoomByRoomId(long roomId,long towerId)
