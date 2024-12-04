@@ -85,7 +85,7 @@ namespace QLNhaTro.Service.RoomService
             }).ToListAsync();
             return roomdata;
         }
-        public async Task CreateEditRoom(CreateEditRoomReqModel input, List<IFormFile> imgs)
+        public async Task CreateEditRoom(CreateEditRoomReqModel input)
         {
             if (input.Id <= 0)
             {
@@ -105,7 +105,7 @@ namespace QLNhaTro.Service.RoomService
                     };
                     _Context.Rooms.Add(newRoom);
 
-                    SaveImgToDB(imgs, newRoom.Id, input.TowerId);
+                    //SaveImgToDB(imgs, newRoom.Id, input.TowerId);
                     await _Context.SaveChangesAsync();
                 }
                 catch (Exception ex)
@@ -127,8 +127,8 @@ namespace QLNhaTro.Service.RoomService
                     room.NumberCountries = input.NumberCountries;
                     room.Note = input.Note;
                     _Context.Rooms.Update(room);
-                    DeleteImgRoomByRoomId(input.Id, input.TowerId);
-                    SaveImgToDB(imgs, input.Id, input.TowerId);
+                    //DeleteImgRoomByRoomId(input.Id, input.TowerId);
+                    //SaveImgToDB(imgs, input.Id, input.TowerId);
                     await _Context.SaveChangesAsync();
                 }
                 catch (Exception ex)

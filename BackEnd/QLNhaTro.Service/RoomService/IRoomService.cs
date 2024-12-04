@@ -13,7 +13,7 @@ namespace QLNhaTro.Service.RoomService
     {
         Task<List<GetAllRoomResModel>> GellAllRoomByTower(long toweId);
         Task<GetRoomDetailByIdResModel> GetDetailRoomById(long roomId);
-        Task CreateEditRoom(CreateEditRoomReqModel input, List<IFormFile> imgs);
+        Task CreateEditRoom(CreateEditRoomReqModel input);
         void DeleteRoom(long roomId);
         Task FineNewCustomers(long roomId);
         Task CheckOut(CheckOutRoomReqModel input);

@@ -38,9 +38,9 @@ namespace QLNhaTro.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateEditRoom([FromForm] CreateEditRoomReqModel data, [FromForm] List<IFormFile> fileData)
+        public async Task<IActionResult> CreateEditRoom([FromBody] CreateEditRoomReqModel data)
         {
-            await roomService.CreateEditRoom(data, fileData);
+            await roomService.CreateEditRoom(data);
             return Ok();
         }
 
