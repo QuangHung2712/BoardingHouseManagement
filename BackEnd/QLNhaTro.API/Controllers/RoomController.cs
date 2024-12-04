@@ -73,5 +73,11 @@ namespace QLNhaTro.API.Controllers
             //Xử lý việc chênh tiền trọ
             return Ok();
         }
+
+        [HttpGet]
+        public async Task<ActionResult<List<GetRoomNoContract>>> GetRoomNoContract([FromQuery] long towerID)
+        {
+            return await roomService.GetRoomNoContract(towerID);
+        }
     }
 }

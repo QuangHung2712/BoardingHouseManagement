@@ -1,4 +1,5 @@
-﻿using DocumentFormat.OpenXml.InkML;
+﻿using DocumentFormat.OpenXml.Drawing.Spreadsheet;
+using DocumentFormat.OpenXml.InkML;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using MimeKit.Encodings;
@@ -262,6 +263,25 @@ namespace QLNhaTro.Service.RoomService
             _Context.Rooms.UpdateRange(roomOld, roomNew);
 
             await _Context.SaveChangesAsync();
+        }
+        public async Task<List<GetRoomNoContract>> GetRoomNoContract(long towerId)
+        {
+            DateTime currentDate = DateTime.Now;
+
+            // Lấy danh sách ID của các phòng đã có hợp đồng hợp lệ
+            var occupiedRoomIds = _Context.Contracts
+                .Where(contract =>
+                    contract.TerminationDate == null || contract.TerminationDate >= currentDate) // Hợp đồng vẫn còn hiệu lực
+                .Select(contract => contract.RoomId)
+                .Distinct();
+            var availableRooms = _Context.Rooms
+            .Where(room => !occupiedRoomIds.Contains(room.Id) && room.TowerId == towerId) // Phòng không thuộc danh sách đã có hợp đồng hợp lệ
+            .Select(room => new GetRoomNoContract
+            {
+                Id = room.Id,
+                Name = room.Name,
+            }).ToList();
+            return availableRooms;
         }
     }
 }
