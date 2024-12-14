@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using QLNhaTro.Commons;
 using QLNhaTro.Moddel.Moddel.RequestModels;
 using QLNhaTro.Moddel.Moddel.ResponseModels;
+using QLNhaTro.Service.ContractService;
 using QLNhaTro.Service.RoomService;
 
 
@@ -13,10 +14,12 @@ namespace QLNhaTro.API.Controllers
     public class RoomController : ControllerBase
     {
         private readonly IRoomService roomService;
+        private readonly IContractService contractService;
 
-        public RoomController(IRoomService roomService)
+        public RoomController(IRoomService roomService, IContractService contractService)
         {
             this.roomService = roomService;
+            this.contractService = contractService;
         }
 
         [HttpGet("{towerId}")]
@@ -29,6 +32,12 @@ namespace QLNhaTro.API.Controllers
         public async Task<GetRoomDetailByIdResModel> GetDetail([FromQuery] long roomId)
         {
             return await roomService.GetDetailRoomById(roomId);
+        }
+
+        [HttpGet]
+        public async Task<GetContractByRoomIDResModel> GetContractByRoomId([FromQuery] long roomId)
+        {
+            return await contractService.GetContractByRoomId(roomId);
         }
 
         [HttpGet]

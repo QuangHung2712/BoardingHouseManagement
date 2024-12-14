@@ -1,5 +1,6 @@
 ﻿using DocumentFormat.OpenXml.Drawing;
 using DocumentFormat.OpenXml.Math;
+using DocumentFormat.OpenXml.Office2010.Excel;
 using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Presentation;
@@ -36,19 +37,31 @@ namespace QLNhaTro.Service.ContractService
             _Context = context;
             _Customer = customer;
         }
-        public Task<List<GetAllContractByTowerId>> GetAllContractByTowerId(long towerId) 
+        public async Task<List<GetAllContractByTowerId>> GetAllContractByTowerId(long towerId) 
         {
-            var contract = _Context.Contracts.Where(record => record.Room.TowerId == towerId).Select(item => new GetAllContractByTowerId
+            var contracts = await _Context.Contracts
+                .Where(record => record.Room.TowerId == towerId && !record.IsDeleted)
+                .Select(item => new
+                {
+                    item.Id,
+                    RoomName = item.Room.Name,
+                    item.StartDate,
+                    item.Deposit,
+                })
+                .ToListAsync();
+
+            // Tính toán các giá trị phức tạp sau khi dữ liệu đã tải
+            var result = contracts.Select(item => new GetAllContractByTowerId
             {
                 Id = item.Id,
-                NumberOfRoom = item.Room.Name,
-                CustomerName = string.Join(",",_Customer.GetCustomerByContract(item.Id).Select(c=> c.FullName)),
-                PhoneCustomer = string.Join(",", _Customer.GetCustomerByContract(item.Id).Select(c => c.PhoneNumber)),
+                NumberOfRoom = item.RoomName,
+                CustomerName = _Customer.GetCustomerNameByContract(item.Id),
+                PhoneCustomer = _Customer.GetCustomerPhoneByContract(item.Id),
                 StartDate = item.StartDate,
                 Deposit = item.Deposit,
-            }).ToListAsync();
-            if (contract == null) throw new NotFoundException(nameof(towerId));
-            return contract;
+            }).ToList();
+            if (result == null) throw new NotFoundException(nameof(towerId));
+            return result;
         }
         public async Task<GetDetailContractResModel> GetDetail(long id)
         {
@@ -74,9 +87,9 @@ namespace QLNhaTro.Service.ContractService
                             Price = x.Price,
                             Number = x.Number
                         }).ToList(),
-                        Customer = _Customer.GetCustomerByContract(record.Id),
                     }).FirstOrDefaultAsync();
                 if (contractData == null) throw new NotFoundException(nameof(id));
+                contractData.Customers = _Customer.GetCustomerByContract(contractData.Id);
                 return contractData;
             }
             catch (Exception ex)
@@ -118,10 +131,13 @@ namespace QLNhaTro.Service.ContractService
                         Price = s.Price,
                         Number = s.Number,
                     }).ToList();
-                    var serviceRoomTask =  _Context.ServiceRooms.AddRangeAsync(contractService);
+                    await _Context.ServiceRooms.AddRangeAsync(contractService);
+                    await _Context.SaveChangesAsync(); // Lưu ServiceRoom
 
-                    var customer = input.Customer.Select(c => _Customer.CreateEditCustomer(c, contract.Id));
-                    await Task.WhenAll(serviceRoomTask,Task.WhenAll(customer));
+
+                    var customer =  input.Customers.Select(c => _Customer.CreateEditCustomer(c, contract.Id));
+                    await Task.WhenAll(customer);
+                    await _Context.SaveChangesAsync();
                 }
                 catch (Exception ex)
                 {
@@ -151,12 +167,12 @@ namespace QLNhaTro.Service.ContractService
                     });
                     var serviceRoomTask = _Context.ServiceRooms.AddRangeAsync(serviceRoom);
 
-                    var invalidCustomer = input.Customer.Any(customer =>
+                    var invalidCustomer = input.Customers.Any(customer =>
                         !_Context.Customers.Any(item => item.Id == customer.Id && !item.IsDeleted));
-                    if (invalidCustomer) throw new NotFoundException(nameof(input.Customer));
-                    var customerRemove = _Context.Customers.Where(item => input.Customer.Any(data => data.Id == item.Id)).ToList();
+                    if (invalidCustomer) throw new NotFoundException(nameof(input.Customers));
+                    var customerRemove = _Context.Customers.Where(item => input.Customers.Any(data => data.Id == item.Id)).ToList();
                     _Context.Customers.RemoveRange(customerRemove);
-                    var customer = input.Customer.Select(c => _Customer.CreateEditCustomer(c, contractUpdate.Id));
+                    var customer = input.Customers.Select(c => _Customer.CreateEditCustomer(c, contractUpdate.Id));
 
                     await Task.WhenAll(serviceRoomTask, Task.WhenAll(customer));
 
@@ -211,6 +227,23 @@ namespace QLNhaTro.Service.ContractService
                 doc.MainDocumentPart.Document.Save();*/
             }
             return outputPath;
+        }
+        public async Task<GetContractByRoomIDResModel> GetContractByRoomId(long roomID)
+        {
+            var contract = _Context.Contracts.Where(item=> !item.IsDeleted 
+                                                    && item.TerminationDate == null
+                                                    && item.RoomId == roomID)
+                                            .Select(record=> new GetContractByRoomIDResModel
+                                            {
+                                                Id = record.Id,
+                                                StartDate = record.StartDate,
+                                                EndDate = record.EndDate,
+                                                Deposit = record.Deposit,
+                                                Note = record.Note,
+                                            }).FirstOrDefault();
+            if (contract == null) throw new NotFoundException(nameof(roomID));
+            contract.Customers = _Customer.GetCustomerByContract(contract.Id);
+            return contract;
         }
     }
 }

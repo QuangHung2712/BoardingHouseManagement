@@ -46,7 +46,7 @@ namespace QLNhaTro.Service.RoomService
         }
         private string GetCustomerByRoom(long roomId)
         {
-            var data = _Context.Contracts.Where(record=> record.RoomId == roomId && record.TerminationDate ==null)
+            var data = _Context.Contracts.Where(record=> record.RoomId == roomId && record.TerminationDate ==null && !record.IsDeleted)
                                 .SelectMany(record=> record.Customers)
                                 .Select(item=> item.FullName).ToList();
             if(data.Count > 0)
@@ -62,7 +62,7 @@ namespace QLNhaTro.Service.RoomService
                 Id = item.Id,
                 NumberOfRoom = item.Name,
                 Equipment = item.Equipment,
-                CustomerName = _Context.Contracts.Where(c=> c.RoomId == roomId && c.TerminationDate == null)
+                CustomerName = _Context.Contracts.Where(c=> c.RoomId == roomId && c.TerminationDate == null && !c.IsDeleted)
                                                 .SelectMany(c=> c.Customers)
                                                 .Select(c=> CustomerResModel.Mapping(c))
                                                 .ToList(),
@@ -230,7 +230,7 @@ namespace QLNhaTro.Service.RoomService
         }
         public async Task CheckOut(CheckOutRoomReqModel input)
         {
-            var contract =  _Context.Contracts.Where(record=> record.RoomId == input.Id && record.TerminationDate == null).FirstOrDefault();
+            var contract =  _Context.Contracts.Where(record=> record.RoomId == input.Id && record.TerminationDate == null && !record.IsDeleted).FirstOrDefault();
             var room = _Context.Rooms.GetAvailableById(input.Id);
             if(contract == null) throw new NotFoundException(nameof(contract));
             contract.TerminationDate = DateTime.Now;

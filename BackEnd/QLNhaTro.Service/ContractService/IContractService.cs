@@ -16,5 +16,6 @@ namespace QLNhaTro.Service.ContractService
         Task ContractExtension(ContractExtensionReqModel input);
         Task<List<GetAllContractByTowerId>> GetAllContractByTowerId(long towerId);
         string ExportWord(long contractId);
+        Task<GetContractByRoomIDResModel> GetContractByRoomId(long roomID);
     }
 }

@@ -27,6 +27,16 @@ namespace QLNhaTro.Service.CustomerService
             if (customerData.Count == 0) throw new NotFoundException(nameof(contractId));
             return customerData;
         }
+        public string GetCustomerNameByContract(long contractId)
+        {
+            var customerData = _Context.Customers.Where(c => c.ContractId == contractId && !c.IsDeleted).Select(c => c.FullName).ToList();
+            return string.Join(", ", customerData);
+        }
+        public string GetCustomerPhoneByContract(long contractId)
+        {
+            var customerData = _Context.Customers.Where(c => c.ContractId == contractId && !c.IsDeleted).Select(c => c.PhoneNumber).ToList();
+            return string.Join(", ", customerData);
+        }
         public async Task CreateEditCustomer(CreateEditCustomerReqModel input,long contractId)
         {
             if (input.Id <= 0)
