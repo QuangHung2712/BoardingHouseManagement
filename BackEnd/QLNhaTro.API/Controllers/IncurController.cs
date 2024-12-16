@@ -31,10 +31,10 @@ namespace QLNhaTro.API.Controllers
             return Ok();
         }
 
-        [HttpPut("{incurId}")]
-        public IActionResult DeleteIncur(long incurId) 
+        [HttpDelete("{incurId}")]
+        public async Task<IActionResult> DeleteIncur(long incurId) 
         {
-            _incurService.DeleteIncur(incurId);    
+            await _incurService.DeleteIncur(incurId);    
             return Ok();
         }
     }

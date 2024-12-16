@@ -11,7 +11,6 @@ namespace QLNhaTro.Moddel.Moddel.RequestModels
     {
         public long TowerId { get; set; }
         public long RoomId { get; set; }
-        public DateTime CreationDate { get; set; }
         public decimal Amount { get; set; }
         public string Reason { get; set; }
     }

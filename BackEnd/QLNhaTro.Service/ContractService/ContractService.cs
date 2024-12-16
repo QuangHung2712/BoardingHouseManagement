@@ -46,6 +46,7 @@ namespace QLNhaTro.Service.ContractService
                     item.Id,
                     RoomName = item.Room.Name,
                     item.StartDate,
+                    item.EndDate,
                     item.Deposit,
                 })
                 .ToListAsync();
@@ -58,6 +59,7 @@ namespace QLNhaTro.Service.ContractService
                 CustomerName = _Customer.GetCustomerNameByContract(item.Id),
                 PhoneCustomer = _Customer.GetCustomerPhoneByContract(item.Id),
                 StartDate = item.StartDate,
+                EndDate = item.EndDate,
                 Deposit = item.Deposit,
             }).ToList();
             if (result == null) throw new NotFoundException(nameof(towerId));
@@ -80,7 +82,7 @@ namespace QLNhaTro.Service.ContractService
                         Deposit = record.Deposit,
                         TerminationDate = record.TerminationDate,
                         Note = record.Note,
-                        ServiceMotels = record.ServiceMotels.Select(x => new ContractServiceResModel
+                        Services = record.ServiceMotels.Select(x => new ContractServiceResModel
                         {
                             ServiceId = x.ServiceId,
                             ServiceName = x.Service.Name,

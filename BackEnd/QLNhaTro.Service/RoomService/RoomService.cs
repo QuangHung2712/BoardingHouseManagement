@@ -34,7 +34,7 @@ namespace QLNhaTro.Service.RoomService
             {
                 Id = r.Id,
                 NumberOfRoom = r.Name,
-                floor = 1,
+                NoPStaying = r.NoPStaying,
                 PriceRoom = r.PriceRoom,
                 Status = r.StatusNewCustomer,
             }).ToListAsync();
@@ -264,19 +264,19 @@ namespace QLNhaTro.Service.RoomService
 
             await _Context.SaveChangesAsync();
         }
-        public async Task<List<GetRoomNoContract>> GetRoomNoContract(long towerId)
+        public async Task<List<GetDropDownRoom>> GetRoomNoContract(long towerId)
         {
             DateTime currentDate = DateTime.Now;
 
             // Lấy danh sách ID của các phòng đã có hợp đồng hợp lệ
             var occupiedRoomIds = _Context.Contracts
                 .Where(contract =>
-                    contract.TerminationDate == null || contract.TerminationDate >= currentDate) // Hợp đồng vẫn còn hiệu lực
+                    (contract.TerminationDate == null || contract.TerminationDate >= currentDate) && !contract.IsDeleted) // Hợp đồng vẫn còn hiệu lực
                 .Select(contract => contract.RoomId)
                 .Distinct();
             var availableRooms = _Context.Rooms
             .Where(room => !occupiedRoomIds.Contains(room.Id) && room.TowerId == towerId) // Phòng không thuộc danh sách đã có hợp đồng hợp lệ
-            .Select(room => new GetRoomNoContract
+            .Select(room => new GetDropDownRoom
             {
                 Id = room.Id,
                 Name = room.Name,

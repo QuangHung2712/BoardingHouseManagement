@@ -84,7 +84,7 @@ namespace QLNhaTro.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<GetRoomNoContract>>> GetRoomNoContract([FromQuery] long towerID)
+        public async Task<ActionResult<List<GetDropDownRoom>>> GetRoomNoContract([FromQuery] long towerID)
         {
             return await roomService.GetRoomNoContract(towerID);
         }

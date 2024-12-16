@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace QLNhaTro.Moddel.Moddel.ResponseModels
 {
-    public class GetRoomNoContract: BaseEntity
+    public class GetDropDownRoom : BaseEntity
     {
         public string Name { get; set; }
     }

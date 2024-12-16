@@ -16,7 +16,7 @@ namespace QLNhaTro.Moddel.Moddel.ResponseModels
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public decimal Deposit { get; set; }
-        public List<ContractServiceResModel> ServiceMotels { get; set; }
+        public List<ContractServiceResModel> Services { get; set; }
         public DateTime? TerminationDate { get; set; }
         public string? Note { get; set; }
 

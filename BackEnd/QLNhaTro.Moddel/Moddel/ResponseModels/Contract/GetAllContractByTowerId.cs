@@ -12,6 +12,7 @@ namespace QLNhaTro.Moddel.Moddel.ResponseModels
         public string CustomerName { get; set; }
         public string NumberOfRoom { get; set; }
         public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
         public string PhoneCustomer { get; set; }
         public decimal Deposit { get; set; }
     }
