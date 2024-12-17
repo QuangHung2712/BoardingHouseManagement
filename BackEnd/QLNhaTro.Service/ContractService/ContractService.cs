@@ -18,12 +18,16 @@ using QLNhaTro.Service.CustomerService;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using static System.Net.Mime.MediaTypeNames;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 using Contract = QLNhaTro.Moddel.Entity.Contract;
+using Text = DocumentFormat.OpenXml.Wordprocessing.Text;
+
 
 namespace QLNhaTro.Service.ContractService
 {
@@ -207,26 +211,50 @@ namespace QLNhaTro.Service.ContractService
         }
         public string ExportWord(long contractId)
         {
-            string SampleContract = "D:\\Word\\HopDong_Mau.docx";
-            string outputPath = "D:\\Word\\output_contract.docx";
+            string SampleContract = "D:\\Code\\BoardingHouseManagement\\BoardingHouseManagement\\Tài liệu\\HopDongMau.docx";
+            string outputPath = "D:\\Code\\BoardingHouseManagement\\BoardingHouseManagement\\Tài liệu\\output_contract.docx";
+
 
             var contractData = _Context.Contracts.GetAvailableById(contractId);
-
+            var roomData = _Context.Rooms.GetAvailableById(contractData.RoomId);
+            var serviecData = _Context.ServiceRooms.Where(item => item.ContractId == contractId).ToList();
+            string serviceDetails = "";
+            foreach (var service in serviecData)
+            {
+                serviceDetails += $"+ {service.ServiceId}: {service.Price} VND\n";
+            }
             System.IO.File.Copy(SampleContract, outputPath, true);
             using (WordprocessingDocument doc = WordprocessingDocument.Open(outputPath, true))
             {
                 var body = doc.MainDocumentPart.Document.Body;
+                
 
-               /* foreach (var text in body.Descendants<Text>)
+                foreach (var text in body.Descendants<Text>())
                 {
-                    text.Text = text.Text.Replace("{name}", contractData.name)
-                                         .Replace("{position}", contractData.position)
-                                         .Replace("{contractType}", contractData.contractType.ToString())
-                                         .Replace("{departments}", contractData.Departments)
-                                         .Replace("{StartDate}", contractData.FromDate)
-                                         .Replace("{EndDate}", contractData.ToDate);
+                    text.Text = text.Text.Replace("{NgayHienTai}", contractData.StartDate.Day.ToString())
+                                         .Replace("{ThangHienTai}", contractData.StartDate.Month.ToString())
+                                         .Replace("{NamHienTai}", contractData.StartDate.Year.ToString())
+                                         .Replace("{TenChuNha}", "Phạm Thị Minh Trang")
+                                         .Replace("{CCCDChuNha}", "022202001454")
+                                         .Replace("{DKTTChuNha}", "Kim Sơn - Đông Triều - Quảng Ninh")
+                                         .Replace("{SDTChuNha}", "0359988934")
+                                         .Replace("{STKChuNha}", "0080127122002 Ngân hàng MB Bank")
+                                         .Replace("{TenDaiDien}", "Phạm Thị Minh Trang")
+                                         .Replace("{CCCDaiDIen}", "022202001454")
+                                         .Replace("{DKTTDaiDien}", "Gang Thép Thành phố Thái Nguyên Tỉnh Thái Nguyên")
+                                         .Replace("{SDTDaiDien}", "0886682304")
+                                         .Replace("{EmailDaiDien}", "trangxu2304@gmail.com")
+                                         .Replace("{SoPhong}", roomData.Name)
+                                         .Replace("{SoThang}", ((contractData.EndDate.Year - contractData.StartDate.Year) * 12 + (contractData.EndDate.Month - contractData.StartDate.Month)).ToString())
+                                         .Replace("{NgayThue}", contractData.StartDate.ToString("dd/MM/yyyy"))
+                                         .Replace("{NgayHetHan}", contractData.EndDate.ToString("dd/MM/yyyy"))
+                                         .Replace("{GiaThue}", roomData.PriceRoom.ToString())
+                                         .Replace("{GiaThueChu}", NumberToWords(roomData.PriceRoom))
+                                         .Replace("{TienCoc}", contractData.Deposit.ToString())
+                                         .Replace("{TienCocBangChu}", NumberToWords(contractData.Deposit))
+                                         .Replace("{DichVu}", "Đây là dịch vụ đã được thay đổi");
                 }
-                doc.MainDocumentPart.Document.Save();*/
+                doc.MainDocumentPart.Document.Save();
             }
             return outputPath;
         }
@@ -246,6 +274,92 @@ namespace QLNhaTro.Service.ContractService
             if (contract == null) throw new NotFoundException(nameof(roomID));
             contract.Customers = _Customer.GetCustomerByContract(contract.Id);
             return contract;
+        }
+        static string NumberToWords(decimal number)
+        {
+            if (number == 0)
+                return "không";
+
+            string[] units = { "", "một", "hai", "ba", "bốn", "năm", "sáu", "bảy", "tám", "chín" };
+            string[] tens = { "", "mười", "hai mươi", "ba mươi", "bốn mươi", "năm mươi", "sáu mươi", "bảy mươi", "tám mươi", "chín mươi" };
+
+            string result = "";
+
+            // Hàm nội bộ xử lý phần nguyên nhỏ hơn 1000
+            string ConvertUnderThousand(long num)
+            {
+                string temp = "";
+                long hundred = num / 100;
+                long ten = (num % 100) / 10;
+                long unit = num % 10;
+
+                if (hundred > 0)
+                    temp += units[hundred] + " trăm ";
+
+                if (ten > 1)
+                {
+                    temp += tens[ten] + " ";
+                    if (unit > 0)
+                        temp += (unit == 5 ? "lăm" : units[unit]) + " ";
+                }
+                else if (ten == 1)
+                {
+                    temp += "mười ";
+                    if (unit > 0)
+                        temp += (unit == 5 ? "lăm" : units[unit]) + " ";
+                }
+                else if (unit > 0)
+                {
+                    temp += "lẻ " + (unit == 5 ? "lăm" : units[unit]) + " ";
+                }
+
+                return temp.Trim();
+            }
+
+            // Hàm nội bộ thêm đơn vị (tỷ, triệu, nghìn)
+            void AppendUnit(long num, string unitName)
+            {
+                if (num > 0)
+                {
+                    result += NumberToWords(num) + " " + unitName + " ";
+                }
+            }
+
+            // Phân tách phần nguyên và phần thập phân
+            long integerPart = (long)Math.Floor(number);
+            long fractionalPart = (long)((number - integerPart) * 100); // Lấy 2 chữ số thập phân
+
+            // Xử lý phần nguyên
+            if (integerPart < 0)
+            {
+                result = "âm " + NumberToWords(-integerPart);
+            }
+            else
+            {
+                AppendUnit(integerPart / 1_000_000_000, "tỷ");
+                AppendUnit((integerPart % 1_000_000_000) / 1_000_000, "triệu");
+                AppendUnit((integerPart % 1_000_000) / 1_000, "nghìn");
+
+                long remaining = integerPart % 1_000;
+
+                if (remaining > 0)
+                {
+                    if (remaining < 100 && result != "")
+                        result += "không trăm ";
+                    if (remaining < 10 && result != "" && remaining > 0)
+                        result += "lẻ ";
+                    result += ConvertUnderThousand(remaining);
+                }
+            }
+
+            // Xử lý phần thập phân (nếu có)
+            if (fractionalPart > 0)
+            {
+                result += "phẩy ";
+                result += ConvertUnderThousand(fractionalPart);
+            }
+
+            return result.Trim();
         }
     }
 }
