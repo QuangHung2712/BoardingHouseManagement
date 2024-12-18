@@ -23,10 +23,17 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using Bold = DocumentFormat.OpenXml.Wordprocessing.Bold;
+using Break = DocumentFormat.OpenXml.Wordprocessing.Break;
 using Contract = QLNhaTro.Moddel.Entity.Contract;
 using FontFamily = DocumentFormat.OpenXml.Wordprocessing.FontFamily;
+using FontSize = DocumentFormat.OpenXml.Wordprocessing.FontSize;
+using Justification = DocumentFormat.OpenXml.Wordprocessing.Justification;
 using Paragraph = DocumentFormat.OpenXml.Wordprocessing.Paragraph;
+using ParagraphProperties = DocumentFormat.OpenXml.Wordprocessing.ParagraphProperties;
 using Run = DocumentFormat.OpenXml.Wordprocessing.Run;
+using RunProperties = DocumentFormat.OpenXml.Wordprocessing.RunProperties;
+using TabStop = DocumentFormat.OpenXml.Wordprocessing.TabStop;
 using Text = DocumentFormat.OpenXml.Wordprocessing.Text;
 
 
@@ -212,8 +219,8 @@ namespace QLNhaTro.Service.ContractService
         }
         public string ExportWord(long contractId)
         {
-            string SampleContract = "D:\\Du_An\\BoardingHouseManagement\\Tài liệu\\HopDongMau.docx";
-            string outputPath = "D:\\Du_An\\BoardingHouseManagement\\Tài liệu\\output_contract.docx";
+            string SampleContract = "D:\\Code\\BoardingHouseManagement\\BoardingHouseManagement\\Tài liệu\\HopDongMau.docx";
+            string outputPath = "D:\\Code\\BoardingHouseManagement\\BoardingHouseManagement\\Tài liệu\\output_contract.docx";
 
 
             var contractData = _Context.Contracts.GetAvailableById(contractId);
@@ -222,8 +229,9 @@ namespace QLNhaTro.Service.ContractService
             var serviceLines = serviecData
                    .Select((service, index) => new { service, index })
                    .GroupBy(x => x.index / 2)
-                   .Select(g => string.Join("   ", g.Select(x => $"+ {x.service.ServiceId}: {FormartPrice(x.service.Price)} VND")))
+                   .Select(g => string.Join("   ", g.Select(x => $"+ {x.service.ServiceId}: {FormartPrice(x.service.Price)} VND                                ")))
                    .ToList();
+            var customerData = _Customer.GetCustomerByContract(contractId);
             System.IO.File.Copy(SampleContract, outputPath, true);
             using (WordprocessingDocument doc = WordprocessingDocument.Open(outputPath, true))
             {
@@ -253,7 +261,83 @@ namespace QLNhaTro.Service.ContractService
                                          .Replace("{TienCoc}", FormartPrice(contractData.Deposit))
                                          .Replace("{TienCocBangChu}", NumberToWords(contractData.Deposit) + " đồng")
                                          ; // Xóa placeholder {DichVu}
-                    if(text.Text.Contains("{DichVu}"))
+                    if (text.Text.Contains("{ThueKem}"))
+                    {
+                        // Xóa placeholder {DichVu}
+                        text.Text = text.Text.Replace("{ThueKem}", string.Empty);
+
+                        // Lấy phần tử chứa Text và thêm các Paragraph vào sau đó
+                        var parent = text.Parent;
+
+
+                        // Thêm tiêu đề "Những người thuê kèm" với chữ in đậm
+                        var titleRun = new Run(new Text("Những người thuê kèm:"));
+                        var titleRunProperties = new RunProperties();
+                        titleRunProperties.AppendChild(new RunFonts() { Ascii = "Times New Roman", HighAnsi = "Times New Roman" });
+                        titleRunProperties.AppendChild(new Bold()); // Chữ in đậm
+                        titleRunProperties.AppendChild(new FontSize() { Val = "28" }); // Font size 14pt
+                        titleRun.RunProperties = titleRunProperties;
+
+                        var titleParagraph = new Paragraph(titleRun);
+                        parent.InsertAfter(titleParagraph, text);
+                        int index = 1;
+
+                        // Lặp qua danh sách customerData và tạo các dòng thông tin
+                        foreach (var customer in customerData)
+                        {
+                            // Tạo Paragraph mới
+                            var paragraph = new Paragraph();
+                            var paragraphProperties = new ParagraphProperties();
+
+                            // Thiết lập thụt đầu dòng từ dòng thứ 2 trở đi (so với lề trái)
+                            Indentation indentation = new Indentation()
+                            {
+                                Left = "500",    // Không lùi toàn bộ đoạn văn
+                                //Hanging = "720" // Thụt dòng thứ hai (và các dòng sau) 0.5 inch từ lề trái
+                            };
+                            paragraphProperties.AppendChild(indentation);
+                            paragraph.ParagraphProperties = paragraphProperties;
+
+                            var indexRun = new Run(new Text($"{index}"));
+                            var indexRunProperties = new RunProperties();
+                            indexRunProperties.AppendChild(new RunFonts() { Ascii = "Times New Roman", HighAnsi = "Times New Roman" });
+                            indexRunProperties.AppendChild(new Bold());
+                            indexRunProperties.AppendChild(new FontSize() { Val = "28" }); // Font size 14pt
+                            indexRun.RunProperties = indexRunProperties;
+
+                            // Thêm số thứ tự vào Paragraph trước thông tin khách hàng
+                            paragraph.AppendChild(indexRun);
+
+                            // 1. Họ và tên
+                            var fullNameRun = new Run(new Text($".   Họ và tên: {customer.FullName}"));
+                            var fullNameRunProperties = new RunProperties();
+                            fullNameRunProperties.AppendChild(new RunFonts() { Ascii = "Times New Roman", HighAnsi = "Times New Roman" });
+                            fullNameRunProperties.AppendChild(new FontSize() { Val = "28" }); // Font size 14pt
+                            fullNameRun.RunProperties = fullNameRunProperties;
+
+                            paragraph.AppendChild(fullNameRun);
+                            paragraph.AppendChild(new Break()); // Xuống dòng
+
+                            // 2. Số CCCD và Điện thoại
+                            var cccdRun = new Run(new Text($"   Số CCCD: {customer.CCCD}                   Điện thoại: {customer.PhoneNumber}"));
+
+                            cccdRun.RunProperties = (RunProperties)fullNameRunProperties.CloneNode(true);
+
+                            paragraph.AppendChild(cccdRun);
+                            paragraph.AppendChild(new Break()); // Xuống dòng
+
+                            // 3. Nơi DKTT
+                            var addressRun = new Run(new Text($"   Nơi DKTT: {customer.Address}"));
+                            addressRun.RunProperties = (RunProperties)fullNameRunProperties.CloneNode(true);
+                            paragraph.AppendChild(addressRun);
+
+                            // Thêm Paragraph vào Body sau phần tử chứa Text
+                            parent.AppendChild(paragraph);
+                            index++;
+                        }
+                    }
+
+                    if (text.Text.Contains("{DichVu}"))
                     {
                         // Xóa placeholder {DichVu}
                         text.Text = text.Text.Replace("{DichVu}", string.Empty);
@@ -264,14 +348,37 @@ namespace QLNhaTro.Service.ContractService
                         // Tạo các Paragraph mới cho mỗi dịch vụ
                         foreach (var service in serviceLines)
                         {
-                            var paragraph = new Paragraph(
-                                new Run(new Text($"{service}")) // Tạo một Run chứa dịch vụ
-                            );
+                            // Tạo một Run chứa text của dịch vụ
+                            var run = new Run(new Text($"{service}"));
+
+                            // Tạo các thuộc tính định dạng cho Run
+                            RunProperties runProperties = new RunProperties();
+                            runProperties.AppendChild(new RunFonts() { Ascii = "Times New Roman", HighAnsi = "Times New Roman" }); // Font Times New Roman
+                            runProperties.AppendChild(new FontSize() { Val = "28" }); // Font size 14pt (28 half-points)
+                            run.RunProperties = runProperties;
+
+                            // Tạo Paragraph chứa Run
+                            var paragraph = new Paragraph(run);
+
+                            // Tạo các thuộc tính định dạng cho Paragraph
+                            ParagraphProperties paragraphProperties = new ParagraphProperties();
+
+                            // Thiết lập thụt đầu dòng từ dòng thứ 2 trở đi (so với lề trái)
+                            Indentation indentation = new Indentation()
+                            {
+                                Left = "720",    // Không lùi toàn bộ đoạn văn
+                                //Hanging = "720" // Thụt dòng thứ hai (và các dòng sau) 0.5 inch từ lề trái
+                            };
+                            paragraphProperties.AppendChild(indentation);
+
+                            // Gắn ParagraphProperties vào Paragraph
+                            paragraph.ParagraphProperties = paragraphProperties;
 
                             // Thêm Paragraph vào Body sau phần tử chứa Text
-                            parent.InsertAfter(paragraph, text);
+                            parent.AppendChild(paragraph);
                         }
                     }
+
                 }
                 doc.MainDocumentPart.Document.Save();
             }
