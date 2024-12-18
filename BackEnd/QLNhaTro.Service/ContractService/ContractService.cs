@@ -23,9 +23,10 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
-using static System.Net.Mime.MediaTypeNames;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 using Contract = QLNhaTro.Moddel.Entity.Contract;
+using FontFamily = DocumentFormat.OpenXml.Wordprocessing.FontFamily;
+using Paragraph = DocumentFormat.OpenXml.Wordprocessing.Paragraph;
+using Run = DocumentFormat.OpenXml.Wordprocessing.Run;
 using Text = DocumentFormat.OpenXml.Wordprocessing.Text;
 
 
@@ -211,23 +212,22 @@ namespace QLNhaTro.Service.ContractService
         }
         public string ExportWord(long contractId)
         {
-            string SampleContract = "D:\\Code\\BoardingHouseManagement\\BoardingHouseManagement\\Tài liệu\\HopDongMau.docx";
-            string outputPath = "D:\\Code\\BoardingHouseManagement\\BoardingHouseManagement\\Tài liệu\\output_contract.docx";
+            string SampleContract = "D:\\Du_An\\BoardingHouseManagement\\Tài liệu\\HopDongMau.docx";
+            string outputPath = "D:\\Du_An\\BoardingHouseManagement\\Tài liệu\\output_contract.docx";
 
 
             var contractData = _Context.Contracts.GetAvailableById(contractId);
             var roomData = _Context.Rooms.GetAvailableById(contractData.RoomId);
             var serviecData = _Context.ServiceRooms.Where(item => item.ContractId == contractId).ToList();
-            string serviceDetails = "";
-            foreach (var service in serviecData)
-            {
-                serviceDetails += $"+ {service.ServiceId}: {service.Price} VND\n";
-            }
+            var serviceLines = serviecData
+                   .Select((service, index) => new { service, index })
+                   .GroupBy(x => x.index / 2)
+                   .Select(g => string.Join("   ", g.Select(x => $"+ {x.service.ServiceId}: {FormartPrice(x.service.Price)} VND")))
+                   .ToList();
             System.IO.File.Copy(SampleContract, outputPath, true);
             using (WordprocessingDocument doc = WordprocessingDocument.Open(outputPath, true))
             {
                 var body = doc.MainDocumentPart.Document.Body;
-                
 
                 foreach (var text in body.Descendants<Text>())
                 {
@@ -248,11 +248,30 @@ namespace QLNhaTro.Service.ContractService
                                          .Replace("{SoThang}", ((contractData.EndDate.Year - contractData.StartDate.Year) * 12 + (contractData.EndDate.Month - contractData.StartDate.Month)).ToString())
                                          .Replace("{NgayThue}", contractData.StartDate.ToString("dd/MM/yyyy"))
                                          .Replace("{NgayHetHan}", contractData.EndDate.ToString("dd/MM/yyyy"))
-                                         .Replace("{GiaThue}", roomData.PriceRoom.ToString())
-                                         .Replace("{GiaThueChu}", NumberToWords(roomData.PriceRoom))
-                                         .Replace("{TienCoc}", contractData.Deposit.ToString())
-                                         .Replace("{TienCocBangChu}", NumberToWords(contractData.Deposit))
-                                         .Replace("{DichVu}", "Đây là dịch vụ đã được thay đổi");
+                                         .Replace("{GiaThue}", FormartPrice(roomData.PriceRoom))
+                                         .Replace("{GiaThueChu}", NumberToWords(roomData.PriceRoom) +" đồng")
+                                         .Replace("{TienCoc}", FormartPrice(contractData.Deposit))
+                                         .Replace("{TienCocBangChu}", NumberToWords(contractData.Deposit) + " đồng")
+                                         ; // Xóa placeholder {DichVu}
+                    if(text.Text.Contains("{DichVu}"))
+                    {
+                        // Xóa placeholder {DichVu}
+                        text.Text = text.Text.Replace("{DichVu}", string.Empty);
+
+                        // Lấy phần tử chứa Text và thêm các Paragraph vào sau đó
+                        var parent = text.Parent;
+
+                        // Tạo các Paragraph mới cho mỗi dịch vụ
+                        foreach (var service in serviceLines)
+                        {
+                            var paragraph = new Paragraph(
+                                new Run(new Text($"{service}")) // Tạo một Run chứa dịch vụ
+                            );
+
+                            // Thêm Paragraph vào Body sau phần tử chứa Text
+                            parent.InsertAfter(paragraph, text);
+                        }
+                    }
                 }
                 doc.MainDocumentPart.Document.Save();
             }
@@ -275,7 +294,7 @@ namespace QLNhaTro.Service.ContractService
             contract.Customers = _Customer.GetCustomerByContract(contract.Id);
             return contract;
         }
-        static string NumberToWords(decimal number)
+        private string NumberToWords(decimal number)
         {
             if (number == 0)
                 return "không";
@@ -310,7 +329,7 @@ namespace QLNhaTro.Service.ContractService
                 }
                 else if (unit > 0)
                 {
-                    temp += "lẻ " + (unit == 5 ? "lăm" : units[unit]) + " ";
+                    temp +=  (unit == 5 ? "lăm" : units[unit]) + " ";
                 }
 
                 return temp.Trim();
@@ -346,8 +365,6 @@ namespace QLNhaTro.Service.ContractService
                 {
                     if (remaining < 100 && result != "")
                         result += "không trăm ";
-                    if (remaining < 10 && result != "" && remaining > 0)
-                        result += "lẻ ";
                     result += ConvertUnderThousand(remaining);
                 }
             }
@@ -359,7 +376,11 @@ namespace QLNhaTro.Service.ContractService
                 result += ConvertUnderThousand(fractionalPart);
             }
 
-            return result.Trim();
+            return result.Trim() ;
+        }
+        private string FormartPrice(decimal input)
+        {
+            return Math.Floor(input).ToString("#,##0", new System.Globalization.CultureInfo("vi-VN"));
         }
     }
 }

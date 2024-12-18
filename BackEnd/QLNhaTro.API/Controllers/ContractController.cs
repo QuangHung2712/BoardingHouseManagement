@@ -55,7 +55,6 @@ namespace QLNhaTro.API.Controllers
         {
             string outputPath = _Contract.ExportWord(contractId);
             return PhysicalFile(outputPath, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "contract.docx");
-
         }
     }
 }

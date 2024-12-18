@@ -155,6 +155,10 @@ namespace QLNhaTro.Moddel.SeedData
                     }
                 }
             }
+            if (!context.Services.Any())
+            {
+
+            }
         }
     }
 }
