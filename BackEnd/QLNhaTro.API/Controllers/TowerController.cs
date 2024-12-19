@@ -29,7 +29,7 @@ namespace QLNhaTro.API.Controllers
             await _towerService.CreateEditTower(data);
             return Ok();
         }
-        [HttpPut("towerId")]
+        [HttpDelete("{towerId}")]
         public IActionResult DeleteTower(long towerId)
         {
              _towerService.DeleteTower(towerId);

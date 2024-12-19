@@ -23,8 +23,9 @@ namespace QLNhaTro.Service.TowerService
         }
         public async Task<List<GetAllTowerResModel>> GetAllTowerByLandlordId(long LandlordId)
         {
-            var towerData = await _Context.Towers.Where(item => item.LandlordId == LandlordId).Select(t => new GetAllTowerResModel
+            var towerData = await _Context.Towers.Where(item => item.LandlordId == LandlordId && !item.IsDeleted).Select(t => new GetAllTowerResModel
             {
+                TowerName  = t.Name,
                 Id = t.Id,
                 Address = t.Address,
                 SumRoom = _Context.Rooms.Count(r=> r.TowerId == t.Id),
@@ -70,12 +71,12 @@ namespace QLNhaTro.Service.TowerService
                 }
             }
         }
-        public async Task DeleteTower(long Id)
+        public void DeleteTower(long Id)
         {
             var tower = _Context.Towers.GetAvailableById(Id);
             tower.IsDeleted = true;
             _Context.Towers.Update(tower);
-            await _Context.SaveChangesAsync();
+            _Context.SaveChangesAsync();
         }
     }
 }

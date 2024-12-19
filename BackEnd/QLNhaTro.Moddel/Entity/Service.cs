@@ -13,5 +13,6 @@ namespace QLNhaTro.Moddel.Entity
         public virtual Tower Tower { get; set; }
         public decimal UnitPrice { get; set; }
         public bool IsActive { get; set; }
+        public string UnitOfCalculation { get; set; } //Đơn vị tính
     }
 }

@@ -13,6 +13,5 @@ namespace QLNhaTro.Moddel.Moddel.RequestModels
         public string TowerName { get; set; }
         public string Address { get; set; }
         public long LandlordId { get; set; }
-        public virtual Landlord Landlord { get; set; }
     }
 }

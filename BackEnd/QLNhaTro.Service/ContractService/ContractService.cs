@@ -99,7 +99,7 @@ namespace QLNhaTro.Service.ContractService
                             ServiceId = x.ServiceId,
                             ServiceName = x.Service.Name,
                             Price = x.Price,
-                            Number = x.Number
+                            Number = x.Number.Value
                         }).ToList(),
                     }).FirstOrDefaultAsync();
                 if (contractData == null) throw new NotFoundException(nameof(id));

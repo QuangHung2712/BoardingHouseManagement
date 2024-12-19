@@ -11,5 +11,7 @@ namespace QLNhaTro.Moddel.Entity
     {
         public long ContractId { get; set; }
         public virtual Contract Contract { get; set; }
+        public bool IsRepresentative { get; set; }//Có phải là người đại diện không
+        public string? Password{ get; set; }
     }
 }
