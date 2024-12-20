@@ -60,8 +60,10 @@ namespace QLNhaTro.Service.ContractService
                     item.StartDate,
                     item.EndDate,
                     item.Deposit,
+                    item.TerminationDate,
                 })
                 .ToListAsync();
+
 
             // Tính toán các giá trị phức tạp sau khi dữ liệu đã tải
             var result = contracts.Select(item => new GetAllContractByTowerId
@@ -71,8 +73,9 @@ namespace QLNhaTro.Service.ContractService
                 CustomerName = _Customer.GetCustomerNameByContract(item.Id),
                 PhoneCustomer = _Customer.GetCustomerPhoneByContract(item.Id),
                 StartDate = item.StartDate,
-                EndDate = item.EndDate,
+                EndDate = item.TerminationDate ?? item.EndDate,
                 Deposit = item.Deposit,
+
             }).ToList();
             if (result == null) throw new NotFoundException(nameof(towerId));
             return result;
@@ -210,10 +213,6 @@ namespace QLNhaTro.Service.ContractService
             Contract contract = _Context.Contracts.GetAvailableById(input.ContractId);
             DateTime timeNew = contract.EndDate.AddMonths(input.ExtensionPeriod);
             contract.EndDate = timeNew;
-            if(input.Deposit != null)
-            {
-                contract.Deposit = input.Deposit.Value;
-            }
             _Context.Contracts.Update(contract);
             await _Context.SaveChangesAsync();
         }

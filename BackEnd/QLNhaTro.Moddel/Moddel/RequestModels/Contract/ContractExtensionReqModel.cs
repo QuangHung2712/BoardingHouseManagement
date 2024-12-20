@@ -10,6 +10,5 @@ namespace QLNhaTro.Moddel.Moddel.RequestModels
     {
         public long ContractId { get; set; }
         public int ExtensionPeriod{ get; set; }
-        public decimal? Deposit { get; set; }
     }
 }

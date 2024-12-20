@@ -12,5 +12,7 @@ namespace QLNhaTro.Moddel.Moddel.RequestModels
         public long RoomIdNew { get; set; }
         public DateTime TimesChange { get; set; }
         public int ContractPeriod { get; set; }
+        public List<ContractServiceReqModel> Services { get; set; }
+
     }
 }

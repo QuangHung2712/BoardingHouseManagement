@@ -14,5 +14,12 @@ namespace QLNhaTro.Commons
             HRM = 1,
             Employee = 2
         }
+        public enum StatusBill
+        {
+            ChuaDienThongTin = 1,
+            ChuaThanhToan = 2,
+            ChuaXacNhanThanhToan = 3,
+            DaXacNhanThanhToan = 4
+        }
     }
 }

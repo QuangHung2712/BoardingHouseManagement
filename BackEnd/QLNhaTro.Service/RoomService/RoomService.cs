@@ -1,5 +1,6 @@
 ﻿using DocumentFormat.OpenXml.Drawing.Spreadsheet;
 using DocumentFormat.OpenXml.InkML;
+using DocumentFormat.OpenXml.Vml.Office;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using MimeKit.Encodings;
@@ -241,27 +242,69 @@ namespace QLNhaTro.Service.RoomService
         }
         public async Task ChangeRoom(ChangeRoomReqModel input)
         {
+            //Lấy thông tin của phòng cũ và mới
+            var roomNew = _Context.Rooms.Where(r => r.Id == input.RoomIdNew).FirstOrDefault();
+            var roomOld = _Context.Rooms.Where(r => r.Id == input.RoomIdOld).FirstOrDefault();
+            if(roomOld == null || roomNew == null)
+            {
+                throw new NotFoundException($"{input.RoomIdOld} và {input.RoomIdNew}");
+            }
+
             var contractOld = _Context.Contracts
             .SingleOrDefault(record => record.RoomId == input.RoomIdOld && !record.IsDeleted && record.TerminationDate == null)
             ?? throw new NotFoundException(nameof(input.RoomIdOld));
+            //Tạo hợp đồng mới và cập nhật lại hợp đồng cũ
             Contract contractNew = new Contract
             {
                 RoomId = input.RoomIdNew,
-                Customers = contractOld.Customers,
                 StartDate = input.TimesChange,
                 EndDate = input.TimesChange.AddMonths(input.ContractPeriod),
                 Deposit = contractOld.Deposit,
-                ServiceMotels = contractOld.ServiceMotels,
             };
             contractOld.TerminationDate = input.TimesChange;
+            contractOld.Note = $"Khách đã chuyển sang phòng {roomNew.Name} ở địa chỉ {roomNew.Tower.Address}";
             _Context.Contracts.Update(contractOld);
             _Context.Contracts.Add(contractNew);
-            var roomOld = _Context.Rooms.GetAvailableById(input.RoomIdOld);
-            var roomNew = _Context.Rooms.GetAvailableById(input.RoomIdNew);
+            await _Context.SaveChangesAsync();
+
+            //Cập nhập lại hợp đồng ở bảng khách hàng
+            var customer = _Context.Customers.Where(c => c.ContractId == contractOld.Id && c!.IsDeleted).ToList();
+            foreach (var item in customer)
+            {
+                item.ContractId = contractNew.Id;
+            }
+            _Context.Customers.UpdateRange(customer);
+
+            //Thêm lại các dịch vụ
+            var contractService = input.Services.Select(s => new ServiceRoom
+            {
+                ContractId = contractNew.Id,
+                ServiceId = s.ServiceId,
+                Price = s.Price,
+                Number = s.Number,
+            }).ToList();
+            await _Context.ServiceRooms.AddRangeAsync(contractService);
+
+            //Cập nhật lại trạng thái phòng
             roomOld.StatusNewCustomer = true;
             roomNew.StatusNewCustomer = false;
             _Context.Rooms.UpdateRange(roomOld, roomNew);
 
+            //Thêm phát sinh nếu 2 phòng có giá khác nhau
+            if(roomOld.PriceRoom != roomNew.PriceRoom)
+            {
+                Incur incurNew = new Incur() 
+                {
+                    RoomId = roomNew.Id,
+                    Amount = roomNew.PriceRoom - roomOld.PriceRoom,
+                    CreationDate = input.TimesChange,
+                    Reason = "Tiền cọc chênh của phòng mới và phòng cũ",
+                    TowerId = roomNew.TowerId,
+                };
+                _Context.Incurs.Add(incurNew);
+            }
+            
+            //Lưu tất cả các thông tin vừa chỉnh sửa
             await _Context.SaveChangesAsync();
         }
         public async Task<List<GetDropDownRoom>> GetRoomNoContract(long towerId)

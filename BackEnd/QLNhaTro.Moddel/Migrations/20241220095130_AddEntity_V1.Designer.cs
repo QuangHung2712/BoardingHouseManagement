@@ -12,8 +12,8 @@ using QLNhaTro.Moddel;
 namespace QLNhaTro.Moddel.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241219024211_Update_Entity_v2")]
-    partial class Update_Entity_v2
+    [Migration("20241220095130_AddEntity_V1")]
+    partial class AddEntity_V1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -41,12 +41,6 @@ namespace QLNhaTro.Moddel.Migrations
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
-
-                    b.Property<long?>("NewElectricity")
-                        .HasColumnType("bigint");
-
-                    b.Property<long?>("NewWater")
-                        .HasColumnType("bigint");
 
                     b.Property<string>("Note")
                         .HasColumnType("nvarchar(max)");
@@ -121,7 +115,7 @@ namespace QLNhaTro.Moddel.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<long>("ContractId")
+                    b.Property<long?>("ContractId")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime>("DoB")
@@ -321,6 +315,44 @@ namespace QLNhaTro.Moddel.Migrations
                     b.ToTable("Rooms");
                 });
 
+            modelBuilder.Entity("QLNhaTro.Moddel.Entity.ServiceInvoiceDetails", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("BillId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("NewNumber")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("OldNumber")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("ServiceId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("ServicesId")
+                        .HasColumnType("bigint");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<long>("UsageNumber")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BillId");
+
+                    b.HasIndex("ServicesId");
+
+                    b.ToTable("ServiceInvoiceDetails");
+                });
+
             modelBuilder.Entity("QLNhaTro.Moddel.Entity.ServiceRoom", b =>
                 {
                     b.Property<long>("Id")
@@ -451,9 +483,7 @@ namespace QLNhaTro.Moddel.Migrations
                 {
                     b.HasOne("QLNhaTro.Moddel.Entity.Contract", "Contract")
                         .WithMany("Customers")
-                        .HasForeignKey("ContractId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ContractId");
 
                     b.Navigation("Contract");
                 });
@@ -497,6 +527,25 @@ namespace QLNhaTro.Moddel.Migrations
                         .IsRequired();
 
                     b.Navigation("Tower");
+                });
+
+            modelBuilder.Entity("QLNhaTro.Moddel.Entity.ServiceInvoiceDetails", b =>
+                {
+                    b.HasOne("QLNhaTro.Moddel.Entity.Bill", "Bills")
+                        .WithMany()
+                        .HasForeignKey("BillId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("QLNhaTro.Moddel.Entity.Services", "Services")
+                        .WithMany()
+                        .HasForeignKey("ServicesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Bills");
+
+                    b.Navigation("Services");
                 });
 
             modelBuilder.Entity("QLNhaTro.Moddel.Entity.ServiceRoom", b =>

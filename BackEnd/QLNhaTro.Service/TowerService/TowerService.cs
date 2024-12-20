@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using DocumentFormat.OpenXml.InkML;
+using Microsoft.EntityFrameworkCore;
 using QLNhaTro.Commons;
 using QLNhaTro.Commons.CustomException;
 using QLNhaTro.Moddel;
@@ -28,9 +29,12 @@ namespace QLNhaTro.Service.TowerService
                 TowerName  = t.Name,
                 Id = t.Id,
                 Address = t.Address,
-                SumRoom = _Context.Rooms.Count(r=> r.TowerId == t.Id),
-                RoomRented = 10,
-                RoomStillEmpty = 10
+                SumRoom = _Context.Rooms.Count(r=> r.TowerId == t.Id && !r.IsDeleted),
+                RoomRented = _Context.Rooms.Count(r =>r.TowerId == t.Id &&
+                    !r.IsDeleted &&
+                     _Context.Contracts.Any(c =>c.RoomId == r.Id &&(c.TerminationDate == null || c.TerminationDate >= DateTime.Now) && !c.IsDeleted)),
+                RoomStillEmpty = _Context.Rooms.Count(r =>r.TowerId == t.Id && !r.IsDeleted 
+                    &&(!_Context.Contracts.Any(c => c.RoomId == r.Id && !c.IsDeleted) ||_Context.Contracts.All(c =>c.RoomId == r.Id && c.TerminationDate < DateTime.Now ) ))
             }).ToListAsync();
             if(towerData.Count == 0) throw new NotFoundException(nameof(LandlordId));
             return towerData;

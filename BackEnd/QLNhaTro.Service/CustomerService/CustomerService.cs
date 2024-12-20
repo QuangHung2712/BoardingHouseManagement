@@ -24,7 +24,6 @@ namespace QLNhaTro.Service.CustomerService
         public List<CustomerResModel> GetCustomerByContract(long contractId)
         {
             var customerData = _Context.Customers.Where(c=>c.ContractId == contractId && !c.IsDeleted).Select(c=> CustomerResModel.Mapping(c)).ToList();
-            if (customerData.Count == 0) throw new NotFoundException(nameof(contractId));
             return customerData;
         }
         public string GetCustomerNameByContract(long contractId)
