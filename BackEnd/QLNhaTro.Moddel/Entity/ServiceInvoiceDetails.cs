@@ -10,7 +10,7 @@ namespace QLNhaTro.Moddel.Entity
     public class ServiceInvoiceDetails : BaseEntity
     {
         public long ServiceId { get; set; }
-        public Services Services { get; set; }
+        public Services Service { get; set; }
         public long BillId { get; set; }
         public Bill Bills { get; set; }
         public long? OldNumber { get; set; } // Số cũ

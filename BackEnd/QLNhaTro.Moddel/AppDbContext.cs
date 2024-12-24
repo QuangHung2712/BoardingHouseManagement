@@ -25,5 +25,9 @@ namespace QLNhaTro.Moddel
         public DbSet<Tower> Towers { get; set; }
         public DbSet<Incur> Incurs { get; set; }
         public DbSet<ServiceInvoiceDetails> ServiceInvoiceDetails { get; set; }
+        public DbSet<NewRoomPhoto> NewRoomPhotos { get; set; }
+        public DbSet<SaveNews> SaveNews { get; set; }
+        public DbSet<SaveRoom> SaveRooms { get; set; }
+        public DbSet<SharedResidents> SharedResidents { get; set; }
     }
 }

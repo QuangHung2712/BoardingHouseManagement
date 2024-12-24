@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using QLNhaTro.Moddel;
 
@@ -11,9 +12,11 @@ using QLNhaTro.Moddel;
 namespace QLNhaTro.Moddel.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241224170821_Update_Entity_V3")]
+    partial class Update_Entity_V3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -404,6 +407,9 @@ namespace QLNhaTro.Moddel.Migrations
                     b.Property<long>("ServiceId")
                         .HasColumnType("bigint");
 
+                    b.Property<long>("ServicesId")
+                        .HasColumnType("bigint");
+
                     b.Property<decimal>("UnitPrice")
                         .HasColumnType("decimal(18,2)");
 
@@ -414,7 +420,7 @@ namespace QLNhaTro.Moddel.Migrations
 
                     b.HasIndex("BillId");
 
-                    b.HasIndex("ServiceId");
+                    b.HasIndex("ServicesId");
 
                     b.ToTable("ServiceInvoiceDetails");
                 });
@@ -501,6 +507,9 @@ namespace QLNhaTro.Moddel.Migrations
                     b.Property<long>("CustomerId")
                         .HasColumnType("bigint");
 
+                    b.Property<long>("CustomersId")
+                        .HasColumnType("bigint");
+
                     b.Property<string>("Describe")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -520,7 +529,7 @@ namespace QLNhaTro.Moddel.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CustomerId");
+                    b.HasIndex("CustomersId");
 
                     b.ToTable("SharedResidents");
                 });
@@ -691,15 +700,15 @@ namespace QLNhaTro.Moddel.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("QLNhaTro.Moddel.Entity.Services", "Service")
+                    b.HasOne("QLNhaTro.Moddel.Entity.Services", "Services")
                         .WithMany()
-                        .HasForeignKey("ServiceId")
+                        .HasForeignKey("ServicesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Bills");
 
-                    b.Navigation("Service");
+                    b.Navigation("Services");
                 });
 
             modelBuilder.Entity("QLNhaTro.Moddel.Entity.ServiceRoom", b =>
@@ -734,13 +743,13 @@ namespace QLNhaTro.Moddel.Migrations
 
             modelBuilder.Entity("QLNhaTro.Moddel.Entity.SharedResidents", b =>
                 {
-                    b.HasOne("QLNhaTro.Moddel.Entity.Customers", "Customer")
+                    b.HasOne("QLNhaTro.Moddel.Entity.Customers", "Customers")
                         .WithMany()
-                        .HasForeignKey("CustomerId")
+                        .HasForeignKey("CustomersId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Customer");
+                    b.Navigation("Customers");
                 });
 
             modelBuilder.Entity("QLNhaTro.Moddel.Entity.Tower", b =>
