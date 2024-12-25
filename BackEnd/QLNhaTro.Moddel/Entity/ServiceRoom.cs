@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace QLNhaTro.Moddel.Entity
 {
-    public class ServiceRoom: BaseEntityIsDelete
+    public class ServiceRoom: BaseEntity
     {
         public long ContractId { get; set; }
         public virtual Contract Contract { get; set; }

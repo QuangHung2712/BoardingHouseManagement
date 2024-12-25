@@ -227,26 +227,53 @@ namespace QLNhaTro.Moddel.SeedData
                     {
                         var NewServiceRoom = new List<ServiceRoom>
                         {
-                            new ServiceRoom {Id = 1,ContractId = 1,ServiceId = 6,Price = 3500,IsDeleted = false,Number = null},
-                            new ServiceRoom {Id = 2,ContractId = 1,ServiceId = 7,Price = 35000,IsDeleted = false,Number = 3},
-                            new ServiceRoom {Id = 3,ContractId = 1,ServiceId = 8,Price = 100000,IsDeleted = false,Number = 3},
-                            new ServiceRoom {Id = 4,ContractId = 2,ServiceId = 6,Price = 3500,IsDeleted = false,Number = null},
-                            new ServiceRoom {Id = 5,ContractId = 2,ServiceId = 7,Price = 35000,IsDeleted = false,Number = 3},
-                            new ServiceRoom {Id = 6,ContractId = 2,ServiceId = 8,Price = 100000,IsDeleted = false,Number = 3},
-                            new ServiceRoom {Id = 7,ContractId = 2,ServiceId = 9,Price = 100000,IsDeleted = false,Number = 3},
-                            new ServiceRoom {Id = 8,ContractId = 3,ServiceId = 6,Price = 3500,IsDeleted = false,Number = null},
-                            new ServiceRoom {Id = 9,ContractId = 3,ServiceId = 10,Price = 100000,IsDeleted = false,Number = 3},
-                            new ServiceRoom {Id = 10,ContractId = 3,ServiceId = 9,Price = 100000,IsDeleted = false,Number = 3},
-                            new ServiceRoom {Id = 11,ContractId = 4,ServiceId = 6,Price = 3500,IsDeleted = false,Number = null},
-                            new ServiceRoom {Id = 12,ContractId = 4,ServiceId = 7,Price = 35000,IsDeleted = false,Number = 3},
-                            new ServiceRoom {Id = 13,ContractId = 4,ServiceId = 9,Price = 100000,IsDeleted = false,Number = 3},
-                            new ServiceRoom {Id = 14,ContractId = 5,ServiceId = 10,Price = 100000,IsDeleted = false,Number = 3},
-                            new ServiceRoom {Id = 15,ContractId = 5,ServiceId = 8,Price = 100000,IsDeleted = false,Number = 3},
+                            new ServiceRoom {Id = 1,ContractId = 1,ServiceId = 6,Price = 3500,Number = null},
+                            new ServiceRoom {Id = 2,ContractId = 1,ServiceId = 7,Price = 35000,Number = 3},
+                            new ServiceRoom {Id = 3,ContractId = 1,ServiceId = 8,Price = 100000,Number = 3},
+                            new ServiceRoom {Id = 4,ContractId = 2,ServiceId = 6,Price = 3500,Number = null},
+                            new ServiceRoom {Id = 5,ContractId = 2,ServiceId = 7,Price = 35000,Number = 3},
+                            new ServiceRoom {Id = 6,ContractId = 2,ServiceId = 8,Price = 100000,Number = 3},
+                            new ServiceRoom {Id = 7,ContractId = 2,ServiceId = 9,Price = 100000,Number = 3},
+                            new ServiceRoom {Id = 8,ContractId = 3,ServiceId = 6,Price = 3500,Number = null},
+                            new ServiceRoom {Id = 9,ContractId = 3,ServiceId = 10,Price = 100000,Number = 3},
+                            new ServiceRoom {Id = 10,ContractId = 3,ServiceId = 9,Price = 100000,Number = 3},
+                            new ServiceRoom {Id = 11,ContractId = 4,ServiceId = 6,Price = 3500,Number = null},
+                            new ServiceRoom {Id = 12,ContractId = 4,ServiceId = 7,Price = 35000,Number = 3},
+                            new ServiceRoom {Id = 13,ContractId = 4,ServiceId = 9,Price = 100000,Number = 3},
+                            new ServiceRoom {Id = 14,ContractId = 5,ServiceId = 10,Price = 100000,Number = 3},
+                            new ServiceRoom {Id = 15,ContractId = 5,ServiceId = 8,Price = 100000,Number = 3},
                         };
                         context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT [dbo].[ServiceRooms] ON");
                         context.ServiceRooms.AddRange(NewServiceRoom);
                         context.SaveChanges();
                         context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT [dbo].[ServiceRooms] OFF");
+                        transaction.Commit();
+                    }
+                    catch (Exception)
+                    {
+                        transaction.Rollback();
+                        throw;
+                    }
+                }
+            }
+            if (!context.Incurs.Any())
+            {
+                using (var transaction = context.Database.BeginTransaction())
+                {
+                    try
+                    {
+                        var NewIncur = new List<Incur>
+                        {
+                            new Incur {Id = 1,TowerId=2,RoomId=6,Amount=100000,CreationDate=new DateTime(2024,12,14),Reason="Tiền phạt",IsDeleted=false,StatusPay=false},
+                            new Incur { Id = 2, TowerId = 2, RoomId = 7, Amount = 200000, CreationDate = new DateTime(2024, 11, 15), Reason = "Tiền phạt bẩn", IsDeleted = false, StatusPay = true },
+                            new Incur { Id = 3, TowerId = 2, RoomId = 8, Amount = 150000, CreationDate = new DateTime(2024, 12, 16), Reason = "Tiền sửa chữa", IsDeleted = false, StatusPay = false },
+                            new Incur { Id = 4, TowerId = 2, RoomId = 9, Amount = 250000, CreationDate = new DateTime(2024, 12, 17), Reason = "Tiền chênh chuyển trọ", IsDeleted = false, StatusPay = false },
+                            new Incur { Id = 5, TowerId = 2, RoomId = 10, Amount = 300000, CreationDate = new DateTime(2024, 12, 18), Reason = "Tiền phạt nhà bẩn", IsDeleted = true, StatusPay = true }
+                        };
+                        context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT [dbo].[Incurs] ON");
+                        context.Incurs.AddRange(NewIncur);
+                        context.SaveChanges();
+                        context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT [dbo].[Incurs] OFF");
                         transaction.Commit();
                     }
                     catch (Exception)

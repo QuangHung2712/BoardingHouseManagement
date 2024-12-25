@@ -97,13 +97,13 @@ namespace QLNhaTro.Service.ContractService
                         Deposit = record.Deposit,
                         TerminationDate = record.TerminationDate,
                         Note = record.Note,
-                        Services = record.ServiceMotels.Select(x => new ContractServiceResModel
+                        /*Services = record.ServiceMotels.Select(x => new ContractServiceResModel
                         {
                             ServiceId = x.ServiceId,
                             ServiceName = x.Service.Name,
                             Price = x.Price,
                             Number = x.Number.Value
-                        }).ToList(),
+                        }).ToList(),*/
                     }).FirstOrDefaultAsync();
                 if (contractData == null) throw new NotFoundException(nameof(id));
                 contractData.Customers = _Customer.GetCustomerByContract(contractData.Id);
