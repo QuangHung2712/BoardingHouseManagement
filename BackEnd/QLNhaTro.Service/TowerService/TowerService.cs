@@ -36,7 +36,7 @@ namespace QLNhaTro.Service.TowerService
                 RoomStillEmpty = _Context.Rooms.Count(r =>r.TowerId == t.Id && !r.IsDeleted 
                     &&(!_Context.Contracts.Any(c => c.RoomId == r.Id && !c.IsDeleted) ||_Context.Contracts.All(c =>c.RoomId == r.Id && c.TerminationDate < DateTime.Now ) ))
             }).ToListAsync();
-            if(towerData.Count == 0) throw new NotFoundException(nameof(LandlordId));
+            if(towerData.Count == 0) throw new NotFoundException("Chủ nhà không tồn tại");
             return towerData;
         }
         public async Task CreateEditTower(CreateEditTowerReqModel input)

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Client;
 using QLNhaTro.Commons;
+using QLNhaTro.Moddel.Entity;
 using QLNhaTro.Moddel.Moddel.RequestModels;
 using QLNhaTro.Moddel.Moddel.ResponseModels;
 using QLNhaTro.Service.TowerService;
@@ -21,19 +22,42 @@ namespace QLNhaTro.API.Controllers
         [HttpGet("{landlordId}")]
         public async Task<ActionResult<List<GetAllTowerResModel>>> GetAllTowerByLandLordId(int landlordId) 
         {
-            return await _towerService.GetAllTowerByLandlordId(landlordId);
+            try
+            {
+                return await _towerService.GetAllTowerByLandlordId(landlordId);
+            }
+            catch (Exception ex) 
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
+
         }
         [HttpPost]
         public async Task<IActionResult> CreateEditTower([FromBody] CreateEditTowerReqModel data)
         {
-            await _towerService.CreateEditTower(data);
-            return Ok();
+            try
+            {
+                await _towerService.CreateEditTower(data);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message  = ex.Message });
+            }
         }
         [HttpDelete("{towerId}")]
         public IActionResult DeleteTower(long towerId)
         {
-             _towerService.DeleteTower(towerId);
-            return Ok();
+            try
+            {
+                _towerService.DeleteTower(towerId);
+                return Ok();
+            }
+            catch(Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
+
         }
     }
 }
