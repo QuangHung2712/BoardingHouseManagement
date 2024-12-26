@@ -1,4 +1,6 @@
 ﻿using DocumentFormat.OpenXml.Drawing;
+using DocumentFormat.OpenXml.Drawing.Spreadsheet;
+using DocumentFormat.OpenXml.InkML;
 using DocumentFormat.OpenXml.Math;
 using DocumentFormat.OpenXml.Office2010.Excel;
 using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
@@ -97,13 +99,13 @@ namespace QLNhaTro.Service.ContractService
                         Deposit = record.Deposit,
                         TerminationDate = record.TerminationDate,
                         Note = record.Note,
-                        /*Services = record.ServiceMotels.Select(x => new ContractServiceResModel
+                        Services = record.ServiceMotels.Select(x => new ContractServiceResModel
                         {
                             ServiceId = x.ServiceId,
                             ServiceName = x.Service.Name,
                             Price = x.Price,
-                            Number = x.Number.Value
-                        }).ToList(),*/
+                            Number = x.Number
+                        }).ToList(),
                     }).FirstOrDefaultAsync();
                 if (contractData == null) throw new NotFoundException(nameof(id));
                 contractData.Customers = _Customer.GetCustomerByContract(contractData.Id);
@@ -221,16 +223,50 @@ namespace QLNhaTro.Service.ContractService
             string SampleContract = "D:\\Code\\BoardingHouseManagement\\BoardingHouseManagement\\Tài liệu\\HopDongMau.docx";
             string outputPath = "D:\\Code\\BoardingHouseManagement\\BoardingHouseManagement\\Tài liệu\\output_contract.docx";
 
-
             var contractData = _Context.Contracts.GetAvailableById(contractId);
-            var roomData = _Context.Rooms.GetAvailableById(contractData.RoomId);
-            var serviecData = _Context.ServiceRooms.Where(item => item.ContractId == contractId).ToList();
+            var roomDetails = _Context.Rooms
+                .Where(r => r.Id == contractData.RoomId)
+                .Include(r => r.Tower) // Bao gồm thông tin Tower
+                .ThenInclude(t => t.Landlord) // Bao gồm thông tin Landlord thông qua Tower
+                .Select(r => new
+                {
+                    Room = new
+                    {
+                        r.Id,
+                        r.Name,
+                        r.PriceRoom,
+                    },
+                    Tower = new
+                    {
+                        r.Tower.Id,
+                        r.Tower.Address,
+                        r.Tower.LandlordId
+                    },
+                    Landlord = new
+                    {
+                        r.Tower.Landlord.FullName,
+                        r.Tower.Landlord.CCCD,
+                        r.Tower.Landlord.Address,
+                        r.Tower.Landlord.PhoneNumber,
+                        r.Tower.Landlord.STK
+                    }
+                }).FirstOrDefault();
+            if(roomDetails == null) throw new NotFoundException(nameof(contractId));
+            //var roomData = _Context.Rooms.GetAvailableById(contractData.RoomId);
+            var serviecData = _Context.ServiceRooms.Where(item => item.ContractId == contractId).Include(sr => sr.Service).ToList();
             var serviceLines = serviecData
                    .Select((service, index) => new { service, index })
+
                    .GroupBy(x => x.index / 2)
-                   .Select(g => string.Join("   ", g.Select(x => $"+ {x.service.ServiceId}: {FormartPrice(x.service.Price)} VND                                ")))
+                   .Select(g => string.Join("   ", g.Select(x => $"+ {x.service.Service.Name}: {FormartPrice(x.service.Price)} VND/ {x.service.Service.UnitOfCalculation}                             ")))
                    .ToList();
             var customerData = _Customer.GetCustomerByContract(contractId);
+            var customerDaiDien = customerData.Where(x => x.IsRepresentative).FirstOrDefault();
+            if (customerDaiDien != null)
+            {
+                // Xóa khách hàng đại diện khỏi danh sách
+                customerData.Remove(customerDaiDien);
+            }
             System.IO.File.Copy(SampleContract, outputPath, true);
             using (WordprocessingDocument doc = WordprocessingDocument.Open(outputPath, true))
             {
@@ -241,22 +277,22 @@ namespace QLNhaTro.Service.ContractService
                     text.Text = text.Text.Replace("{NgayHienTai}", contractData.StartDate.Day.ToString())
                                          .Replace("{ThangHienTai}", contractData.StartDate.Month.ToString())
                                          .Replace("{NamHienTai}", contractData.StartDate.Year.ToString())
-                                         .Replace("{TenChuNha}", "Phạm Thị Minh Trang")
-                                         .Replace("{CCCDChuNha}", "022202001454")
-                                         .Replace("{DKTTChuNha}", "Kim Sơn - Đông Triều - Quảng Ninh")
-                                         .Replace("{SDTChuNha}", "0359988934")
-                                         .Replace("{STKChuNha}", "0080127122002 Ngân hàng MB Bank")
-                                         .Replace("{TenDaiDien}", "Phạm Thị Minh Trang")
-                                         .Replace("{CCCDaiDIen}", "022202001454")
-                                         .Replace("{DKTTDaiDien}", "Gang Thép Thành phố Thái Nguyên Tỉnh Thái Nguyên")
-                                         .Replace("{SDTDaiDien}", "0886682304")
-                                         .Replace("{EmailDaiDien}", "trangxu2304@gmail.com")
-                                         .Replace("{SoPhong}", roomData.Name)
+                                         .Replace("{TenChuNha}", roomDetails.Landlord.FullName)
+                                         .Replace("{CCCDChuNha}", roomDetails.Landlord.CCCD)
+                                         .Replace("{DKTTChuNha}", roomDetails.Landlord.Address)
+                                         .Replace("{SDTChuNha}", roomDetails.Landlord.PhoneNumber)
+                                         .Replace("{STKChuNha}", roomDetails.Landlord.STK)
+                                         .Replace("{TenDaiDien}", customerDaiDien.FullName)
+                                         .Replace("{CCCDaiDIen}", customerDaiDien.CCCD)
+                                         .Replace("{DKTTDaiDien}", customerDaiDien.Address)
+                                         .Replace("{SDTDaiDien}", customerDaiDien.PhoneNumber)
+                                         .Replace("{EmailDaiDien}", customerDaiDien.Email)
+                                         .Replace("{SoPhong}", roomDetails.Room.Name)
                                          .Replace("{SoThang}", ((contractData.EndDate.Year - contractData.StartDate.Year) * 12 + (contractData.EndDate.Month - contractData.StartDate.Month)).ToString())
                                          .Replace("{NgayThue}", contractData.StartDate.ToString("dd/MM/yyyy"))
                                          .Replace("{NgayHetHan}", contractData.EndDate.ToString("dd/MM/yyyy"))
-                                         .Replace("{GiaThue}", FormartPrice(roomData.PriceRoom))
-                                         .Replace("{GiaThueChu}", NumberToWords(roomData.PriceRoom) +" đồng")
+                                         .Replace("{GiaThue}", FormartPrice(roomDetails.Room.PriceRoom))
+                                         .Replace("{GiaThueChu}", NumberToWords(roomDetails.Room.PriceRoom) +" đồng")
                                          .Replace("{TienCoc}", FormartPrice(contractData.Deposit))
                                          .Replace("{TienCocBangChu}", NumberToWords(contractData.Deposit) + " đồng")
                                          ; // Xóa placeholder {DichVu}
@@ -308,7 +344,7 @@ namespace QLNhaTro.Service.ContractService
                             paragraph.AppendChild(indexRun);
 
                             // 1. Họ và tên
-                            var fullNameRun = new Run(new Text($".   Họ và tên: {customer.FullName}"));
+                            var fullNameRun = new Run(new Text($".   Họ và tên: {customer.FullName}             Ngày sinh: {customer.DoB}"));
                             var fullNameRunProperties = new RunProperties();
                             fullNameRunProperties.AppendChild(new RunFonts() { Ascii = "Times New Roman", HighAnsi = "Times New Roman" });
                             fullNameRunProperties.AppendChild(new FontSize() { Val = "28" }); // Font size 14pt

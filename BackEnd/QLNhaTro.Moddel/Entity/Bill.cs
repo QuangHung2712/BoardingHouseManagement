@@ -15,8 +15,9 @@ namespace QLNhaTro.Moddel.Entity
         public long RoomId { get; set; }
         public virtual Room Room { get; set; }
         public DateOnly CreationDate { get; set; }
+        public decimal PriceRoom { get; set; }
         public decimal TotalAmount { get; set; }
-        public bool Status { get; set; }
+        public CommonEnums.StatusBill Status { get; set; }
         public string? Note { get; set; }
     }
 }

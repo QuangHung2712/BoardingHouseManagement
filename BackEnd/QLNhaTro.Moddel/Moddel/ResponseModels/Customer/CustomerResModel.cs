@@ -16,6 +16,8 @@ namespace QLNhaTro.Moddel.Moddel.ResponseModels
         public string Email { get; set; }
         public string CCCD { get; set; }
         public string Address { get; set; }
+        public bool IsRepresentative { get; set; }//Có phải là người đại diện không
+        public string? Password { get; set; }
         public static CustomerResModel Mapping(Customers customer)
         {
             return new CustomerResModel
@@ -26,7 +28,9 @@ namespace QLNhaTro.Moddel.Moddel.ResponseModels
                 PhoneNumber = customer.PhoneNumber,
                 Email = customer.Email,
                 CCCD = customer.CCCD,
-                Address = customer.Address
+                Address = customer.Address,
+                IsRepresentative = customer.IsRepresentative,
+                Password = customer.Password,
             };
         }
     }

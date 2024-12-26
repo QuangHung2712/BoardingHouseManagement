@@ -24,5 +24,6 @@ namespace QLNhaTro.Commons
         public string CCCD { get; set; }
         public string Address { get; set; }
         public string? SDTZalo { get; set; }
+        public string? PathAvatar { get; set; }
     }
 }
