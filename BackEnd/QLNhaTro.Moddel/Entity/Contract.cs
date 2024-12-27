@@ -17,6 +17,7 @@ namespace QLNhaTro.Moddel.Entity
         public decimal Deposit {  get; set; }
         public virtual ICollection<ServiceRoom> ServiceMotels { get; set; }
         public DateTime? TerminationDate { get; set; }
+        public bool UserEnterInformation { get; set; }
         public string? Note { get; set; }
     }
 }

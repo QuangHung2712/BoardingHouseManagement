@@ -8,6 +8,6 @@ namespace QLNhaTro.Service.BillService
 {
     public interface IBillService
     {
-
+        Task SubmitRequesInformation();
     }
 }

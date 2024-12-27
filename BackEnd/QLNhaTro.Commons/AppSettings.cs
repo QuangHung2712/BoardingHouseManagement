@@ -24,4 +24,9 @@ namespace QLNhaTro.Moddel
         public string Password { get; set; }
         public bool EnableSsl { get; set; }
     }
+    public class Key
+    {
+        public string EncryptionKey { get; set; }
+        public string IVKey { get; set; }
+    }
 }

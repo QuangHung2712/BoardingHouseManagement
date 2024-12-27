@@ -78,63 +78,71 @@
     <v-container>
 
         <v-row>
-            <v-col offset="2" cols="6">
+            <v-col offset="1" cols="11">
                 <pageheader title="" pageTitle="Chi tiết phòng trọ" />
-                <BCard no-body class="mt-2">
-                    <v-row justify="center" class="m-0" >
-                        <!-- Carousel chính -->
-                        <v-carousel v-model="currentSlide" hide-delimiters show-arrows="hover" height="480" class="item" >
-                            <v-carousel-item v-for="(item, index) in images" :key="index">
-                                <v-img :src="item.src" :alt="item.name" @click="showImg(index)" />
-                            </v-carousel-item>
-                        </v-carousel>
+                <BRow>
+                    <BCol class="col-lg-8">
+                        <BCard no-body class="mt-2">
+                            <v-row justify="center" class="m-0" >
+                                <!-- Carousel chính -->
+                                <v-carousel v-model="currentSlide" hide-delimiters show-arrows="hover" height="480" class="item" >
+                                    <v-carousel-item v-for="(item, index) in images" :key="index">
+                                        <v-img :src="item.src" :alt="item.name" @click="showImg(index)" />
+                                    </v-carousel-item>
+                                </v-carousel>
 
-                        <!-- Thumbnails -->
-                        <v-row justify="center" class="m-0">
-                            <div
-                            v-for="(item, index) in images"
-                            :key="index"
-                            @click="currentSlide = index"
-                            class="thumbnail-container"
-                            >
-                            <v-img
-                                :src="item.src"
-                                :alt="item.name"
-                                class="thumbnail"
-                                :class="{ active: currentSlide === index }"
-                            />
-                            </div>
-                        </v-row>
-                    </v-row>
-                </BCard>
-                <BCard>
-                    <BCardHeader class="p-0">
-                        <h4>Số 11 Ngõ 91 đường Cầu Diễn</h4>
-                        <p><v-icon>mdi-map-marker-radius</v-icon> Số 11 Ngõ 91 Đường Cầu Diễn Phường Cầu Diễn Quận Nam Từ Liêm Thành phố Hà Nội </p>
-                        <h3>Giá: <span style="color: red;">3.000.000 VNĐ</span></h3>
-                    </BCardHeader>
-                </BCard>
-            </v-col>
-            <v-col cols="3">
-                <BCard class="statistics-card-1" no-body>
-                    <BCardBody class="text-center">
-                        <div class="chat-avtar d-inline-flex mx-auto">
-                            <img class="rounded-circle img-fluid wid-90 img-thumbnail"
-                                src="/images/Room/20241119180011-e1cc_wm.jpg" alt="User image">
-                        </div>
-                        <h5 class="mb-0">William Bond</h5>
-                        <div class="d-grid gap-2 mt-3 ">
-                            <BButton class="customBtn"><v-icon class="mr-2">mdi-phone</v-icon>0359988934</BButton>
-                        </div>
-                        <div class="d-grid gap-2 mt-3">
-                            <BButton variant="primary"><v-icon class="mr-2">mdi-chat-processing-outline</v-icon>Nhắn tin Zalo</BButton>
-                        </div>
-                        <div class="d-flex justify-space-evenly mt-3">
-                            <BButton variant="white"><v-icon class="mr-2">mdi-heart-outline</v-icon>Lưu phòng</BButton>
-                            <BButton variant="white"><v-icon class="mr-2">mdi-share-variant</v-icon>Chia sẻ phòng</BButton>
-                        </div>
-                    </BCardBody>
-                </BCard>
+                                <!-- Thumbnails -->
+                                <v-row justify="center" class="m-0">
+                                    <div
+                                    v-for="(item, index) in images"
+                                    :key="index"
+                                    @click="currentSlide = index"
+                                    class="thumbnail-container"
+                                    >
+                                    <v-img
+                                        :src="item.src"
+                                        :alt="item.name"
+                                        class="thumbnail"
+                                        :class="{ active: currentSlide === index }"
+                                    />
+                                    </div>
+                                </v-row>
+                            </v-row>
+                        </BCard>
+                        <BCard>
+                            <BCardHeader >
+                                <h4>Số 11 Ngõ 91 đường Cầu Diễn</h4>
+                                <p><v-icon>mdi-map-marker-radius</v-icon> Số 11 Ngõ 91 Đường Cầu Diễn Phường Cầu Diễn Quận Nam Từ Liêm Thành phố Hà Nội </p>
+                                <h3>Giá: <span style="color: red;">3.000.000 VNĐ</span></h3>
+                            </BCardHeader>
+                            <BCardBody class="p-0 py-3">
+                                <h4>Thông tin thiết bị</h4>
+                                <p>Các thiết bị của phòng: Máy giặt, điều hòa, </p>
+                            </BCardBody>
+                        </BCard>
+                    </BCol>
+                    <BCol class="col-lg-4">
+                        <BCard class="statistics-card-1" no-body>
+                            <BCardBody class="text-center">
+                                <div class="chat-avtar d-inline-flex mx-auto">
+                                    <img class="rounded-circle img-fluid wid-90 img-thumbnail"
+                                        src="/images/Room/20241119180011-e1cc_wm.jpg" alt="User image">
+                                </div>
+                                <h5 class="mb-0">William Bond</h5>
+                                <div class="d-grid gap-2 mt-3 ">
+                                    <BButton class="customBtn"><v-icon class="mr-2">mdi-phone</v-icon>0359988934</BButton>
+                                </div>
+                                <div class="d-grid gap-2 mt-3">
+                                    <BButton variant="primary"><v-icon class="mr-2">mdi-chat-processing-outline</v-icon>Nhắn tin Zalo</BButton>
+                                </div>
+                                <div class="d-flex justify-space-evenly mt-3">
+                                    <BButton variant="white" class="p-0"><v-icon class="mr-2">mdi-heart-outline</v-icon>Lưu phòng</BButton>
+                                    <BButton variant="white" class="p-0"><v-icon class="mr-2">mdi-share-variant</v-icon>Chia sẻ phòng</BButton>
+                                </div>
+                            </BCardBody>
+                        </BCard>
+                    </BCol>
+                </BRow>
             </v-col>
         </v-row>
     </v-container>

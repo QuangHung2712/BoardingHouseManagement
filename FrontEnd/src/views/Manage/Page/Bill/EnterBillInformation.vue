@@ -4,10 +4,16 @@
     }
 </style>
 <script>
-
+    import CryptoJS from "crypto-js";
+    const key = CryptoJS.enc.Utf8.parse("kkFVQVMYIdJglUxs"); // Trùng với key backend
+    const iv = CryptoJS.enc.Utf8.parse("dLnolzxmIyvmcfSD"); // Trùng với IV backend
     export default {
         name: "Enter-Bill-Information",
         components: {
+        },
+        created(){
+            const idBill = this.$route.params.idbill;
+            console.log(this.Decrypt(idBill));
         },
         data(){
             return{
@@ -17,6 +23,16 @@
                 address: 'Số 11 Ngõ 91 Đường Cầu Diễn Phường Cầu Diễn Quận Nam Từ Liêm Thành phố Hà Nội',
                 qrPay: '/eb67b8edadf110af49e0.jpg',
                 
+            }
+        },
+        methods:{
+            Decrypt(cipherText) {
+                const bytes = CryptoJS.AES.decrypt(cipherText, key, {
+                    iv: iv,
+                    mode: CryptoJS.mode.CBC,
+                    padding: CryptoJS.pad.Pkcs7,
+                });
+                return bytes.toString(CryptoJS.enc.Utf8);
             }
         }
     }

@@ -90,7 +90,7 @@ export default [
         component: () => import("../views/Manage/Auth/code-verification.vue"),
     },
     {
-        path: "/EnterBill/:idtower",
+        path: "/EnterBill/:idbill",
         name: "EnterBill",
         meta: { title: "Nhập thông tin hoá đơn" },
         component: () => import("../views/Manage/Page/Bill/EnterBillInformation.vue"),

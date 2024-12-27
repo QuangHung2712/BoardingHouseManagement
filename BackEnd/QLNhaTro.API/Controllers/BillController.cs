@@ -16,11 +16,10 @@ namespace QLNhaTro.API.Controllers
             _billService = billService;
         }
         [HttpPost]
-        public IActionResult CreatePayment([FromBody] BillPaymentRequest request)
+        public async Task<ActionResult> SendRequestBill()
         {
-            // Xử lý tạo URL thanh toán
-            string paymentUrl = _billService.CreatePaymentUrl(request.Amount, request.OrderId, request.OrderInfo, request.BankCode);
-            return Ok(new { url = paymentUrl });
+            await _billService.SubmitRequesInformation();
+            return Ok();
         }
     }
 }

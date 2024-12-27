@@ -34,7 +34,8 @@ namespace QLNhaTro.Moddel.SeedData
                                 Password= "hungksdtqn",
                                 STK = "0080127122002",
                                 SampleContractLink = "D:\\Code\\BoardingHouseManagement\\BoardingHouseManagement\\Tài liệu\\HopDongMau.docx",
-                                PaymentQRImageLink = "Chưa có"
+                                PaymentQRImageLink = "Chưa có",
+                                
                             }
                         };
                         context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT [dbo].[Landlords] ON");
@@ -167,11 +168,11 @@ namespace QLNhaTro.Moddel.SeedData
                     {
                         var NewContract = new List<Contract>
                         {
-                            new Contract {Id = 1, RoomId = 6, StartDate = currentDate.AddMonths(-1), EndDate = currentDate.AddMonths(6),Deposit = 3300000,TerminationDate = null,Note = null, IsDeleted = false},
+                            new Contract {Id = 1, RoomId = 6, StartDate = currentDate.AddMonths(-1), EndDate = currentDate.AddMonths(6),Deposit = 3300000,TerminationDate = null,Note = null, IsDeleted = false,UserEnterInformation = true},
                             new Contract {Id = 2, RoomId = 7, StartDate = currentDate, EndDate = currentDate.AddMonths(6),Deposit = 3100000,TerminationDate = null,Note = null, IsDeleted = false},
-                            new Contract {Id = 3, RoomId = 8, StartDate = currentDate.AddMonths(-2), EndDate = currentDate.AddMonths(6),Deposit = 2000000,TerminationDate = null,Note = null, IsDeleted = false},
-                            new Contract {Id = 4, RoomId = 9, StartDate = currentDate.AddMonths(-3), EndDate = currentDate.AddMonths(6),Deposit = 2000000,TerminationDate = null,Note = null, IsDeleted = false},
-                            new Contract {Id = 5, RoomId = 10, StartDate = currentDate.AddMonths(-2), EndDate = currentDate.AddMonths(6),Deposit = 3700000,TerminationDate = null,Note = null, IsDeleted = false},
+                            new Contract {Id = 3, RoomId = 8, StartDate = currentDate.AddMonths(-2), EndDate = currentDate.AddMonths(6),Deposit = 2000000,TerminationDate = null,Note = null, IsDeleted = false,UserEnterInformation = true},
+                            new Contract {Id = 4, RoomId = 9, StartDate = currentDate.AddMonths(-3), EndDate = currentDate.AddMonths(6),Deposit = 2000000,TerminationDate = null,Note = null, IsDeleted = false, UserEnterInformation = true},
+                            new Contract {Id = 5, RoomId = 10, StartDate = currentDate.AddMonths(-2), EndDate = currentDate.AddMonths(6),Deposit = 3700000,TerminationDate = null,Note = null, IsDeleted = false, UserEnterInformation = true},
 
                         };
                         context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT [dbo].[Contracts] ON");
@@ -195,7 +196,7 @@ namespace QLNhaTro.Moddel.SeedData
                     {
                         var NewCustomer = new List<Customers>
                         {
-                            new Customers {Id = 1,FullName = "Phạm Quang Hưng",DoB = new DateTime(2002,12,27), PhoneNumber = "0359988934", CCCD = "022202001454",Address = "Kim Sơn Đông Triều Quảng Ninh",ContractId = 1,IsDeleted = false,Email = "quanghungksdtqn@gmail.com",IsRepresentative = true},
+                            new Customers {Id = 1,FullName = "Phạm Quang Hưng",DoB = new DateTime(2002,12,27), PhoneNumber = "0359988934", CCCD = "022202001454",Address = "Kim Sơn Đông Triều Quảng Ninh",ContractId = 1,IsDeleted = false,Email = "quanghungksdtqn@gmail.com",IsRepresentative = true,},
                             new Customers {Id = 2,FullName = "Phạm Văn A",DoB = new DateTime(2002,12,27), PhoneNumber = "0363317140", CCCD = "386751689273",Address = "Đường Phan Chu Trinh, Quận 7, Vũng Tàu",ContractId = 1,IsDeleted = false,Email = "Khachhangso1@gmail.com",IsRepresentative = false},
                             new Customers {Id = 3,FullName = "Phạm Thị Minh Trang",DoB = new DateTime(2002,04,23), PhoneNumber = "0886682304", CCCD = "282721999505",Address = "Găng Thép Thái Nguyên",ContractId = 2,IsDeleted = false,Email = "phamquanghungksdtqn@gmail.com",IsRepresentative = true},
                             new Customers {Id = 4,FullName = "Phạm Thị B",DoB = new DateTime(2002,12,27), PhoneNumber = "0882320612", CCCD = "445804496623",Address = "Đường Hoàng Diệu, Quận 9, Vũng Tàu",ContractId = 2,IsDeleted = false,Email = "Khachhangso2@gmail.com",IsRepresentative = false},
@@ -227,21 +228,21 @@ namespace QLNhaTro.Moddel.SeedData
                     {
                         var NewServiceRoom = new List<ServiceRoom>
                         {
-                            new ServiceRoom {Id = 1,ContractId = 1,ServiceId = 6,Price = 3500,Number = null},
-                            new ServiceRoom {Id = 2,ContractId = 1,ServiceId = 7,Price = 35000,Number = 3},
-                            new ServiceRoom {Id = 3,ContractId = 1,ServiceId = 8,Price = 100000,Number = 3},
-                            new ServiceRoom {Id = 4,ContractId = 2,ServiceId = 6,Price = 3500,Number = null},
-                            new ServiceRoom {Id = 5,ContractId = 2,ServiceId = 7,Price = 35000,Number = 3},
-                            new ServiceRoom {Id = 6,ContractId = 2,ServiceId = 8,Price = 100000,Number = 3},
-                            new ServiceRoom {Id = 7,ContractId = 2,ServiceId = 9,Price = 100000,Number = 3},
-                            new ServiceRoom {Id = 8,ContractId = 3,ServiceId = 6,Price = 3500,Number = null},
-                            new ServiceRoom {Id = 9,ContractId = 3,ServiceId = 10,Price = 100000,Number = 3},
-                            new ServiceRoom {Id = 10,ContractId = 3,ServiceId = 9,Price = 100000,Number = 3},
-                            new ServiceRoom {Id = 11,ContractId = 4,ServiceId = 6,Price = 3500,Number = null},
-                            new ServiceRoom {Id = 12,ContractId = 4,ServiceId = 7,Price = 35000,Number = 3},
-                            new ServiceRoom {Id = 13,ContractId = 4,ServiceId = 9,Price = 100000,Number = 3},
-                            new ServiceRoom {Id = 14,ContractId = 5,ServiceId = 10,Price = 100000,Number = 3},
-                            new ServiceRoom {Id = 15,ContractId = 5,ServiceId = 8,Price = 100000,Number = 3},
+                            new ServiceRoom {Id = 1,ContractId = 1,ServiceId = 6,Price = 3500,Number = 1,IsOldNewNumber = false},
+                            new ServiceRoom {Id = 2,ContractId = 1,ServiceId = 7,Price = 35000,Number = 3,IsOldNewNumber = false},
+                            new ServiceRoom {Id = 3,ContractId = 1,ServiceId = 8,Price = 100000,Number = 3,IsOldNewNumber = false},
+                            new ServiceRoom {Id = 4,ContractId = 2,ServiceId = 6,Price = 3500,Number = 1,IsOldNewNumber = false},
+                            new ServiceRoom {Id = 5,ContractId = 2,ServiceId = 7,Price = 35000,Number = 3,IsOldNewNumber = false},
+                            new ServiceRoom {Id = 6,ContractId = 2,ServiceId = 8,Price = 100000,Number = 3,IsOldNewNumber = false},
+                            new ServiceRoom {Id = 7,ContractId = 2,ServiceId = 9,Price = 100000,Number = 3,IsOldNewNumber = false},
+                            new ServiceRoom {Id = 8,ContractId = 3,ServiceId = 6,Price = 3500,Number = 1,IsOldNewNumber = false},
+                            new ServiceRoom {Id = 9,ContractId = 3,ServiceId = 10,Price = 100000,Number = 3,IsOldNewNumber = false},
+                            new ServiceRoom {Id = 10,ContractId = 3,ServiceId = 9,Price = 100000,Number = 3,IsOldNewNumber = false},
+                            new ServiceRoom {Id = 11,ContractId = 4,ServiceId = 6,Price = 3500,Number = 1,IsOldNewNumber = false},
+                            new ServiceRoom {Id = 12,ContractId = 4,ServiceId = 7,Price = 35000,Number = 3,IsOldNewNumber = false},
+                            new ServiceRoom {Id = 13,ContractId = 4,ServiceId = 9,Price = 100000,Number = 3,IsOldNewNumber = false},
+                            new ServiceRoom {Id = 14,ContractId = 5,ServiceId = 10,Price = 100000,Number = 3,IsOldNewNumber = false},
+                            new ServiceRoom {Id = 15,ContractId = 5,ServiceId = 8,Price = 100000,Number = 3,IsOldNewNumber = false},
                         };
                         context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT [dbo].[ServiceRooms] ON");
                         context.ServiceRooms.AddRange(NewServiceRoom);

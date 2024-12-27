@@ -16,4 +16,7 @@ export default {
   left: 90%;
   bottom: auto !important; /* Đảm bảo không hiển thị ở dưới */
 }
+p{
+  font-size: 16px !important;
+}
 </style>
