@@ -8,7 +8,7 @@ namespace QLNhaTro.API.MiddleWare
     public class PermissionAttribute : Attribute, IAuthorizationFilter
     {
         private readonly FeatureCode[] requiredPermissions;
-        public PermissionAttribute(FeatureCode permission = FeatureCode.Commons) 
+        public PermissionAttribute(FeatureCode permission ) 
         {
             requiredPermissions = new FeatureCode[] { permission };
         }

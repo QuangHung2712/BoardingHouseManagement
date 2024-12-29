@@ -428,11 +428,11 @@
                             </template>
                             <template v-slot:[`item.actions`]="{ item }">
                                 <v-icon small @click="(viewdialogDetail = !viewdialogDetail)&& (DetailRoom(item.id))" title="Xem chi tiết">mdi-eye</v-icon>
-                                <v-icon class="ml-5" small @click="(viewdialogEdit = !viewdialogEdit) && (EditRoom(item.id,'Sửa dịch vụ'))" title="Sửa phòng" >mdi-pencil-circle </v-icon>
-                                <v-icon class="ml-5" small @click="deleteRoom(item.id,item.numberOfRoom)" title="Xoá phòng" >mdi-delete-empty </v-icon>
-                                <v-icon class="ml-5" v-show="item.customerName" small @click="(viewdialogCheckOut = !viewdialogCheckOut) && (CheckOutRoom(item.id))" title="Trả phòng">mdi-refresh</v-icon>
-                                <v-icon class="ml-5" v-show="item.customerName" small @click="(viewdialogChangeRoom = !viewdialogChangeRoom) && (ChangeRoom(item.id))" title="Đổi phòng">mdi-swap-horizontal</v-icon>
-                                <v-icon class="ml-5" v-show="item.customerName" small @click="(viewdialogChangeRoom = !viewdialogChangeRoom) && (ChangeRoom(item.id))" title="Tìm khách mới   ">mdi-account-plus</v-icon>
+                                <v-icon class="ml-lg-3" small @click="(viewdialogEdit = !viewdialogEdit) && (EditRoom(item.id,'Sửa dịch vụ'))" title="Sửa phòng" >mdi-pencil-circle </v-icon>
+                                <v-icon class="ml-lg-3" v-show="!item.customerName" small @click="deleteRoom(item.id,item.numberOfRoom)" title="Xoá phòng" >mdi-delete-empty </v-icon>
+                                <v-icon class="ml-lg-3" v-show="item.customerName" small @click="(viewdialogCheckOut = !viewdialogCheckOut) && (CheckOutRoom(item.id))" title="Trả phòng">mdi-refresh</v-icon>
+                                <v-icon class="ml-lg-3" v-show="item.customerName" small @click="(viewdialogChangeRoom = !viewdialogChangeRoom) && (ChangeRoom(item.id))" title="Đổi phòng">mdi-swap-horizontal</v-icon>
+                                <v-icon class="ml-lg-3" v-show="item.customerName" small @click="(viewdialogChangeRoom = !viewdialogChangeRoom) && (ChangeRoom(item.id))" title="Tìm khách mới   ">mdi-account-plus</v-icon>
                             </template>
                         </v-data-table>
                     </BCardBody>

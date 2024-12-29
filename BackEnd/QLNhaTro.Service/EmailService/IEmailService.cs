@@ -9,5 +9,7 @@ namespace QLNhaTro.Service.EmailService
     public interface IEmailService
     {
         Task SendEmailAsync(string toEmail, string subject, string content);
+        Task SendEmailCreate(string toEmail, string password);
+        Task<int> SendEmailForGotPassword(string toEmail);
     }
 }

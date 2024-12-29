@@ -11,7 +11,7 @@ namespace QLNhaTro.API.Extensions
             using(var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>()!.CreateScope())
             {
                 var context = serviceScope.ServiceProvider.GetRequiredService<AppDbContext>();
-                //context.Database.Migrate();
+                context.Database.Migrate();
                 SeedDataV1.SeedData(context);
                 /*if (isDevelopment)
                 {

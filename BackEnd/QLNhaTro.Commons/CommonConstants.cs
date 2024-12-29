@@ -22,9 +22,9 @@ namespace QLNhaTro.Commons
         }
         public class ExceptionMessage
         {
-            public const string NOT_FOUND = "{0} not found.";
+            public const string NOT_FOUND = "{0} không tồn tại.";
             public const string ITEM_NOT_FOUND = "Item not found.";
-            public const string ALREADY_EXIST = "{0} already exist.";
+            public const string ALREADY_EXIST = "{0} đã tồn tại.";
             public const string SUCCESS = "{0} success.";
             public const string SHOULD_GREATER_TODAY = "{0} Date is late.";
             public const string INVALID = "{0} invalid.";

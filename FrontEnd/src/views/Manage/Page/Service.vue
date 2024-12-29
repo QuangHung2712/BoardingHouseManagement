@@ -216,8 +216,8 @@ export default {
                                 {{ formatTablePrice(item.price) }}
                             </template>
                             <template v-slot:[`item.actions`]="{ item }">
-                                <v-icon class="ml-5" small @click="(viewdialog = !viewdialog) && (DetailService(item.id,'Sửa dịch vụ'))" >mdi-pencil-circle </v-icon>
-                                <v-icon class="ml-5" small @click="deleteService(item.id,item.name)" >mdi-delete-empty </v-icon>
+                                <v-icon class="ml-lg-3" small @click="(viewdialog = !viewdialog) && (DetailService(item.id,'Sửa dịch vụ'))" >mdi-pencil-circle </v-icon>
+                                <v-icon class="ml-lg-3" small @click="deleteService(item.id,item.name)" >mdi-delete-empty </v-icon>
                             </template>
                         </v-data-table>
                     </BCardBody>

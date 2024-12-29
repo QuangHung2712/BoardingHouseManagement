@@ -1,10 +1,53 @@
 <script>
 import Rightbar from "@/components/right-bar.vue"
+import apiClient from "@/plugins/axios";
 
 export default {
     name: "LOGIN",
     components: {
         Rightbar
+    },
+    data(){
+        return{
+            login:{
+                email:'',
+                password:'',
+            },
+            remember: false,
+            form: false,
+            showPassword: false,
+            errorMessage: '',
+        }
+    },
+    created() {
+        const token = localStorage.getItem('tokenlandlord');
+        if (token) {
+            // Token tồn tại, chuyển hướng đến trang tower
+            this.$router.push({ name: 'tower' });
+        }
+    },
+    methods:{
+        required (v) {
+            return !!v || 'Vui lòng không để trống'
+        },
+        LogIn() {
+            apiClient.post(`/Landlord/Login`,this.login)
+                .then(response=>{
+                    this.$store.dispatch('login',response.data);
+                    this.$router.push({ name: 'tower' });
+                    if(this.remember){
+                        localStorage.setItem('tokenlandlord',response.data.token)
+                    }
+                    this.errorMessage = ""
+                })
+                .catch(error=>{
+                    if (error.response && error.response.status === 401) {
+                        this.errorMessage = error.response.data.message ;
+                    } else {
+                        this.errorMessage = 'Đã xảy ra lỗi hệ thống. '+ error.response.data.message;
+                    }
+                })
+        },
     }
 }
 </script>
@@ -38,23 +81,42 @@ export default {
                         <h4 class="f-w-500 mb-1">Đăng nhập</h4>
                         <p class="mb-3">Bạn chưa có tài khoản? <router-link to="/register"
                                 class="link-primary ms-1">Tạo tài khoản</router-link></p>
-                        <div class="form-group mb-3">
-                            <input type="email" class="form-control" id="floatingInput" placeholder="Email">
-                        </div>
-                        <div class="form-group mb-3">
-                            <input type="password" class="form-control" id="floatingInput1" placeholder="Mật khẩu">
-                        </div>
-                        <div class="d-flex mt-1 justify-content-between align-items-center">
-                            <div class="form-check">
-                                <input class="form-check-input input-primary" type="checkbox" id="customCheckc1" checked="">
-                                <label class="form-check-label text-muted" for="customCheckc1">Nhớ mật khẩu</label>
+                        <v-form v-model="form" ref="form">
+                            <div class="form-group mb-3">
+                                <v-text-field 
+                                    type="email" 
+                                    label="Email"  
+                                    variant="outlined" 
+                                    placeholder="Email" 
+                                    :rules="[required]" 
+                                    v-model="login.email"
+                                    prepend-inner-icon="mdi-email-outline"
+                                ></v-text-field>
                             </div>
-                            <router-link to="/forgot">
-                                <h6 class="text-secondary f-w-400 mb-0">Quên mật khẩu?</h6>
-                            </router-link>
-                        </div>
+                                <v-text-field 
+                                    :type="showPassword ? 'text' : 'password'" 
+                                    label="Mật khẩu"  
+                                    variant="outlined"
+                                    placeholder="Mật khẩu" 
+                                    :rules="[required]" 
+                                    v-model="login.password"
+                                    prepend-inner-icon="mdi-lock-outline"
+                                    :append-inner-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+                                    @click:append-inner="showPassword = !showPassword"
+                                    ></v-text-field>
+                            <div class="d-flex mt-1 justify-content-between align-items-center">
+                                <div class="form-check">
+                                    <input class="form-check-input input-primary" type="checkbox" id="customCheckc1" v-model="remember">
+                                    <label class="form-check-label text-muted" for="customCheckc1">Nhớ mật khẩu</label>
+                                </div>
+                                <router-link to="/forgot">
+                                    <h6 class="text-secondary f-w-400 mb-0">Quên mật khẩu?</h6>
+                                </router-link>
+                            </div>
+                        </v-form>
                         <div class="d-grid mt-4">
-                            <button type="button" class="btn btn-primary">Đăng nhập</button>
+                            <button type="button" @click="LogIn()" class="btn btn-primary" :disabled="!form">Đăng nhập</button>
+                            <p v-if="errorMessage" class="text-danger mt-2">{{ errorMessage }}</p>
                         </div>
                         <div class="saprator my-3">
                             <span>Đăng nhập bằng</span>

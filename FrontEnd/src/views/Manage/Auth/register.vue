@@ -1,15 +1,66 @@
 <script>
 import Rightbar from "@/components/right-bar.vue"
+import apiClient from "@/plugins/axios"
+import Swal from "sweetalert2";
+
 
 export default {
     name: "REGISTER",
     components: {
         Rightbar
-    }
+    },
+    data(){
+        return{
+            register:{
+                fullName: '',
+                doB: '',
+                phoneNumber: '',
+                email: '',
+                cCCD: '',
+                address: '',
+                sDTZalo: '',
+                password: '',
+            },
+            rules: {
+                required: v => !!v || 'Vui lòng không để trống',
+                validPhone: v => /^0\d{9}$/.test(v) || 'Số điện thoại phải có 10 chữ số và bắt đầu bằng 0',
+                validEmail: v => /^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(v) || 'Email phải hợp lệ và kết thúc bằng @gmail.com',
+            },
+            form: false,
+            termsAccepted: false,
+            message: '',
+            snackbar: false,
+            snackbarColor: '',
+        }
+    },
+    methods:{
+        Save(){
+            apiClient.post(`/Landlord/Create`,this.register)
+                    .then(()=>{
+                        Swal.fire("Tạo tài khoảng thành công!", "Mật khẩu đã được gửi qua email của bạn. Bạn vui lòng vào Email để lấy mật khẩu đăng nhập", "success")
+                            .then(()=>{
+                                this.$router.push('/login');
+                            })
+                    })
+                    .catch(error=>{
+                        this.message = 'Đã xảy ra lỗi: ' + error.response.data.message;
+                        this.snackbarColor = 'red';
+                        this.snackbar = true;
+                    })
+        }      
+    },
 }
 </script>
 
 <template>
+    <v-snackbar
+        v-model="snackbar"
+        :timeout="10000"
+        class="custom-snackbar"
+        :color="snackbarColor"
+    >
+        <h5 class="text-center">{{ message }}</h5>
+    </v-snackbar>
     <div class="auth-main v2">
         <div class="bg-overlay bg-dark"></div>
         <div class="auth-wrapper">
@@ -35,31 +86,69 @@ export default {
             <div class="auth-form">
                 <div class="card my-5 mx-3">
                     <div class="card-body">
-                        <h4 class="f-w-500 mb-1">Đăng ký tài khoản</h4>
-                        <p class="mb-3">Đã có tài khoản? <router-link to="/login" class="link-primary">Đăng nhập</router-link ></p>
-                        <div class="form-group mb-3">
-                            <input type="email" class="form-control" placeholder="Họ và tên">
-                        </div>
-                        <div class="form-group mb-3">
-                            <input type="email" class="form-control" placeholder="Email">
-                        </div>
-                        <div class="form-group mb-3">
-                            <input type="number" class="form-control" placeholder="Số điện thoại">
-                        </div>
-                        <div class="form-group mb-3">
-                            <input type="password" class="form-control" placeholder="Mật khẩu">
-                        </div>
-                        <div class="form-group mb-3">
-                            <input type="password" class="form-control" placeholder="Nhập lại mật khẩu">
-                        </div>
-                        <div class="d-flex mt-1 justify-content-between">
-                            <div class="form-check">
-                                <input class="form-check-input input-primary" type="checkbox" id="customCheckc1" checked="">
-                                <label class="form-check-label text-muted" for="customCheckc1">Tôi đồng ý với tất cả các Điều khoản & Điều kiện</label>
+                        <v-form v-model="form">
+                            <h4 class="f-w-500 mb-1">Đăng ký tài khoản</h4>
+                            <p class="mb-3">Đã có tài khoản? <router-link to="/login" class="link-primary">Đăng nhập</router-link ></p>
+                            <v-text-field 
+                                type="text" 
+                                label="Họ và tên"  
+                                variant="outlined" 
+                                placeholder="Họ và tên" 
+                                :rules="[required]" 
+                                v-model="register.fullName"
+                            ></v-text-field>
+                            <div class="form-group">
+                                <label class="form-label">Ngày sinh: </label>
+                                <input type="date" class="form-control" id="example-datemin" :rules="[required]" v-model="register.doB" min="2000-01-02">
                             </div>
-                        </div>
+                            <v-text-field 
+                                type="text" 
+                                label="Số điện thoại"  
+                                variant="outlined" 
+                                placeholder="Số điện thoại" 
+                                :rules="[rules.required, rules.validPhone]" 
+                                v-model="register.phoneNumber"
+                            ></v-text-field>
+                            <v-text-field 
+                                type="text" 
+                                label="Email"  
+                                variant="outlined" 
+                                placeholder="Email" 
+                                :rules="[rules.required, rules.validEmail]"
+                                v-model="register.email"
+                            ></v-text-field>
+                            <v-text-field 
+                                type="text" 
+                                label="Căn cược công dân"  
+                                variant="outlined" 
+                                placeholder="Căn cược công dân" 
+                                :rules="[required]" 
+                                v-model="register.cCCD"
+                            ></v-text-field>
+                            <v-text-field 
+                                type="text" 
+                                label="Địa chỉ thường trú"  
+                                variant="outlined" 
+                                placeholder="Địa chỉ thường trú" 
+                                :rules="[required]" 
+                                v-model="register.address"
+                            ></v-text-field>
+                            <v-text-field 
+                                type="text" 
+                                label="Số điện thoại đăng ký Zalo"  
+                                variant="outlined" 
+                                placeholder="Số điện thoại đăng ký Zalo" 
+                                v-model="register.sDTZalo"
+                            ></v-text-field>
+                            <div class="d-flex mt-1 justify-content-between">
+                                <div class="form-check">
+                                    <input class="form-check-input input-primary" type="checkbox" id="customCheckc1" v-model="termsAccepted">
+                                    <label class="form-check-label text-muted" for="customCheckc1">Tôi đồng ý với tất cả các Điều khoản & Điều kiện</label>
+                                </div>
+                            </div>
+                        </v-form>
                         <div class="d-grid mt-4">
-                            <button type="button" class="btn btn-primary">Tạo tài khoản</button>
+                            <button type="button" class="btn btn-primary" :disabled="!form || !termsAccepted" @click="Save()">Tạo tài khoản</button>
                         </div>
                         <div class="saprator my-3">
                             <span>Đăng nhập bằng</span>

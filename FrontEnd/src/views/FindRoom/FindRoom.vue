@@ -28,25 +28,6 @@ export default {
         this.GetTinh();
     },
     methods: {
-        changeMode(mode) {
-            this.currentMode = mode;
-            if (mode == "dark") {
-                document.body.setAttribute("data-pc-theme", "dark");
-                document.body.setAttribute("data-topbar", "dark");
-                document.body.classList.remove("mode-auto");
-            } else if (mode == "auto") {
-                document.body.setAttribute("data-pc-theme", "light");
-                document.body.setAttribute("data-topbar", "light");
-                document.body.classList.add("mode-auto");
-            } else {
-                document.body.setAttribute("data-pc-theme", "light");
-                document.body.setAttribute("data-topbar", "light");
-                document.body.classList.remove("mode-auto");
-            }
-        },
-        toggleMenu() {
-            document.getElementById("navbarTogglerDemo01").classList.toggle("show");
-        },
         GetTinh(){
             Axios.get(`https://esgoo.net/api-tinhthanh/1/0.htm`)
                 .then(response=>{
@@ -84,7 +65,7 @@ export default {
 }
 </script>
 <template>
-    <v-container class="pt-0">
+    <v-container class="py-0">
             <BCard>
                 <BRow>
                     <BCol class="col-xl-3 col-md-4 col-12">
@@ -118,24 +99,7 @@ export default {
                             ></v-autocomplete>
                         </div>
                     </BCol>
-                    <BCol class="col-xl-3 col-md-4 col-12 mt-lg-3">
-                        <div class="form-group">
-                            <label class="form-label">Phường, xã</label>
-                            <v-autocomplete
-                                v-model="selectPhuong"
-                                :items="phuongData"
-                                item-title="full_name"
-                                item-value="id"
-                                outlined
-                                dense
-                                clearable
-                                :disabled="!selectHuyen"
-                                multiple
-                                @update:modelValue="onPhuongChange"
-                            ></v-autocomplete>
-                        </div>
-                    </BCol>
-                    <BCol class="col-xl-3 col-md-8">
+                    <BCol class="col-xl-4 col-md-8">
                         <div class="form-group m-0">
                             <label class="form-label">Giá phòng</label>
                             <v-range-slider
@@ -207,8 +171,9 @@ export default {
                 </div>               
             </div>
             <div class="mx-sm-3 ListRoom">
-                <v-container>
-                        <BCard>
+                <v-container class="pt-0">
+                    <h3>Danh sách các phòng trọ</h3>
+                        <BCard no-body>
                             <BCardBody class="p-0">
                                 <BRow>
                                     <BCol class="col-md-4 col-12">
@@ -221,7 +186,7 @@ export default {
                                             v-for="n in length"
                                             :key="n"
                                             >
-                                            <v-card class="d-flex justify-center align-center" height="250px">
+                                            <v-card class="d-flex justify-center align-center" height="200px">
                                                 <v-img
                                                     src="/images/Room/20241119180012-04a6_wm.jpg"
                                                     alt="Room Image"
@@ -233,24 +198,93 @@ export default {
                                             </v-window-item>
                                         </v-window>
                                     </BCol>
-                                    <BCol class="col-md-8 col-12">
+                                    <BCol class="col-md-8 col-12 mt-4">
                                         <router-link to="/detail">
                                             <h4> Số 11 Ngõ 91 đường Cầu Diễn </h4>
                                             <h5>Giá: <span style="color: red;">3.000.000 VNĐ</span></h5>
                                             <p><v-icon>mdi-map-marker-radius</v-icon> Số 11 Ngõ 91 đường Cầu Diễn Phường Cầu Diễn </p>
                                             <p>Thiết bị: Máy giặt, Thang máy, Điều hoà, Nóng lạnh</p>
-                                            <BRow class="ml-1">
-                                                <BCol class="col-xl-2 col-lg-4 col-6">-Điện: 100.000</BCol>
-                                                <BCol class="col-xl-2 col-lg-4 col-6">-Điện: 100.000</BCol>
-                                                <BCol class="col-xl-2 col-lg-4 col-6">-Máy giặt: 100.000</BCol>
-                                                <BCol class="col-xl-2 col-lg-4 col-6">-Máy giặt: 100.000</BCol>
-                                                <BCol class="col-xl-2 col-lg-4 col-6">-Máy giặt: 100.000</BCol>
-                                                <BCol class="col-xl-2 col-lg-4 col-6">-Máy giặt: 100.000</BCol>
-                                                
-                                            </BRow>
                                         </router-link>
                                         <div class="text-right">
-                                            <v-btn class="p-0"><v-icon>mdi-heart-outline</v-icon></v-btn>
+                                            <BButton variant="white"><v-icon >mdi-heart-outline</v-icon></BButton>
+                                        </div>
+                                    </BCol>
+                                </BRow>
+                            </BCardBody>
+                        </BCard>
+                        <BCard no-body>
+                            <BCardBody class="p-0">
+                                <BRow>
+                                    <BCol class="col-md-4 col-12">
+                                        <v-window style="height: 100%;"
+                                            v-model="window"
+                                            show-arrows
+                                            theme="dark"
+                                        >
+                                            <v-window-item
+                                            v-for="n in length"
+                                            :key="n"
+                                            >
+                                            <v-card class="d-flex justify-center align-center" height="200px">
+                                                <v-img
+                                                    src="/images/Room/20241119180012-04a6_wm.jpg"
+                                                    alt="Room Image"
+                                                    aspect-ratio="16/9"
+                                                    class="rounded elevation-2"
+                                                    contain
+                                                ></v-img>
+                                            </v-card>
+                                            </v-window-item>
+                                        </v-window>
+                                    </BCol>
+                                    <BCol class="col-md-8 col-12 mt-4">
+                                        <router-link to="/detail">
+                                            <h4> Số 11 Ngõ 91 đường Cầu Diễn </h4>
+                                            <h5>Giá: <span style="color: red;">3.000.000 VNĐ</span></h5>
+                                            <p><v-icon>mdi-map-marker-radius</v-icon> Số 11 Ngõ 91 đường Cầu Diễn Phường Cầu Diễn </p>
+                                            <p>Thiết bị: Máy giặt, Thang máy, Điều hoà, Nóng lạnh</p>
+                                        </router-link>
+                                        <div class="text-right">
+                                            <BButton variant="white"><v-icon>mdi-heart-outline</v-icon></BButton>
+                                        </div>
+                                    </BCol>
+                                </BRow>
+                            </BCardBody>
+                        </BCard>
+                        <BCard no-body>
+                            <BCardBody class="p-0">
+                                <BRow>
+                                    <BCol class="col-md-4 col-12">
+                                        <v-window style="height: 100%;"
+                                            v-model="window"
+                                            show-arrows
+                                            theme="dark"
+                                        >
+                                            <v-window-item
+                                            v-for="n in length"
+                                            :key="n"
+                                            >
+                                            <v-card class="d-flex justify-center align-center" height="200px">
+                                                <v-img
+                                                    src="/images/Room/20241119180012-04a6_wm.jpg"
+                                                    alt="Room Image"
+                                                    aspect-ratio="16/9"
+                                                    class="rounded elevation-2"
+                                                    contain
+                                                ></v-img>
+                                            </v-card>
+                                            </v-window-item>
+                                        </v-window>
+                                    </BCol>
+                                    <BCol class="col-md-8 col-12 mt-4">
+                                        <router-link to="/detail">
+                                            <h4> Số 11 Ngõ 91 đường Cầu Diễn </h4>
+                                            <h5>Giá: <span style="color: red;">3.000.000 VNĐ</span></h5>
+                                            <p><v-icon>mdi-map-marker-radius</v-icon> Số 11 Ngõ 91 đường Cầu Diễn Phường Cầu Diễn </p>
+                                            <p>Thiết bị: Máy giặt, Thang máy, Điều hoà, Nóng lạnh</p>
+                                        </router-link>
+                                        <div class="text-right">
+                                            <BButton variant="white"><v-icon>mdi-heart-outline</v-icon></BButton>
                                         </div>
                                     </BCol>
                                 </BRow>

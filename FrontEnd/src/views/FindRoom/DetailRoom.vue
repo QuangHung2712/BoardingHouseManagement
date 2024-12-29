@@ -118,6 +118,8 @@
                             <BCardBody class="p-0 py-3">
                                 <h4>Thông tin thiết bị</h4>
                                 <p>Các thiết bị của phòng: Máy giặt, điều hòa, </p>
+                                <h4>Mô tả</h4>
+                                <p>Các thiết bị của phòng: Máy giặt, điều hòa, </p>
                             </BCardBody>
                         </BCard>
                     </BCol>

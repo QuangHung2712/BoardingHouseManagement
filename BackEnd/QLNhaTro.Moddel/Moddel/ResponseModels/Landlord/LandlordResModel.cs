@@ -16,6 +16,8 @@ namespace QLNhaTro.Moddel.Moddel.ResponseModels
         public required string Email { get; set; }
         public required string CCCD { get; set; }
         public required string Address { get; set; }
+        public string? SDTZalo { get; set; }
+        public string? PathAvatar { get; set; }
         public static LandlordResModel Mapping(Landlord landlord)
         {
             return new LandlordResModel
@@ -27,7 +29,8 @@ namespace QLNhaTro.Moddel.Moddel.ResponseModels
                 Email = landlord.Email,
                 CCCD = landlord.CCCD,
                 Address = landlord.Address,
-
+                SDTZalo = landlord.SDTZalo,
+                PathAvatar = landlord.PathAvatar,
             };
         }
     }

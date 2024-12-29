@@ -27,7 +27,7 @@ namespace QLNhaTro.Service
         {
             try
             {
-                List<Claim> claims = new List<Claim>() {new Claim (ClaimTypes.Role,string.Join(",",permissions)) };
+                List<Claim> claims = new List<Claim>() { new Claim(ClaimTypes.Role, string.Join(",", permissions)) };
                 SymmetricSecurityKey secret = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_appSettings.Jwt.SecretKey));
                 SigningCredentials credentials = new SigningCredentials(secret, SecurityAlgorithms.HmacSha256);
                 JwtSecurityToken token = new JwtSecurityToken(
@@ -43,9 +43,14 @@ namespace QLNhaTro.Service
                 throw;
             }
         }
-        public string GenerateToke()
+        public string GenerateTokeLandlord()
         {
-            return GenerateToke(new List<FeatureCode> { FeatureCode.Commons});
+            return GenerateToke(new List<FeatureCode> { FeatureCode.Landlord });
         }
+        public string GenerateTokeCustomer()
+        {
+            return GenerateToke(new List<FeatureCode> { FeatureCode.Customer});
+        }
+
     }
 }

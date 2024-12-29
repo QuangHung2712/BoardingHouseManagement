@@ -43,9 +43,18 @@ namespace QLNhaTro.Service.EmailService
                 throw;
             }
         }
-        public void ScheduleEmail()
+        public async Task SendEmailCreate(string toEmail,string password)
         {
-            
+            string content = $"Bạn đã tạo tài khoản trên hệ thông quản lý nhà trọ thành công. \n Mật khẩu của bạn là : {password}\n Bạn vui lòng truy cập vào http://localhost:8080/vue/tower để đăng nhập";
+            await SendEmailAsync(toEmail, "Tạo tài khoản thành công", content);
+        }
+        public async Task<int> SendEmailForGotPassword(string toEmail)
+        {
+            Random random = new Random();
+            int code = random.Next(100000, 1000000);
+            string content = $"Bạn đang thực hiện quên mật khẩu trên website quản lý nhà trọ.Đây là mã bảo mật của bạn Mã bảo mật: {code}\n ";
+            await SendEmailAsync(toEmail, "Mã bảo mật", content);
+            return code;
         }
     }
 }

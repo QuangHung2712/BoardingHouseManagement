@@ -344,10 +344,10 @@ export default {
                             </template>
                             <template v-slot:[`item.actions`]="{ item }">
                                 <v-icon small @click="(viewdialog = !viewdialog) && (DetailService(item.id,'Chi tiết hợp đồng'))" title="Xem hợp đồng">mdi-eye</v-icon>
-                                <v-icon class="ml-5" small @click="CreateEditContract(item.id)" title="Sửa hợp đồng" >mdi-pencil-circle </v-icon>
-                                <v-icon class="ml-5" small @click="deleteContract(item.id,item.numberOfRoom)" title="Xóa hợp đồng" >mdi-delete-empty </v-icon>
-                                <v-icon class="ml-5" small @click="ExportWordcontract(item.id)" title="Xuất hợp đồng ra file Word" >mdi-download </v-icon>
-                                <v-icon class="ml-5" small @click="(viewdialogContractExtension = !viewdialogContractExtension) && (ContractExtension(item.id,item.numberOfRoom))" title="Gia hạn hợp đồng" >mdi-autorenew </v-icon>
+                                <v-icon class="ml-lg-3" small @click="CreateEditContract(item.id)" title="Sửa hợp đồng" >mdi-pencil-circle </v-icon>
+                                <v-icon class="ml-lg-3" small @click="deleteContract(item.id,item.numberOfRoom)" title="Xóa hợp đồng" >mdi-delete-empty </v-icon>
+                                <v-icon class="ml-lg-3" small @click="ExportWordcontract(item.id)" title="Xuất hợp đồng ra file Word" >mdi-download </v-icon>
+                                <v-icon class="ml-lg-3" small @click="(viewdialogContractExtension = !viewdialogContractExtension) && (ContractExtension(item.id,item.numberOfRoom))" title="Gia hạn hợp đồng" >mdi-autorenew </v-icon>
                             </template>
                         </v-data-table>
                     </BCardBody>

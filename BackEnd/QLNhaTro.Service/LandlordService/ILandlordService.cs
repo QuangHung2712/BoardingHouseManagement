@@ -10,9 +10,11 @@ namespace QLNhaTro.Service.LandlordService
 {
     public interface ILandlordService
     {
+        long Login(LoginReqModels request);
         Task<LandlordResModel> GetDetail(long id);
         Task CreateLandlord(CreateEditLandlordReqModels input);
         Task UpdateLandlord(CreateEditLandlordReqModels input);
         Task DeleteLandlord(long id);
+        bool ForgotPassword(string inputEmail);
     }
 }

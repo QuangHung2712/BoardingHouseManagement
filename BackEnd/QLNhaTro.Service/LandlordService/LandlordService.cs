@@ -1,4 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using DocumentFormat.OpenXml.Office2010.Excel;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using QLNhaTro.Commons;
 using QLNhaTro.Commons.CustomException;
@@ -8,9 +12,12 @@ using QLNhaTro.Moddel.Moddel.RequestModels;
 using QLNhaTro.Moddel.Moddel.ResponseModels;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using static QLNhaTro.Commons.CommonEnums;
 
 namespace QLNhaTro.Service.LandlordService
 {
@@ -20,6 +27,10 @@ namespace QLNhaTro.Service.LandlordService
         public LandlordService(AppDbContext context)
         {
             _Context = context;
+        }
+        public long Login(LoginReqModels request)
+        {
+             return _Context.Landlords.Where(item=> item.Email == request.Email && item.Password == request.Password).Select(record => record.Id).FirstOrDefault();
         }
         public async Task<LandlordResModel> GetDetail(long id)
         {
@@ -38,6 +49,11 @@ namespace QLNhaTro.Service.LandlordService
         {
             try
             {
+                bool IsEmail = _Context.Landlords.Any(item => item.Email != null && item.Email.ToLower() == input.Email.ToLower());
+                if (IsEmail)
+                {
+                    throw new AlreadyExistException(nameof(input.Email));
+                }
                 var landlord = new Landlord
                 {
                     FullName = input.FullName,
@@ -46,6 +62,11 @@ namespace QLNhaTro.Service.LandlordService
                     Email = input.Email,
                     CCCD = input.CCCD,
                     Address = input.Address,
+                    SDTZalo = input.SDTZalo,
+                    Password = "defaultpassword",
+                    STK = "Chưa có",
+                    PaymentQRImageLink="Chưa có",
+                    SampleContractLink= "Chưa có"
                 };
                 _Context.Landlords.Add(landlord);
                 await _Context.SaveChangesAsync();
@@ -69,6 +90,7 @@ namespace QLNhaTro.Service.LandlordService
                     Email = input.Email,
                     CCCD = input.CCCD,
                     Address = input.Address,
+                    SDTZalo=input.SDTZalo,
                 };
                 _Context.Landlords.Update(landlord);
                 await _Context.SaveChangesAsync();
@@ -94,6 +116,10 @@ namespace QLNhaTro.Service.LandlordService
                 Console.WriteLine(ex.Message);
                 throw;
             }
+        }
+        public bool ForgotPassword(string inputEmail)
+        {
+            return _Context.Landlords.Any(item => item.Email != null && item.Email.ToLower() == inputEmail.ToLower());
         }
 
         private async Task<Landlord> GetById(long id)

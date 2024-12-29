@@ -170,8 +170,8 @@ export default {
                             </template>
                             <template v-slot:[`item.actions`]="{ item }">
                                 <v-icon small @click="(viewdialog = !viewdialog)">mdi-eye</v-icon>
-                                <v-icon class="ml-5" small @click="(viewdialogEdit = !viewdialogEdit)" >mdi-pencil-circle </v-icon>
-                                <v-icon class="ml-5" small @click="deleteBill(item.id,item.numberName)" >mdi-delete-empty </v-icon>
+                                <v-icon class="ml-lg-3" small @click="(viewdialogEdit = !viewdialogEdit)" >mdi-pencil-circle </v-icon>
+                                <v-icon class="ml-lg-3" small @click="deleteBill(item.id,item.numberName)" >mdi-delete-empty </v-icon>
                             </template>
                         </v-data-table>
                     </BCardBody>

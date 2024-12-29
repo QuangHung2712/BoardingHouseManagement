@@ -1,7 +1,9 @@
 <style scoped>
-
+    .user-avtar{
+        width: 40px;
+        border-radius: 50%;
+    }
 </style>
-
 <script>
 
 import Rightbar from "@/components/right-bar.vue"
@@ -30,6 +32,7 @@ export default {
             status: false,
             length: 3,
             window: 0,
+            LoginStatus: false,
         }
     },
     name: "LANDING",
@@ -104,39 +107,90 @@ export default {
                 <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
                     <ul class="navbar-nav ms-auto mt-lg-0 mt-2 mb-2 mb-lg-0 align-items-start">
                         <li class="nav-item px-1">
-                            <h5><router-link class="nav-link" to="/dashboard">Tìm Phòng trọ</router-link></h5>
+                            <h5><router-link class="nav-link" to="/">Tìm Phòng trọ</router-link></h5>
                         </li>
                         <li class="nav-item px-1">
-                            <h5><router-link class="nav-link" to="/components/alert">Tìm người ở ghép</router-link></h5>
+                            <h5><router-link class="nav-link" to="/findpeople">Tìm người ở ghép</router-link></h5>
                         </li>
                         <li class="nav-item px-1">
-                            <h5><a class="nav-link" href="https://moonthemes-3.gitbook.io/moon-able-bootstrap/" target="_blank">Các phòng, đăng bài đã lưu</a></h5>
+                            <h5><router-link to="/save" class="nav-link" v-show="LoginStatus">Phòng, đăng bài đã lưu</router-link></h5>
                         </li>
-                        <li class="nav-item px-1">
-                            <h5><a class="nav-link" href="https://moonthemes-3.gitbook.io/moon-able-bootstrap/" target="_blank">Bài đăng của tôi</a></h5>
-                        </li>
-                    </ul>
-                    <ul class="navbar-nav mb-2 mb-lg-0 align-items-start">
-                        <BDropdown variant="link-secondary" class="card-header-dropdown pb-0 pe-2" toggle-class="text-reset dropdown-btn arrow-none" menu-class="dropdown-menu-end" aria-haspopup="true" :offset="{ alignmentAxis: -150, crossAxis: 0, mainAxis: 20 }">
-                            <template #button-content><span class="text-muted"><i :class="currentMode === 'dark' ? 'ph-duotone ph-moon' : (currentMode === 'light' ? 'ph-duotone ph-sun-dim' : 'ph-duotone ph-cpu') "></i></span>
-                            </template>
-                            <a href="#!" class="dropdown-item" @click="changeMode('dark')">
-                                <i class="ph-duotone ph-moon"></i>
-                                <span>Dark</span>
-                            </a>
-                            <a href="#!" class="dropdown-item" @click="changeMode('light')">
-                                <i class="ph-duotone ph-sun-dim"></i>
-                                <span>Light</span>
-                            </a>
-                            <a href="#!" class="dropdown-item" @click="changeMode('auto')">
-                                <i class="ph-duotone ph-cpu"></i>
-                                <span>Default</span>
-                            </a>
-                        </BDropdown>
-                        <li class="nav-item">
+
+                        <li class="nav-item" v-show="LoginStatus">
                             <router-link to="/tower" class="btn btn-primary">Đăng bài</router-link>
                         </li>
+                        <li class="nav-item" v-show="!LoginStatus">
+                            <router-link to="/tower" class="btn btn-primary mr-4">Đăng nhập</router-link>
+                        </li>
+                        <li class="nav-item" v-show="!LoginStatus">
+                            <router-link to="/tower" class="btn btn-primary">Đăng ký</router-link>
+                        </li>
                     </ul>
+                    <ul class="navbar-nav mb-2 mb-lg-0 align-items-start ">
+
+                    </ul>
+                    <BDropdown v-show="LoginStatus" variant="link-secondary" auto-close="outside" class="info card-header-dropdown py-0" toggle-class="text-reset dropdown-btn arrow-none me-0" menu-class="dropdown-menu-end dropdown-user-profile dropdown-menu-end pc-h-dropdown" aria-haspopup="true" :offset="{ alignmentAxis: -145, crossAxis: 0, mainAxis: 20 }">
+                        <template  #button-content><span class="text-muted"> <img src="/images/avatar/324413887_476531747779411_8255796672765316904_n.jpg" alt="user-image" class="user-avtar">
+                            </span>
+                        </template>
+                        <div class="dropdown-header d-flex align-items-center justify-content-between">
+                            <h4 class="m-0">Thông tin cá nhân</h4>
+                        </div>
+                        <div class="dropdown-body">
+                            <simplebar data-simplebar style="max-height: 500px;">
+                                <div class="profile-notification-scroll position-relative" style="max-height: calc(100vh - 225px)">
+                                    <ul class="list-group list-group-flush w-100">
+                                        <li class="list-group-item">
+                                            <div class="d-flex align-items-center">
+                                                <div class="flex-shrink-0">
+                                                    <img src="/images/avatar/324413887_476531747779411_8255796672765316904_n.jpg" alt="user-image" class="wid-50 rounded-circle">
+                                                </div>
+                                                <div class="flex-grow-1 mx-3">
+                                                    <h5 class="mb-0">Phạm Quang Hưng</h5>
+                                                </div>
+                                                <span class="badge bg-primary">PRO</span>
+                                            </div>
+                                        </li>
+                                        <li class="list-group-item">
+                                            <div class="dropdown-item" @click="viewdialogChangePassword = !viewdialogChangePassword">
+                                                <span class="d-flex align-items-center">
+                                                    <i class="ph-duotone ph-key"></i>
+                                                    <span>Đổi mật khẩu</span>
+                                                </span>
+                                            </div>
+                                            <div class="dropdown-item">
+                                                <span class="d-flex align-items-center">
+                                                    <i class="ph-duotone ph-moon"></i>
+                                                    <span>Dark mode</span>
+                                                </span>
+                                                <div class="form-check form-switch form-check-reverse m-0">
+                                                    <input class="form-check-input f-18" id="dark-mode" type="checkbox" @click="changeMode('dark')" role="switch">
+                                                </div>
+                                            </div>
+                                            <div class="dropdown-item"  @click="(viewdialogInfo = !viewdialogInfo) &&(btnInfo())">
+                                                <span class="d-flex align-items-center">
+                                                    <i class="ph-duotone ph-user-circle"></i>
+                                                    <span>Thông tin cá nhân</span>
+                                                </span>
+                                            </div>
+                                            <a href="#" class="dropdown-item">
+                                                <span class="d-flex align-items-center">
+                                                    <i class="ph-duotone ph-gear-six"></i>
+                                                    <span>Quản lý bài đăng</span>
+                                                </span>
+                                            </a>
+                                            <router-link to="/login" class="dropdown-item">
+                                                <span class="d-flex align-items-center">
+                                                    <i class="ph-duotone ph-power"></i>
+                                                    <span>Đăng xuất</span>
+                                                </span>
+                                            </router-link>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </simplebar>
+                        </div>
+                    </BDropdown>
                 </div>
             </div>
         </BNav>

@@ -10,9 +10,8 @@ namespace QLNhaTro.Commons
     {
         public enum FeatureCode
         {
-            Commons = 0,
-            HRM = 1,
-            Employee = 2
+            Landlord = 0,
+            Customer = 1,
         }
         public enum StatusBill
         {

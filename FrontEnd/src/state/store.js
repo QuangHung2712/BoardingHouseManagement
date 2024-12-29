@@ -1,6 +1,7 @@
 import { createStore } from 'vuex';
-
 import modules from './modules';
+
+
 
 const store = createStore({
     modules,
@@ -12,6 +13,8 @@ const store = createStore({
         isSidebarHidden: false,
         isMobileSidebarActive: false,
         isFixedWidth: false,
+        token: null,
+        userId: null,
     },
     mutations: {
         toggleSidebar(state) {
@@ -29,9 +32,57 @@ const store = createStore({
         changeLayoutType(state, payload) {
             state.layoutType = payload.layoutType;
         },
+        setToken(state, token) {
+            state.token = token;
+        },
+        setUser(state, userId) {
+            state.userId = userId;
+        },
+        clearAuth(state) {
+            state.token = null;
+            state.userId = null;
+        },
+    },
+    actions: {
+        login({ commit }, Userformation) {
+            const { token, userId } = Userformation
+            console.log(token);
+            // Lưu token và userId vào Vuex
+            commit('setToken', token);
+            commit('setUser', userId);
+
+            // Cập nhật token vào header mặc định của axios
+            //axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        },
+        logout({ commit }) {
+            // Xóa dữ liệu trong Vuex
+            commit('clearAuth');
+
+            // Xóa token trong localStorage
+            localStorage.removeItem('token');
+
+            // Xóa header Authorization
+            //delete axios.defaults.headers.common['Authorization'];
+
+        },
+        autoLogin({ commit }) {
+
+            // Kiểm tra token trong localStorage khi tải ứng dụng
+            const token = localStorage.getItem('tokenlandlord');
+            if (token) {
+                commit('setToken', token);
+                // Gọi thêm API để lấy userId nếu cần
+            }
+        },
     },
     getters: {
         isFixedWidth: state => state.isFixedWidth,
+        isAuthenticated(state) {
+            return !!state.token; // Trả về true nếu token không null
+        },
+        getUserId(state) {
+            return state.userId;
+        },
     },
 });
 

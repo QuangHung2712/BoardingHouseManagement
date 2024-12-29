@@ -2,65 +2,62 @@ export default [
     {
         path: "/tower",
         name: "tower",
-        meta: { title: "Tòa nhà" },
+        meta: { title: "Tòa nhà",requiresAuth: true },
         component: () => import("../views/Manage/TowerView.vue"),
     },
     {
         path: '/:idtower',
         name: "towerDetails",
-        meta: { title: "Tòa nhà" },
+        meta: { title: "Tòa nhà",requiresAuth: true },
         component: () => import("../views/Manage/TowerDetails.vue"),
         redirect: { name: "homepage" },
         children:[
             {
                 path: "homepage",
                 name: "homepage",
-                meta: { title: "Trang chủ" },
+                meta: { title: "Trang chủ",requiresAuth: true },
                 component: () => import("../views/Manage/Page/HomePage.vue"),  
             },
             {
                 path: "room",
                 name: "room",
-                meta: { title: "Phòng" },
+                meta: { title: "Phòng",requiresAuth: true },
                 component: () => import("../views/Manage/Page/Room.vue"),
             },
             {
                 path: "arise",
                 name: "arise",
-                meta: { title: "Phát sinh" },
+                meta: { title: "Phát sinh",requiresAuth: true },
                 component: () => import("../views/Manage/Page/Arise.vue"),
             },
             {
                 path: "bill",
                 name: "bill",
-                meta: { title: "Hóa đơn" },
+                meta: { title: "Hóa đơn",requiresAuth: true },
                 component: () => import("../views/Manage/Page/Bill.vue"),
             },
             {
                 path: "contract",
                 name: "contract",
-                meta: { title: "Hợp đồng" },
+                meta: { title: "Hợp đồng",requiresAuth: true },
                 component: () => import("../views/Manage/Page/Contract/ContractView.vue"),
             },
             {
                 path: "createEdit/:idcontract",
                 name: "createEdit",
-                meta: { title: "Chỉnh sửa hợp đồng" },
+                meta: { title: "Chỉnh sửa hợp đồng",requiresAuth: true },
                 component: () => import("../views/Manage/Page/Contract/CreateEditContract.vue"),
-                props: (route) => ({
-                    idtower: route.params.idtower,
-                }),
             },
             {
                 path: "report",
                 name: "report",
-                meta: { title: "Báo cáo" },
+                meta: { title: "Báo cáo",requiresAuth: true },
                 component: () => import("../views/Manage/Page/Report.vue"),  
             },
             {
                 path: "service",
                 name: "service",
-                meta: { title: "Dịch vụ" },
+                meta: { title: "Dịch vụ",requiresAuth: true },
                 component: () => import("../views/Manage/Page/Service.vue"),
             },
         ]
@@ -108,11 +105,29 @@ export default [
                 component: () => import("../views/FindRoom/FindRoom.vue"),
             },
             {
+                path: "/findpeople",
+                name: "findpeople",
+                meta: { title: "Tìm kiếm người ở ghép" },
+                component: () => import("../views/FindRoom/FindPeople.vue"),
+            },
+            {
                 path: "/detail",
                 name: "detail",
                 meta: { title: "Chi tiết phòng trọ" },
                 component: () => import("../views/FindRoom/DetailRoom.vue"),
-            }
+            },
+            {
+                path: "/save",
+                name: "save",
+                meta: { title: "Phòng, bài đăng đã lưu" },
+                component: () => import("../views/FindRoom/Save.vue"),
+            },
+            {
+                path: "/managePosts",
+                name: "managePosts",
+                meta: { title: "Quản lý bài đăng" },
+                component: () => import("../views/FindRoom/ManagePosts.vue"),
+            },
         ]
     },
 ]

@@ -249,8 +249,8 @@ export default {
                                 {{ formatDate(item.creationDate) }}
                             </template>
                             <template v-slot:[`item.actions`]="{ item }">
-                                <v-icon class="ml-5" small @click="(viewdialog = !viewdialog) && (ViewEdit(item.id,'Sửa phát sinh'))" >mdi-pencil-circle </v-icon>
-                                <v-icon class="ml-5" small @click="deleteService(item.id,item.roomName)" >mdi-delete-empty </v-icon>
+                                <v-icon class="ml-lg-3" small @click="(viewdialog = !viewdialog) && (ViewEdit(item.id,'Sửa phát sinh'))" >mdi-pencil-circle </v-icon>
+                                <v-icon class="ml-lg-3" small @click="deleteService(item.id,item.roomName)" >mdi-delete-empty </v-icon>
                             </template>
                         </v-data-table>
                     </BCardBody>

@@ -4,6 +4,8 @@ using QLNhaTro.Commons;
 using QLNhaTro.Moddel.Entity;
 using QLNhaTro.Moddel.Moddel.RequestModels;
 using QLNhaTro.Moddel.Moddel.ResponseModels;
+using QLNhaTro.Service;
+using QLNhaTro.Service.EmailService;
 using QLNhaTro.Service.LandlordService;
 
 namespace QLNhaTro.API.Controllers
@@ -13,10 +15,38 @@ namespace QLNhaTro.API.Controllers
     public class LandlordController : ControllerBase
     {
         private readonly ILandlordService _Service;
+        private readonly IAuthService _authService;
+        private readonly IEmailService _emailService;
 
-        public LandlordController(ILandlordService service)
+        public LandlordController(ILandlordService service, IAuthService authService, IEmailService emailService)
         {
             _Service = service;
+            _authService = authService;
+            _emailService = emailService;
+        }
+
+        [HttpPost]
+        public IActionResult Login([FromBody] LoginReqModels request)
+        {
+            try
+            {
+                long landLordId = _Service.Login(request);
+                if(landLordId == 0)
+                {
+                    return Unauthorized(new { Message = "Tài khoản hoặc mật khẩu không đúng!" });
+                }
+                var result = new LoginResModel
+                {
+                    Token = _authService.GenerateTokeLandlord(),
+                    UserId = landLordId,
+                };
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
+            
         }
 
         [HttpGet("{landlordId}")]
@@ -25,6 +55,22 @@ namespace QLNhaTro.API.Controllers
             try
             {
                 return await _Service.GetDetail(landlordId);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreateEditLandlordReqModels data)
+        {
+
+            try
+            {
+                await _Service.CreateLandlord(data);
+                await _emailService.SendEmailCreate(data.Email, "defaultpassword");
+                return Ok();
             }
             catch (Exception ex)
             {
@@ -54,6 +100,24 @@ namespace QLNhaTro.API.Controllers
             {
                 _Service.DeleteLandlord(landlordId);
                 return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
+        }
+        [HttpPost("{email}")]
+        public async Task<IActionResult> ForGotPassword(string email)
+        {
+            try
+            {
+                bool isEmail = _Service.ForgotPassword(email);
+                if (!isEmail)
+                {
+                    return Unauthorized(new { Message = "Địa chỉ Email không tồn tại!" });
+                }
+                var result = await _emailService.SendEmailForGotPassword(email);
+                return Ok(result);
             }
             catch (Exception ex)
             {

@@ -17,6 +17,7 @@ export default {
             formChange: false,
             viewdialogInfo: false,
             bankData: [],
+            viewdialogEditBank: false,
         };
     },
     methods: {
@@ -46,20 +47,26 @@ export default {
             return !!v || 'Vui lòng không để trống'
         },
         btnInfo(){
-            Axios.get(`https://api.vietqr.io/v2/banks`)
-                        .then(response=>{
-                            this.bankData = response.data.data.map(bank => ({
-                                name: bank.name,
-                                shortName: bank.shortName
-                            }));
-                            console.log(this.bankData)
-                        })
-                        .catch(error=>{
-                            this.message = "Lấy danh sách tỉnh thành bị lỗi " + error;
-                            this.snackbar = true;
-                            this.snackbarColor = 'red';
-                        })
+            
         },
+        btnEditBank(){
+            Axios.get(`https://api.vietqr.io/v2/banks`)
+                    .then(response=>{
+                        this.bankData = response.data.data.map(bank => ({
+                            name: bank.name,
+                            shortName: bank.shortName
+                        }));
+                        console.log(this.bankData)
+                    })
+                    .catch(error=>{
+                        this.message = "Lấy danh sách tỉnh thành bị lỗi " + error;
+                        this.snackbar = true;
+                        this.snackbarColor = 'red';
+                    })
+        },
+        SignOut(){
+            localStorage.removeItem('tokenlandlord');
+        }
     },
 }
 </script>
@@ -272,13 +279,13 @@ export default {
                                                 <span>Thông tin cá nhân</span>
                                             </span>
                                         </div>
-                                        <a href="#" class="dropdown-item">
+                                        <div @click="(viewdialogEditBank = !iewdialogEditBank) &&(btnEditBank())" class="dropdown-item">
                                             <span class="d-flex align-items-center">
                                                 <i class="ph-duotone ph-gear-six"></i>
                                                 <span>Cấu hình</span>
                                             </span>
-                                        </a>
-                                        <router-link to="/login" class="dropdown-item">
+                                        </div>
+                                        <router-link to="/login" class="dropdown-item" @click="SignOut()">
                                             <span class="d-flex align-items-center">
                                                 <i class="ph-duotone ph-power"></i>
                                                 <span>Đăng xuất</span>
@@ -333,6 +340,11 @@ export default {
         <div class="card-body">
             <v-form v-model="form" ref="form">
                 <BRow>
+                    <BCol class="col-lg-12 text-center">
+                        <div class="form-group">
+                            <v-avatar image="/images/avatar/324413887_476531747779411_8255796672765316904_n.jpg" size="80"></v-avatar>
+                        </div>
+                    </BCol>
                     <BCol class="col-lg-6">
                         <div class="form-group">
                             <label class="form-label">Họ và tên:</label>
@@ -384,6 +396,21 @@ export default {
                             <v-text-field v-model="changePassword.passwordNew" :rules="[required]" type="text" @input="formatPrice" variant="outlined" clearable class="input-control"></v-text-field>
                         </div>
                     </BCol>
+                    
+                </BRow>
+            </v-form>
+        </div>
+        <div class="modal-footer v-modal-footer">
+            <BButton type="button" variant="light" @click="viewdialogChangePassword = false">Close
+            </BButton>
+            <BButton type="button" variant="primary" @click="CreateEditService()" :disabled="!formChange">Save Changes</BButton>
+        </div>
+    </BModal>
+    <BModal v-model="viewdialogEditBank" hide-footer title="Chỉnh sửa thông tin ngân hàng" modal-class="fadeInRight"
+    class="v-modal-custom" centered size="md">
+        <div class="card-body">
+            <v-form v-model="form" ref="form">
+                <BRow>
                     <BCol class="col-lg-6">
                         <div class="form-group">
                             <label class="form-label">Ngân hàng:</label>
@@ -407,11 +434,6 @@ export default {
                     </BCol>
                 </BRow>
             </v-form>
-        </div>
-        <div class="modal-footer v-modal-footer">
-            <BButton type="button" variant="light" @click="viewdialogChangePassword = false">Close
-            </BButton>
-            <BButton type="button" variant="primary" @click="CreateEditService()" :disabled="!formChange">Save Changes</BButton>
         </div>
     </BModal>
 </template>

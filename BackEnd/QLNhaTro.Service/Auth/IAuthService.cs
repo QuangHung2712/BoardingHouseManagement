@@ -8,6 +8,7 @@ namespace QLNhaTro.Service
 {
     public interface IAuthService
     {
-        string GenerateToke();
+        string GenerateTokeLandlord();
+        string GenerateTokeCustomer();
     }
 }

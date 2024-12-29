@@ -6,9 +6,17 @@ export default {
     components: {
         Rightbar
     },
+    data(){
+        return{
+            email:'',
+            IsEmail: false,
+            password: '',
+            passwordConfirm: '',
+        }
+    },
     methods:{
         btnSendEmail(){
-            this.$router.push('/verification');
+            this.IsEmail = true;
         }
     }
 }
@@ -42,12 +50,64 @@ export default {
                     <div class="card-body">
                         <h4 class="f-w-500 mb-1">Quên mật khẩu</h4>
                         <p class="mb-3">Quay lại <router-link to="/login" class="link-primary">Đăng nhập</router-link></p>
-                        <div class="form-group mb-3">
+                        <div class="form-group">
                             <label class="form-label">Email</label>
-                            <input type="email" class="form-control" id="floatingInput" placeholder="Email Address">
+                            <v-text-field 
+                                type="text"  
+                                variant="outlined" 
+                                placeholder="Nhập vào Email" 
+                                v-model="email"
+                            ></v-text-field>
                         </div>
-                        <div class="d-grid mt-3">
-                            <button type="button" class="btn btn-primary" @click="btnSendEmail">Gửi Email</button>
+                        <div   class="d-grid">
+                            <button type="button" v-show="!IsEmail" class="btn btn-primary" @click="btnSendEmail">Gửi Email</button>
+                        </div>
+                        <div v-show="IsEmail">
+                            <p class="mb-0">Chúng tôi đã gửi mã đến Email: qua****qn@gmail.com</p>
+                            <p class="mb-3">Không nhận được Email?<a href="#" class="link-primary ms-1">Gửi lại mã</a></p>
+                            <BRow class="row my-4 text-center">
+                                <BCol class="col">
+                                    <input type="text" class="form-control text-center" placeholder="0">
+                                </BCol>
+                                <BCol class="col">
+                                    <input type="text" class="form-control text-center" placeholder="0">
+                                </BCol>
+                                <BCol class="col">
+                                    <input type="text" class="form-control text-center" placeholder="0">
+                                </BCol>
+                                <BCol class="col">
+                                    <input type="text" class="form-control text-center" placeholder="0">
+                                </BCol>
+                                <BCol class="col">
+                                    <input type="text" class="form-control text-center" placeholder="0">
+                                </BCol>
+                                <BCol class="col">
+                                    <input type="text" class="form-control text-center" placeholder="0">
+                                </BCol>
+                            </BRow>
+                            <div  class="d-grid">
+                                <button type="button" class="btn btn-primary">Tiếp tục</button>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="form-group">
+                                <label class="form-label">Mật khẩu</label>
+                                <v-text-field 
+                                    type="text"  
+                                    variant="outlined" 
+                                    placeholder="Nhập vào Email" 
+                                    v-model="email"
+                                ></v-text-field>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Nhập lại mật khẩu</label>
+                                <v-text-field 
+                                    type="text"  
+                                    variant="outlined" 
+                                    placeholder="Nhập vào Email" 
+                                    v-model="email"
+                                ></v-text-field>
+                            </div>
                         </div>
                     </div>
                 </div>

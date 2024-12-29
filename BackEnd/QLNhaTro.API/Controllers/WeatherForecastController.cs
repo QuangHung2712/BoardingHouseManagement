@@ -32,11 +32,5 @@ namespace QLNhaTro.API.Controllers
             })
             .ToArray();
         }
-        [HttpGet("[action]")]
-        public IActionResult GetToken()
-        {
-            var result = _authService.GenerateToke();
-            return Ok(result);
-        }
     }
 }

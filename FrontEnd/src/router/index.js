@@ -1,6 +1,7 @@
 import { createWebHistory, createRouter } from "vue-router";
 import routes from './routes';
 import appConfig from "../../app.config";
+import store from "../state/store";
 
 
 const router = createRouter({
@@ -47,6 +48,20 @@ router.beforeResolve(async (routeTo, routeFrom, next) => {
     document.title = routeTo.meta.title + ' | ' + appConfig.title;
     // If we reach this point, continue resolving the route.
     next();
+});
+router.beforeEach((to, from, next) => {
+    // Kiểm tra nếu route yêu cầu đăng nhập
+    if (to.meta.requiresAuth) {
+        const isAuthenticated = store.getters['isAuthenticated']; // Kiểm tra trạng thái đăng nhập từ Vuex hoặc localStorage
+        
+        if (isAuthenticated) {
+            next(); // Đã đăng nhập, cho phép truy cập
+        } else {
+            next({ name: 'login' }); // Chuyển hướng tới trang đăng nhập
+        }
+    } else {
+        next(); // Không yêu cầu đăng nhập, cho phép truy cập
+    }
 });
 
 export default router;

@@ -12,8 +12,8 @@ namespace QLNhaTro.Moddel.Entity
     {
         public bool IsActive { get; set; }
         public string Password { get; set; }
-        public string STK { get; set; } //Số tài khoản
-        public string SampleContractLink { get; set; }//Đường dẫn đến hợp đồng mẫu
-        public string PaymentQRImageLink { get; set; }//Đường đãn đến QR thanh toán
+        public string? STK { get; set; } //Số tài khoản
+        public string? SampleContractLink { get; set; }//Đường dẫn đến hợp đồng mẫu
+        public string? PaymentQRImageLink { get; set; }//Đường đãn đến QR thanh toán
     }
 }
