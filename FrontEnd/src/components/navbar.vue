@@ -1,6 +1,7 @@
 <script>
 import simplebar from "simplebar-vue"
 import Axios from "axios";
+import apiClient from "@/plugins/axios";
 
 export default {
     name: "NAVBAR",
@@ -56,7 +57,6 @@ export default {
                             name: bank.name,
                             shortName: bank.shortName
                         }));
-                        console.log(this.bankData)
                     })
                     .catch(error=>{
                         this.message = "Lấy danh sách tỉnh thành bị lỗi " + error;
@@ -66,6 +66,19 @@ export default {
         },
         SignOut(){
             localStorage.removeItem('tokenlandlord');
+        },
+        btnChangePassword(){
+            apiClient.put(`/Landlord/ChangePassword`,this.changePassword)
+                    .then(()=>{
+                        this.message = "Đổi mật khẩu thành công ";
+                        this.snackbar = true;
+                        this.snackbarColor = 'green';
+                    })
+                    .catch(error=>{
+                        this.message = "Đổi mật khẩu bị lỗi: " + error;
+                        this.snackbar = true;
+                        this.snackbarColor = 'red';
+                    })
         }
     },
 }
@@ -332,7 +345,7 @@ export default {
         <div class="modal-footer v-modal-footer">
             <BButton type="button" variant="light" @click="viewdialogChangePassword = false">Close
             </BButton>
-            <BButton type="button" variant="primary" @click="CreateEditService()" :disabled="!formChange">Save Changes</BButton>
+            <BButton type="button" variant="primary" @click="btnChangePassword()" :disabled="!formChange">Save Changes</BButton>
         </div>
     </BModal>
     <BModal v-model="viewdialogInfo" hide-footer title="Đổi thông tin cá nhân" modal-class="fadeInRight"

@@ -10,6 +10,6 @@ namespace QLNhaTro.Service.EmailService
     {
         Task SendEmailAsync(string toEmail, string subject, string content);
         Task SendEmailCreate(string toEmail, string password);
-        Task<int> SendEmailForGotPassword(string toEmail);
+        Task<int> SendEmailCode(string toEmail,string chucNang);
     }
 }

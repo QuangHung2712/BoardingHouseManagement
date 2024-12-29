@@ -81,7 +81,7 @@ export default {
                         <h4 class="f-w-500 mb-1">Đăng nhập</h4>
                         <p class="mb-3">Bạn chưa có tài khoản? <router-link to="/register"
                                 class="link-primary ms-1">Tạo tài khoản</router-link></p>
-                        <v-form v-model="form" ref="form">
+                        <v-form v-model="form" ref="form" @keyup.enter="LogIn()">
                             <div class="form-group mb-3">
                                 <v-text-field 
                                     type="email" 

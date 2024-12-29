@@ -1,4 +1,6 @@
-﻿using QLNhaTro.Moddel.Moddel.RequestModels;
+﻿using QLNhaTro.Moddel.Entity;
+using QLNhaTro.Moddel.Moddel.RequestModels;
+using QLNhaTro.Moddel.Moddel.RequestModels.Landlord;
 using QLNhaTro.Moddel.Moddel.ResponseModels;
 using System;
 using System.Collections.Generic;
@@ -11,10 +13,12 @@ namespace QLNhaTro.Service.LandlordService
     public interface ILandlordService
     {
         long Login(LoginReqModels request);
-        Task<LandlordResModel> GetDetail(long id);
+        LandlordResModel GetDetail(long id);
         Task CreateLandlord(CreateEditLandlordReqModels input);
         Task UpdateLandlord(CreateEditLandlordReqModels input);
         Task DeleteLandlord(long id);
         bool ForgotPassword(string inputEmail);
+        Landlord GetById(long id);
+        Task ChangePassword(ChangePasswordReqModel input);
     }
 }

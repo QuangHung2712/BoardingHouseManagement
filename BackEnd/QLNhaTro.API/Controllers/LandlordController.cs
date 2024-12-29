@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Writers;
 using QLNhaTro.Commons;
+using QLNhaTro.Commons.CustomException;
 using QLNhaTro.Moddel.Entity;
 using QLNhaTro.Moddel.Moddel.RequestModels;
+using QLNhaTro.Moddel.Moddel.RequestModels.Landlord;
 using QLNhaTro.Moddel.Moddel.ResponseModels;
 using QLNhaTro.Service;
 using QLNhaTro.Service.EmailService;
@@ -50,11 +52,12 @@ namespace QLNhaTro.API.Controllers
         }
 
         [HttpGet("{landlordId}")]
-        public async Task<ActionResult<LandlordResModel>> GetDetail(long landlordId)
+        public IActionResult GetDetail(long landlordId)
         {
             try
             {
-                return await _Service.GetDetail(landlordId);
+                var result = _Service.GetDetail(landlordId);
+                return Ok(result);
             }
             catch (Exception ex)
             {
@@ -116,13 +119,28 @@ namespace QLNhaTro.API.Controllers
                 {
                     return Unauthorized(new { Message = "Địa chỉ Email không tồn tại!" });
                 }
-                var result = await _emailService.SendEmailForGotPassword(email);
+                var result = await _emailService.SendEmailCode(email,"quên mật khẩu");
                 return Ok(result);
             }
             catch (Exception ex)
             {
                 return StatusCode(500, new { Message = ex.Message });
             }
+        }
+        [HttpPut]
+        public async Task<IActionResult> ChangePassword(ChangePasswordReqModel input)
+        {
+            try
+            {
+                await _Service.ChangePassword(input);
+                return Ok();
+                
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
+
         }
     }
 }

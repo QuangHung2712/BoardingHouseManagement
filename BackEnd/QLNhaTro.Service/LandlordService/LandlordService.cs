@@ -9,6 +9,7 @@ using QLNhaTro.Commons.CustomException;
 using QLNhaTro.Moddel;
 using QLNhaTro.Moddel.Entity;
 using QLNhaTro.Moddel.Moddel.RequestModels;
+using QLNhaTro.Moddel.Moddel.RequestModels.Landlord;
 using QLNhaTro.Moddel.Moddel.ResponseModels;
 using System;
 using System.Collections.Generic;
@@ -32,11 +33,11 @@ namespace QLNhaTro.Service.LandlordService
         {
              return _Context.Landlords.Where(item=> item.Email == request.Email && item.Password == request.Password).Select(record => record.Id).FirstOrDefault();
         }
-        public async Task<LandlordResModel> GetDetail(long id)
+        public LandlordResModel GetDetail(long id)
         {
             try
             {
-                Landlord landlord = await GetById(id);
+                Landlord landlord = _Context.Landlords.GetAvailableById(id);
                 return LandlordResModel.Mapping(landlord);
             }
             catch (Exception ex) 
@@ -122,19 +123,26 @@ namespace QLNhaTro.Service.LandlordService
             return _Context.Landlords.Any(item => item.Email != null && item.Email.ToLower() == inputEmail.ToLower());
         }
 
-        private async Task<Landlord> GetById(long id)
+        public Landlord GetById(long id)
         {
             try
             {
-                IQueryable<Landlord> landlordQuery = _Context.Landlords.Where(e => e.Id == id).AsQueryable();
-                if (landlordQuery.IsNullOrEmpty()) throw new NotFoundException(nameof(Landlord.Id));
-                return await landlordQuery.FirstAsync();
+                Landlord landlordQuery = _Context.Landlords.GetAvailableById(id);
+                if (landlordQuery == null) throw new NotFoundException("Tài khoản chủ nhà không tồn tại");
+                return landlordQuery;
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
                 throw;
             }
+        }
+        public async Task ChangePassword(ChangePasswordReqModel input)
+        {
+            var landlord = _Context.Landlords.GetAvailableById(input.Id);
+            landlord.Password = input.PasswordNew;
+            _Context.Landlords.Update(landlord);
+            await _Context.SaveChangesAsync();
         }
     }
 }
