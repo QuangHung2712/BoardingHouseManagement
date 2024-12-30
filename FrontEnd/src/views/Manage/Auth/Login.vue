@@ -37,6 +37,7 @@ export default {
                     this.$router.push({ name: 'tower' });
                     if(this.remember){
                         localStorage.setItem('tokenlandlord',response.data.token)
+                        localStorage.setItem('landlordId',response.data.userId)
                     }
                     this.errorMessage = ""
                 })

@@ -46,11 +46,9 @@ const store = createStore({
     actions: {
         login({ commit }, Userformation) {
             const { token, userId } = Userformation
-            console.log(token);
             // Lưu token và userId vào Vuex
             commit('setToken', token);
             commit('setUser', userId);
-
             // Cập nhật token vào header mặc định của axios
             //axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         },
@@ -59,7 +57,8 @@ const store = createStore({
             commit('clearAuth');
 
             // Xóa token trong localStorage
-            localStorage.removeItem('token');
+            localStorage.removeItem('tokenlandlord');
+            localStorage.removeItem('landlordId');
 
             // Xóa header Authorization
             //delete axios.defaults.headers.common['Authorization'];
@@ -69,9 +68,13 @@ const store = createStore({
 
             // Kiểm tra token trong localStorage khi tải ứng dụng
             const token = localStorage.getItem('tokenlandlord');
+            const userId = localStorage.getItem('landlordId');
             if (token) {
                 commit('setToken', token);
                 // Gọi thêm API để lấy userId nếu cần
+            }
+            if(userId){
+                commit('setUser', userId);
             }
         },
     },

@@ -2,6 +2,7 @@
 import simplebar from "simplebar-vue"
 import Axios from "axios";
 import apiClient from "@/plugins/axios";
+import store from "../state/store";
 
 export default {
     name: "NAVBAR",
@@ -14,11 +15,28 @@ export default {
             isSidebarHidden: false,
             currentMode: 'light',
             viewdialogChangePassword: false,
-            changePassword:{},
+            changePassword:{
+                id: 0,
+                passwordOld: '',
+                passwordNew: '',
+            },
             formChange: false,
             viewdialogInfo: false,
             bankData: [],
             viewdialogEditBank: false,
+            passwordConfirm: '',
+            showPassword: false,
+            showPassword1: false,
+            showPassword2: false,
+            message: '',
+            snackbar: false,
+            snackbarColor: '',
+            rules: {
+                required: v => !!v || 'Vui lòng không để trống',
+                validEmail: v => /^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(v) || 'Email phải hợp lệ và kết thúc bằng @gmail.com',
+                validPassword: v=> /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/.test(v) || 'Mật khẩu phải có ít nhất 8 ký tự, bao gồm ít nhất 1 chữ cái và 1 chữ số',
+                matchPassword: (v) =>v === this.changePassword.passwordNew || 'Mật khẩu xác nhận không khớp',
+            },
         };
     },
     methods: {
@@ -59,23 +77,27 @@ export default {
                         }));
                     })
                     .catch(error=>{
-                        this.message = "Lấy danh sách tỉnh thành bị lỗi " + error;
+                        this.message = "Lấy danh sách ngân hàng bị lỗi " + error;
                         this.snackbar = true;
                         this.snackbarColor = 'red';
                     })
         },
         SignOut(){
-            localStorage.removeItem('tokenlandlord');
+            this.$store.dispatch('logout');
         },
         btnChangePassword(){
+            this.changePassword.id = store.getters['getUserId'];
+            console.log(this.changePassword);
             apiClient.put(`/Landlord/ChangePassword`,this.changePassword)
                     .then(()=>{
                         this.message = "Đổi mật khẩu thành công ";
                         this.snackbar = true;
                         this.snackbarColor = 'green';
+                        this.viewdialogChangePassword =false;
+                        
                     })
                     .catch(error=>{
-                        this.message = "Đổi mật khẩu bị lỗi: " + error;
+                        this.message = "Đổi mật khẩu bị lỗi: " + error.response.data.message;
                         this.snackbar = true;
                         this.snackbarColor = 'red';
                     })
@@ -86,6 +108,14 @@ export default {
 
 <template>
     <div class="header-wrapper"> <!-- [Mobile Media Block] start -->
+        <v-snackbar
+            v-model="snackbar"
+            :timeout="10000"
+            class="custom-snackbar"
+            :color="snackbarColor"
+        >
+            <h5 class="text-center">{{ message }}</h5>
+        </v-snackbar>
         <div class="me-auto pc-mob-drp">
             <ul class="list-unstyled">
                 <!-- ======= Menu collapse Icon ===== -->
@@ -316,27 +346,54 @@ export default {
     <BModal v-model="viewdialogChangePassword" hide-footer title="Đổi mật khẩu" modal-class="fadeInRight"
         class="v-modal-custom" centered size="md" >
         <div class="card-body">
-            <v-form v-model="form" ref="form">
+            <v-form v-model="formChange" ref="formChange">
                 <BRow>
                     <BCol class="col-lg-12">
                         <div class="form-group">
                             <label class="form-label">Mật khẩu cũ:</label>
-                            <!-- <input type="email" class="form-control" placeholder="Nhập vào tên dịch vụ"> -->
-                            <v-text-field v-model="changePassword.passwordOld" :rules="[required]" variant="outlined" clearable placeholder="Nhập vào tên dịch vụ" class="input-control"></v-text-field>
+                            <v-text-field 
+                                :type="showPassword ? 'text' : 'password'" 
+                                v-model="changePassword.passwordOld" 
+                                :rules="[rules.required]" 
+                                variant="outlined" 
+                                clearable 
+                                placeholder="Nhập vào mật khẩu cũ" 
+                                class="input-control"
+                                :append-inner-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+                                @click:append-inner="showPassword = !showPassword"
+                            ></v-text-field>
                         </div>
                     </BCol>
                     <BCol class="col-lg-12">
                         <div class="form-group">
                             <label class="form-label">Mật khẩu mới:</label>
-                            <!-- <input type="email" class="form-control" placeholder="Nhập vào giá của dịch vụ"> -->
-                            <v-text-field v-model="changePassword.passwordNew" :rules="[required]" type="text" @input="formatPrice" variant="outlined" clearable placeholder="Nhập vào tên dịch vụ" class="input-control"></v-text-field>
+                            <v-text-field 
+                                :type="showPassword1 ? 'text' : 'password'" 
+                                v-model="changePassword.passwordNew" 
+                                :rules="[rules.validPassword]"
+                                variant="outlined" 
+                                clearable
+                                placeholder="Nhập vào mật khẩu mới"
+                                class="input-control"
+                                :append-inner-icon="showPassword1 ? 'mdi-eye' : 'mdi-eye-off'"
+                                @click:append-inner="showPassword1 = !showPassword1"
+                            ></v-text-field>
                         </div>
                     </BCol>
                     <BCol class="col-lg-12">
                         <div class="form-group">
                             <label class="form-label">Mật khẩu mới:</label>
-                            <!-- <input type="email" class="form-control" placeholder="Nhập vào giá của dịch vụ"> -->
-                            <v-text-field v-model="changePassword.passwordNew" :rules="[required]" type="text" @input="formatPrice" variant="outlined" clearable placeholder="Nhập vào tên dịch vụ" class="input-control"></v-text-field>
+                            <v-text-field 
+                                :type="showPassword2 ? 'text' : 'password'" 
+                                v-model="passwordConfirm" 
+                                :rules="[rules.matchPassword]" 
+                                variant="outlined" 
+                                clearable 
+                                placeholder="Nhập lại mật khẩu" 
+                                class="input-control"
+                                :append-inner-icon="showPassword2 ? 'mdi-eye' : 'mdi-eye-off'"
+                                @click:append-inner="showPassword2 = !showPassword2"
+                            ></v-text-field>
                         </div>
                     </BCol>
                 </BRow>
@@ -406,7 +463,7 @@ export default {
                     <BCol class="col-lg-12">
                         <div class="form-group">
                             <label class="form-label">Địa chỉ:</label>
-                            <v-text-field v-model="changePassword.passwordNew" :rules="[required]" type="text" @input="formatPrice" variant="outlined" clearable class="input-control"></v-text-field>
+                            <v-text-field v-model="passwordConfirm" :rules="[required]" type="text" @input="formatPrice" variant="outlined" clearable class="input-control"></v-text-field>
                         </div>
                     </BCol>
                     

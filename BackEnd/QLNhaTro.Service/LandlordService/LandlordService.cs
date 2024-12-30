@@ -140,6 +140,10 @@ namespace QLNhaTro.Service.LandlordService
         public async Task ChangePassword(ChangePasswordReqModel input)
         {
             var landlord = _Context.Landlords.GetAvailableById(input.Id);
+            if(landlord.Password != input.PasswordOld)
+            {
+                throw new Exception("Mật khẩu không chính xác");
+            }
             landlord.Password = input.PasswordNew;
             _Context.Landlords.Update(landlord);
             await _Context.SaveChangesAsync();

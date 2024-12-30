@@ -32,7 +32,7 @@ export default {
             status: false,
             length: 3,
             window: 0,
-            LoginStatus: false,
+            LoginStatus: true,
         }
     },
     name: "LANDING",
@@ -113,7 +113,7 @@ export default {
                             <h5><router-link class="nav-link" to="/findpeople">Tìm người ở ghép</router-link></h5>
                         </li>
                         <li class="nav-item px-1">
-                            <h5><router-link to="/save" class="nav-link" v-show="LoginStatus">Phòng, đăng bài đã lưu</router-link></h5>
+                            <h5><router-link to="/save" class="nav-link" v-show="LoginStatus">Phòng, tin đã lưu</router-link></h5>
                         </li>
 
                         <li class="nav-item" v-show="LoginStatus">

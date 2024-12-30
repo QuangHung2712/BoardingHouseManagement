@@ -9,6 +9,7 @@ namespace QLNhaTro.Moddel.Moddel.RequestModels.Landlord
 {
     public class ChangePasswordReqModel : BaseEntity
     {
+        public string PasswordOld { get; set; }
         public string PasswordNew { get; set; }
     }
 }
