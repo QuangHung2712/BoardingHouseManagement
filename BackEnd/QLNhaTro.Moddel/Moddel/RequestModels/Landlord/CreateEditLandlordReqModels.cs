@@ -15,7 +15,6 @@ namespace QLNhaTro.Moddel.Moddel.RequestModels
         public string Email { get; set; }
         public string CCCD { get; set; }
         public string Address { get; set; }
-        public string? SDTZalo { get; set; }
-        public string? PathAvatar { get; set; }
+        public string SDTZalo { get; set; }
     }
 }

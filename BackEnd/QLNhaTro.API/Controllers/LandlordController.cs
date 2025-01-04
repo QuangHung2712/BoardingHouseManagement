@@ -4,7 +4,6 @@ using QLNhaTro.Commons;
 using QLNhaTro.Commons.CustomException;
 using QLNhaTro.Moddel.Entity;
 using QLNhaTro.Moddel.Moddel.RequestModels;
-using QLNhaTro.Moddel.Moddel.RequestModels.Landlord;
 using QLNhaTro.Moddel.Moddel.ResponseModels;
 using QLNhaTro.Service;
 using QLNhaTro.Service.EmailService;
@@ -33,7 +32,7 @@ namespace QLNhaTro.API.Controllers
             try
             {
                 long landLordId = _Service.Login(request);
-                if(landLordId == 0)
+                if (landLordId == 0)
                 {
                     return Unauthorized(new { Message = "Tài khoản hoặc mật khẩu không đúng!" });
                 }
@@ -48,7 +47,7 @@ namespace QLNhaTro.API.Controllers
             {
                 return StatusCode(500, new { Message = ex.Message });
             }
-            
+
         }
 
         [HttpGet("{landlordId}")]
@@ -82,12 +81,12 @@ namespace QLNhaTro.API.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> UpdateLandlord([FromBody] CreateEditLandlordReqModels data)
+        public async Task<IActionResult> UpdateLandlord([FromForm] CreateEditLandlordReqModels data, [FromForm] IFormFile ImgAvatar)
         {
-            
+
             try
             {
-                await _Service.UpdateLandlord(data);
+                await _Service.UpdateLandlord(data, ImgAvatar);
                 return Ok();
             }
             catch (Exception ex)
@@ -119,7 +118,7 @@ namespace QLNhaTro.API.Controllers
                 {
                     return Unauthorized(new { Message = "Địa chỉ Email không tồn tại!" });
                 }
-                var result = await _emailService.SendEmailCode(email,"quên mật khẩu");
+                var result = await _emailService.SendEmailCode(email, "quên mật khẩu");
                 return Ok(result);
             }
             catch (Exception ex)
@@ -134,7 +133,7 @@ namespace QLNhaTro.API.Controllers
             {
                 await _Service.ChangePassword(input);
                 return Ok();
-                
+
             }
             catch (Exception ex)
             {
@@ -162,11 +161,24 @@ namespace QLNhaTro.API.Controllers
                 await _Service.UpdateInfoPayment(data, paymentQRImageLink);
                 return Ok();
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 return StatusCode(500, new { Message = ex.Message });
             }
 
+        }
+        [HttpGet]
+        public ActionResult GetInfoContact([FromQuery] long id)
+        {
+            try
+            {
+                var result = _Service.GetContactInfo(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
         }
     }
 }

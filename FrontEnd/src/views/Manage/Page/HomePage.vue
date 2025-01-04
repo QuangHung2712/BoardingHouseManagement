@@ -12,7 +12,9 @@
 </style>
 <script>
     import pageheader from "@/components/page-header.vue"
-    import Swal from "sweetalert2";
+    import apiClient from "@/plugins/axios";
+    import CryptoJS from 'crypto-js';
+
 
     export default {
         name: "HOMEPAGE",
@@ -24,58 +26,39 @@
                 viewdialog: false,
                 titleDialog:'',
                 form: false,
-                headersTable:[
-                    {title: 'Số phòng',value:'soPhong',sortable: true},
-                    {title: 'Số tiền',value: 'SoTien',sortable: true},
-                    {title: 'Ngày thanh toán', value: 'NgayThanhToan',sortable: true},
-                    {title: '',value: 'actions',sortable: false}
-                ],
-                RequestPaymentConfirmation: [
-                    {id: 1, soPhong: "102",SoTien: "3.000.000 VNĐ", NgayThanhToan: '20/12/2024'},
-                    {id: 1, soPhong: "102",SoTien: "3.000.000 VNĐ", NgayThanhToan: '20/12/2024'},
-                    {id: 1, soPhong: "102",SoTien: "3.000.000 VNĐ", NgayThanhToan: '20/12/2024'},
-
-                ],
+                towerId: 0,
+                dataInfo:{
+                    infoRoomAvailable: '',
+                    infoRoomExpireContract: "",
+                    infoRoomNoInvoice: "", 
+                    infoRoomPaid: "",
+                    infoRoomUnpaid: "",
+                    roomAvailable: 0,
+                    roomExpireContract: 0,
+                    roomNoInvoice: 0,
+                    roomPaid: 0,
+                    roomUnpaid: 0
+                },
             }
         },
+        created(){
+            const idtower = this.$route.params.idtower;
+            const DecodingIdTower = CryptoJS.enc.Utf8.stringify(CryptoJS.enc.Base64.parse(idtower));
+            this.towerId = DecodingIdTower;
+            this.getInfo();
+        },
         methods:{
-            deleteService(id,name) {
-                const swalWithBootstrapButtons = Swal.mixin({
-                    customClass: {
-                        confirmButton: "btn btn-success",
-                        cancelButton: "btn btn-danger ml-2",
-                    },
-                    buttonsStyling: false,
-                });
-
-                swalWithBootstrapButtons
-                    .fire({
-                        title: "Bạn có chắc chắn không?",
-                        text: `Bạn đang muốn xóa phát sinh của phòng: ${name}`,
-                        icon: "warning",
-                        confirmButtonText: "Có!",
-                        cancelButtonText: "Không!",
-                        showCancelButton: true,
-                    })
-                    .then((result) => {
-                        if (result.value) {
-                            swalWithBootstrapButtons.fire(
-                                "Xóa thành công!",
-                                `Đã xóa phát sinh của phòng thành công: ${name}`,
-                                "success"
-                            );
-                        } else if (
-                            /* Read more about handling dismissals below */
-                            result.dismiss === Swal.DismissReason.cancel
-                        ) {
-                            swalWithBootstrapButtons.fire(
-                                "Xóa không thành công",
-                                `Đã xảy ra lỗi khi xóa phát sinh của phòng: ${name}`,
-                                "error"
-                            );
-                        }
-                    });
-            },
+            getInfo(){
+                apiClient.get(`/Room/GetInfoHome?towerID=${this.towerId}`)
+                        .then(response=>{
+                            this.dataInfo = response.data;
+                        })
+                        .catch(error=>{
+                            this.message = "Lấy thông tin bị lỗi " + error.response?.data?.message || error.message;
+                            this.snackbar = true;
+                            this.snackbarColor = 'red';
+                        })
+            }
         }
 }
 </script>
@@ -93,9 +76,9 @@
                         <div class="avtar bg-brand-color-1 text-white me-3">
                             <i class="ph-duotone ph-currency-dollar f-26"></i>
                         </div>
-                        <h3 class="f-w-300 d-flex align-items-center m-b-0">4</h3>
+                        <h3 class="f-w-300 d-flex align-items-center m-b-0">{{ dataInfo.roomUnpaid }}</h3>
                     </div>
-                    <p class="text-muted mb-2 text-sm mt-3">Các phòng đã thanh toán: 102, 103, 104</p>
+                    <p class="text-muted mb-2 text-sm mt-3">{{dataInfo.infoRoomUnpaid ? 'Các phòng đã thanh toán: ' + dataInfo.infoRoomUnpaid : 'Không có phòng nào đã thanh toán'}}</p>
                     <div class="progress" style="height: 7px">
                         <div class="progress-bar bg-brand-color-3" role="progressbar" style="width: 75%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>
@@ -112,9 +95,9 @@
                         <div class="avtar bg-brand-color-1 text-white me-3">
                             <i class="ph-duotone ph-currency-dollar f-26"></i>
                         </div>
-                        <h3 class="f-w-300 d-flex align-items-center m-b-0">4</h3>
+                        <h3 class="f-w-300 d-flex align-items-center m-b-0">{{ dataInfo.roomPaid }}</h3>
                     </div>
-                    <p class="text-muted mb-2 text-sm mt-3">Các phòng chưa thanh toán: 202, 203, 204</p>
+                    <p class="text-muted mb-2 text-sm mt-3">{{dataInfo.infoRoomPaid ? 'Các phòng chưa thanh toán: ' + dataInfo.infoRoomPaid : 'Không có phòng nào chưa thanh toán'}}</p>
                     <div class="progress" style="height: 7px">
                         <div class="progress-bar bg-brand-color-3" role="progressbar" style="width: 75%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>
@@ -131,9 +114,9 @@
                         <div class="avtar bg-brand-color-1 text-white me-3">
                             <i class="ph-duotone ph-currency-dollar f-26"></i>
                         </div>
-                        <h3 class="f-w-300 d-flex align-items-center m-b-0">4</h3>
+                        <h3 class="f-w-300 d-flex align-items-center m-b-0">{{ dataInfo.roomNoInvoice }}</h3>
                     </div>
-                    <p class="text-muted mb-2 text-sm mt-3">Các phòng chưa có hoá đơn: 202, 203, 204</p>
+                    <p class="text-muted mb-2 text-sm mt-3">{{dataInfo.infoRoomNoInvoice ? 'Các phòng chưa có hoá đơn: ' + dataInfo.infoRoomNoInvoice : 'Không có phòng nào chưa có hoá đơn'}}</p>
                     <div class="progress" style="height: 7px">
                         <div class="progress-bar bg-brand-color-3" role="progressbar" style="width: 75%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>
@@ -150,8 +133,8 @@
                         <div>
                             <p class="text-muted mb-0">Số phòng còn trống</p>
                             <div class="d-flex align-items-end">
-                                <h2 class="mb-0 f-w-500">4</h2>
-                                <span class="badge bg-light-danger ms-2">Phòng: 102, 103, 104</span>
+                                <h2 class="mb-0 f-w-500">{{ dataInfo.roomAvailable }}</h2>
+                                <span class="badge bg-light-danger ms-2">{{dataInfo.infoRoomAvailable ? 'Phòng: ' + dataInfo.infoRoomAvailable : 'Không có phòng nào còn trống'}}</span>
                             </div>
                         </div>
                     </div>
@@ -166,8 +149,8 @@
                         <div>
                             <p class="text-muted mb-0">Số phòng sắp hết hạn hợp đồng</p>
                             <div class="d-flex align-items-end">
-                                <h2 class="mb-0 f-w-500">4</h2>
-                                <span class="badge bg-light-warning ms-2">Phòng: 102, 103, 104</span>
+                                <h2 class="mb-0 f-w-500">{{ dataInfo.roomExpireContract }}</h2>
+                                <span class="badge bg-light-warning ms-2">{{dataInfo.infoRoomExpireContract ? 'Phòng: ' + dataInfo.infoRoomExpireContract : 'Không có phòng nào sắp hết hạn hợp đồng'}}</span>
                             </div>
                         </div>
                     </div>

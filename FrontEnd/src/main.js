@@ -9,6 +9,9 @@ import PhosphorIcons from "@phosphor-icons/vue";
 import Wizard from 'form-wizard-vue3'
 import vuetify from './plugins/vuetify'
 import { loadFonts } from './plugins/webfontloader'
+import { createI18n } from 'vue-i18n';
+import vi from 'vuetify/locale';
+
 import 'bootstrap';
 
 // CSS import
@@ -38,15 +41,20 @@ import '@/assets/css/landing.css'
 import '@/assets/css/uikit.css'
 
 loadFonts()
-
+const i18n = createI18n({
+    locale: 'vi',  // Ngôn ngữ mặc định là tiếng Việt
+    messages: {
+        vi,  // Sử dụng locale tiếng Việt của Vuetify
+    },
+    });
 createApp(App)
-.use(store)
-.use(router)
-.use(BootstrapVueNext)
-.use(vuetify)
-.use(VueApexCharts)
+    .use(store)
+    .use(router)
+    .use(BootstrapVueNext)
+    .use(vuetify)
+    .use(VueApexCharts)
     .use(PhosphorIcons)
-.component('Wizard', Wizard)
-
+    .use(i18n) // Thêm i18n vào ứng dụng
+    .component('Wizard', Wizard)
     .mount('#app')
 store.dispatch('autoLogin');

@@ -39,14 +39,14 @@ export default {
             },
             infoUser:{
                 fullName: '',
-                doB: '',
+                doB: null,
                 phoneNumber: '',
                 email: '',
                 cccd: '',
                 address: '',
                 sdtZalo: '',
-                pathAvatar: '',
             },
+            imgAvatar: null,
             form: false,
             rules: {
                 required: v => !!v || 'Vui lòng không để trống',
@@ -55,6 +55,9 @@ export default {
                 matchPassword: (v) =>v === this.changePassword.passwordNew || 'Mật khẩu xác nhận không khớp',
             },
         };
+    },
+    created(){
+        this.GetInfo();
     },
     methods: {
         changeMode(mode) {
@@ -83,6 +86,7 @@ export default {
             return !!v || 'Vui lòng không để trống'
         },
         btnInfo(){
+            this.previewImage = null
             apiClient.get(`/Landlord/GetDetail/${1}`)
                     .then(response=>{
                         this.infoUser = response.data;
@@ -145,6 +149,7 @@ export default {
             const file = event.target.files[0];
             if (file) {
                 this.dataUpdatePayment.paymentQRImageLink = file;
+                this.imgAvatar = file;
                 this.previewImage = URL.createObjectURL(file); // Tạo URL để xem trước
             }
         },
@@ -154,7 +159,6 @@ export default {
             formData.append("id",4);
             formData.append("bank", this.dataUpdatePayment.bank);
             formData.append("sTK", this.dataUpdatePayment.stk);
-            console.log(this.dataUpdatePayment)
             if (this.dataUpdatePayment.paymentQRImageLink) {
                 formData.append("paymentQRImageLink", this.dataUpdatePayment.paymentQRImageLink);
             }
@@ -170,7 +174,43 @@ export default {
                         this.snackbarColor = 'red';
                         this.snackbar = true;
                     })
-        }
+        },
+        UpdateInfo(){
+            const formData = new FormData();
+            formData.append("landlordId",1);
+            formData.append("fullName", this.infoUser.fullName);
+            formData.append("doB", this.infoUser.doB);
+            formData.append("PhoneNumber",this.infoUser.phoneNumber);
+            formData.append("email", this.infoUser.email);
+            formData.append("cccd", this.infoUser.cccd);
+            formData.append("address",this.infoUser.address);
+            formData.append("sdtZalo", this.infoUser.sdtZalo);
+            formData.append("imgAvatar", this.imgAvatar);
+            apiClient.put(`/Landlord/UpdateLandlord`,formData)
+                    .then(()=>{
+                        this.snackbarColor = 'green';
+                        this.snackbar = true;
+                        this.message = 'Cập nhật thông tin người dùng thành công!';
+                        this.viewdialogInfo = false;
+                        window.location.reload();
+                    })
+                    .catch(error=>{
+                        this.message = `Đã xảy ra lỗi: ${error.response?.data?.message || error.message}`;
+                        this.snackbarColor = 'red';
+                        this.snackbar = true;
+                    })
+        },
+        GetInfo(){
+            apiClient.get(`/Landlord/GetInfoContact?id=${1}`)
+                    .then(response=>{
+                        this.infoUser.pathAvatar = response.data.pathAvatar;
+                    })
+                    .catch(error=>{
+                        this.message = `Đã xảy ra lỗi: ${error.response?.data?.message || error.message}`;
+                        this.snackbarColor = 'red';
+                        this.snackbar = true;
+                    })
+        },
     },
 }
 </script>
@@ -348,7 +388,7 @@ export default {
                     </div>
                 </BDropdown>
                 <BDropdown variant="link-secondary" auto-close="outside" class="card-header-dropdown py-0" toggle-class="text-reset dropdown-btn arrow-none me-0" menu-class="dropdown-menu-end dropdown-user-profile dropdown-menu-end pc-h-dropdown" aria-haspopup="true" :offset="{ alignmentAxis: -145, crossAxis: 0, mainAxis: 20 }">
-                    <template #button-content><span class="text-muted"> <img src="/images/UserInformation/1/324413887_476531747779411_8255796672765316904_n.jpg" alt="user-image" class="user-avtar">
+                    <template #button-content><span class="text-muted"> <img :src="infoUser.pathAvatar" alt="user-image" class="user-avtar">
                         </span>
                     </template>
                     <div class="dropdown-header d-flex align-items-center justify-content-between">
@@ -361,7 +401,7 @@ export default {
                                     <li class="list-group-item">
                                         <div class="d-flex align-items-center">
                                             <div class="flex-shrink-0">
-                                                <img src="/images/UserInformation/1/324413887_476531747779411_8255796672765316904_n.jpg" alt="user-image" class="wid-50 rounded-circle">
+                                                <img :src="infoUser.pathAvatar" alt="user-image" class="wid-50 rounded-circle">
                                             </div>
                                             <div class="flex-grow-1 mx-3">
                                                 <h5 class="mb-0">Phạm Quang Hưng</h5>
@@ -479,22 +519,25 @@ export default {
         <div class="card-body">
             <v-form v-model="form" ref="form">
                 <BRow>
-                    <BCol class="col-lg-12 text-center">
+                    <BCol class="col-lg-12 ">
                         <div class="form-group">
-                            <v-avatar image="/images/avatar/324413887_476531747779411_8255796672765316904_n.jpg" size="80"></v-avatar>
+                            <label class="form-label">Ảnh đại diện:</label>
+                            <div class="d-flex align-items-center">
+                                <v-avatar :image="previewImage || infoUser.pathAvatar" size="80"></v-avatar>
+                                <input type="file" @change="onFileSelected" accept="image/*" class="input-control ml-2" />
+                            </div>
                         </div>
                     </BCol>
-                    <BCol class="col-lg-6">
+                    <BCol class="col-lg-4">
                         <div class="form-group">
                             <label class="form-label">Họ và tên:</label>
                             <v-text-field v-model="infoUser.fullName" :rules="[required]" variant="outlined" clearable placeholder="Nhập vào họ và tên" class="input-control"></v-text-field>
                         </div>
                     </BCol>
-                    <BCol class="col-lg-6">
+                    <BCol class="col-lg-4">
                         <div class="form-group">
                             <label class="form-label">Ngày sinh:</label>
-                            <v-date-input clearable label="Date input" variant="outlined" :format="'DD/MM/YYYY'"></v-date-input>
-                            <!-- <input type="date"  id="example-datemin"   min="2000-01-02"> -->
+                            <v-date-input clearable variant="outlined" v-model="infoUser.doB" placeholder="Chọn ngày tháng năm sinh"></v-date-input>
                         </div>
                     </BCol>
                     <BCol class="col-lg-4">
@@ -515,19 +558,10 @@ export default {
                             <v-text-field v-model="infoUser.cccd" :rules="[required]" type="text" @input="formatPrice" variant="outlined" clearable placeholder="Nhập vào căn cước công dân" class="input-control"></v-text-field>
                         </div>
                     </BCol>
-                    <BCol class="col-lg-5">
+                    <BCol class="col-lg-4">
                         <div class="form-group">
                             <label class="form-label">Email:</label>
                             <v-text-field v-model="infoUser.email" :rules="[required]" type="text" @input="formatPrice" variant="outlined" clearable placeholder="Nhập vào email" class="input-control"></v-text-field>
-                        </div>
-                    </BCol>
-                    <BCol class="col-lg-2 d-flex justify-center align-center">
-                        <v-btn>Gửi mã</v-btn>
-                    </BCol>
-                    <BCol class="col-lg-5">
-                        <div class="form-group">
-                            <label class="form-label">Mã xác nhận:</label>
-                            <v-text-field v-model="changePassword.passwordNew" :rules="[required]" type="text" @input="formatPrice" variant="outlined" clearable placeholder="Nhập vào mã xác nhận được gửi qua email" class="input-control"></v-text-field>
                         </div>
                     </BCol>
                     <BCol class="col-lg-12">
@@ -542,7 +576,7 @@ export default {
         <div class="modal-footer v-modal-footer">
             <BButton type="button" variant="light" @click="viewdialogChangePassword = false">Close
             </BButton>
-            <BButton type="button" variant="primary" @click="CreateEditService()" :disabled="!formChange">Save Changes</BButton>
+            <BButton type="button" variant="primary" @click="UpdateInfo()" :disabled="!form">Save Changes</BButton>
         </div>
     </BModal>
     <BModal v-model="viewdialogEditBank" hide-footer title="Chỉnh sửa thông tin ngân hàng" modal-class="fadeInRight"

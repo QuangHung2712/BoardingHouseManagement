@@ -206,7 +206,13 @@ namespace QLNhaTro.Service.ContractService
         }
         public async Task DeleteContract(long Id)
         {
-            _Context.Contracts.Delete(Id);
+            var contract = _Context.Contracts.GetAvailableById(Id);
+            if (contract.TerminationDate == null)
+            {
+                throw new Exception("Hợp đồng còn thời hạn không thể xoá. Vui lòng kết thúc hợp đồng trước khi xoá");
+            }
+            contract.IsDeleted = true;
+            _Context.Contracts.Update(contract);
             _Customer.DeteleCustomer(Id);
             await _Context.SaveChangesAsync();
         }

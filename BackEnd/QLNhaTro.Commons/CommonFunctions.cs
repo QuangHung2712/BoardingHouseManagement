@@ -7,6 +7,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using static QLNhaTro.Commons.CommonConstants;
 
 namespace QLNhaTro.Commons
 {
@@ -64,6 +65,12 @@ namespace QLNhaTro.Commons
                     }
                 }
             }
+        }
+        public static string ConverPathIMG(string input)
+        {
+            string path = Path.GetRelativePath(DefaultValue.DEFAULT_BASE_Directory_IMG, input);
+            var result = path.Replace("\\", "/");
+            return "/" + result;
         }
     }
 }

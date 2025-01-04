@@ -326,5 +326,33 @@ namespace QLNhaTro.Service.RoomService
             }).ToList();
             return availableRooms;
         }
+        public GetInfomationHomeResModel GetInfoHome(long towerId)
+        {
+            var occupiedRoomIds = _Context.Contracts
+               .Where(contract =>
+                   contract.TerminationDate == null && !contract.IsDeleted) // Hợp đồng vẫn còn hiệu lực
+               .Select(contract => contract.RoomId)
+               .Distinct();
+            var availableRooms = _Context.Rooms
+            .Where(room => !occupiedRoomIds.Contains(room.Id) && room.TowerId == towerId).Select(item=> new
+            {
+                name = item.Name,
+            }).ToList();
+            int RoomAvailable = availableRooms.Count();
+            string InfoRoomAvailable = string.Join(", ", availableRooms.Select(item=> item.name));
+            return new GetInfomationHomeResModel
+            {
+                RoomUnpaid = 5,
+                InfoRoomUnpaid = "102, 103, 104",
+                RoomPaid = 5,
+                InfoRoomPaid = "102, 103, 104",
+                RoomNoInvoice = 5,
+                InfoRoomNoInvoice = "102, 103, 104",
+                RoomAvailable = RoomAvailable,
+                InfoRoomAvailable = InfoRoomAvailable,
+                RoomExpireContract = 5,
+                InfoRoomExpireContract = "102, 103, 104"
+            };
+        }
     }
 }

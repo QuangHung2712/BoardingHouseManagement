@@ -138,7 +138,7 @@ export default {
                                     .catch(error =>{
                                         swalWithBootstrapButtons.fire(
                                             "Xóa không thành công",
-                                            ` ${error}`,
+                                            ` ${error.response?.data?.message || error.message}`,
                                             "error"
                                         );
                                     })

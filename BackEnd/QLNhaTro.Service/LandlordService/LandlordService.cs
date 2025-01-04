@@ -1,4 +1,5 @@
-﻿using DocumentFormat.OpenXml.Office2010.Excel;
+﻿using DocumentFormat.OpenXml.Office.CustomUI;
+using DocumentFormat.OpenXml.Office2010.Excel;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,7 +10,6 @@ using QLNhaTro.Commons.CustomException;
 using QLNhaTro.Moddel;
 using QLNhaTro.Moddel.Entity;
 using QLNhaTro.Moddel.Moddel.RequestModels;
-using QLNhaTro.Moddel.Moddel.RequestModels.Landlord;
 using QLNhaTro.Moddel.Moddel.ResponseModels;
 using System;
 using System.Collections.Generic;
@@ -39,6 +39,7 @@ namespace QLNhaTro.Service.LandlordService
             try
             {
                 Landlord landlord = _Context.Landlords.GetAvailableById(id);
+
                 return LandlordResModel.Mapping(landlord);
             }
             catch (Exception ex) 
@@ -51,7 +52,7 @@ namespace QLNhaTro.Service.LandlordService
         {
             var landlord =  _Context.Landlords.Where(item => item.Id == id && !item.IsDeleted).Select(record => new GetInfoPaymentResModel
             {
-                PaymentQRImageLink = ConverPathIMG(record.PaymentQRImageLink),
+                PaymentQRImageLink = CommonFunctions.ConverPathIMG(record.PaymentQRImageLink),
                 STK = record.STK
             }).FirstOrDefault();
             if (landlord == null) 
@@ -64,7 +65,7 @@ namespace QLNhaTro.Service.LandlordService
         {
             var landlord = _Context.Landlords.GetAvailableById(input.Id);
             landlord.STK = input.STK;
-            landlord.PaymentQRImageLink = SaveImgLocal(ImgQR, landlord.Id,landlord.PaymentQRImageLink);
+            landlord.PaymentQRImageLink = SaveImgLocal(ImgQR, landlord.Id,landlord.PaymentQRImageLink, "Ảnh QR ngân hàng thanh toán");
             _Context.Landlords.Update(landlord);
             await _Context.SaveChangesAsync();
         }
@@ -100,21 +101,19 @@ namespace QLNhaTro.Service.LandlordService
                 throw;
             }
         }
-        public async Task UpdateLandlord(CreateEditLandlordReqModels input)
+        public async Task UpdateLandlord(CreateEditLandlordReqModels input, IFormFile ImgAvatar)
         {
             var landlord = _Context.Landlords.GetAvailableById(input.LandlordId);
             try
             {
-                landlord = new Landlord
-                {
-                    FullName = input.FullName,
-                    DoB = input.DoB,
-                    PhoneNumber = input.PhoneNumber,
-                    Email = input.Email,
-                    CCCD = input.CCCD,
-                    Address = input.Address,
-                    SDTZalo=input.SDTZalo,
-                };
+                landlord.FullName = input.FullName;
+                landlord.DoB = input.DoB;
+                landlord.PhoneNumber = input.PhoneNumber;
+                landlord.Email = input.Email;
+                landlord.CCCD = input.CCCD;
+                landlord.Address = input.Address;
+                landlord.SDTZalo = input.SDTZalo;
+                landlord.PathAvatar = SaveImgLocal(ImgAvatar, landlord.Id, landlord.PathAvatar, "Avatar");
                 _Context.Landlords.Update(landlord);
                 await _Context.SaveChangesAsync();
             }
@@ -170,14 +169,25 @@ namespace QLNhaTro.Service.LandlordService
             _Context.Landlords.Update(landlord);
             await _Context.SaveChangesAsync();
         }
-        private string SaveImgLocal(IFormFile input,long userId,string PathImgQROld)
+        public ContactInfoResModel GetContactInfo(long id)
+        {
+            var infoContact = _Context.Landlords.GetAvailableById(id);
+            return new  ContactInfoResModel
+            {
+                PathAvatar = CommonFunctions.ConverPathIMG(infoContact.PathAvatar),
+                PhoneNumber = infoContact.PhoneNumber,
+                SDTZalo = infoContact.SDTZalo
+            };
+
+        }
+        private string SaveImgLocal(IFormFile input,long userId,string PathImgQROld,string nameFile)
         {
             if (!string.IsNullOrEmpty(PathImgQROld))
             {
                 File.Delete(PathImgQROld);
             }
             // Tạo GUID cho tên ảnh
-            string fileName = "Ảnh QR ngân hàng thanh toán"+ Path.GetExtension(input.FileName);
+            string fileName = nameFile + Path.GetExtension(input.FileName);
 
             // Đường dẫn thư mục lưu ảnh
             string directoryPath = Path.Combine(Directory.GetCurrentDirectory(), $@"D:\Code\BoardingHouseManagement\BoardingHouseManagement\FrontEnd\public\images\UserInformation\{userId}");
@@ -200,11 +210,6 @@ namespace QLNhaTro.Service.LandlordService
             // Trả về đường dẫn ảnh đã lưu
             return filePath;
         }
-        private static string ConverPathIMG(string input)
-        {
-            string path =  Path.GetRelativePath(DefaultValue.DEFAULT_BASE_Directory_IMG, input);
-            var result =  path.Replace("\\", "/");
-            return "/" + result;
-        }
+        
     }
 }

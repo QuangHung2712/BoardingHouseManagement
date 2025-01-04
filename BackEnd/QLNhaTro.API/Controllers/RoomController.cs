@@ -88,5 +88,19 @@ namespace QLNhaTro.API.Controllers
         {
             return await roomService.GetRoomNoContract(towerID);
         }
+
+        [HttpGet]
+        public IActionResult GetInfoHome([FromQuery] long towerID)
+        {
+            try
+            {
+                var result = roomService.GetInfoHome(towerID);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
+        }
     }
 }

@@ -53,6 +53,7 @@
     "vue-cropperjs": "^5.0.0",
     "vue-easy-lightbox": "^1.16.0",
     "vue-flatpickr-component": "^11.0.3",
+    "vue-i18n": "^11.0.1",
     "vue-loading-overlay": "^6.0.3",
     "vue-router": "^4.2.5",
     "vue3-apexcharts": "^1.4.4",
