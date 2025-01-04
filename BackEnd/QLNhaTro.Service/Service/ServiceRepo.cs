@@ -34,6 +34,7 @@ namespace QLNhaTro.Service.Service
                 Id = s.Id,
                 Name = s.Name,
                 Price = s.UnitPrice,
+                UnitOfCalculation = s.UnitOfCalculation,
             }).ToListAsync();
             return ServiceData;
         }
@@ -50,6 +51,7 @@ namespace QLNhaTro.Service.Service
                         Name = input.Name,
                         UnitPrice = input.Price,
                         TowerId = input.TowerId,
+                        UnitOfCalculation = input.UnitOfCalculation,
                         IsActive = true,
                     };
                     _Context.Services.Add(newService);
@@ -68,6 +70,7 @@ namespace QLNhaTro.Service.Service
                     var service = _Context.Services.GetAvailableById(input.Id);
                     service.Name = input.Name;
                     service.UnitPrice = input.Price;
+                    service.UnitOfCalculation = input.UnitOfCalculation;
                     _Context.Services.Update(service);
                     if (input.ApplyPriceServiceAllRoom)
                     {

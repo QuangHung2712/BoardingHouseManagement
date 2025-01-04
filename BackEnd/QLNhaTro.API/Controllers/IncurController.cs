@@ -20,22 +20,43 @@ namespace QLNhaTro.API.Controllers
         [HttpGet("{towerId}")]
         public async Task<ActionResult<List<GetAllIncurResModel>>> GetAllIncur(long towerId)
         {
-            var result = await _incurService.GetAllByTower(towerId);
-            return Ok(result);
+            try
+            {
+                var result = await _incurService.GetAllByTower(towerId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateEditIncur([FromBody] CreateEditIncurReqModel data)
         {
-            await _incurService.CreateEditIncur(data);
-            return Ok();
+            try
+            {
+                await _incurService.CreateEditIncur(data);
+                return Ok();
+            }
+            catch (Exception ex) 
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
         }
 
         [HttpDelete("{incurId}")]
         public async Task<IActionResult> DeleteIncur(long incurId) 
         {
-            await _incurService.DeleteIncur(incurId);    
-            return Ok();
+            try
+            {
+                await _incurService.DeleteIncur(incurId);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
         }
     }
 }

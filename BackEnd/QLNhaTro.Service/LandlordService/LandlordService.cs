@@ -18,6 +18,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using static QLNhaTro.Commons.CommonConstants;
 using static QLNhaTro.Commons.CommonEnums;
 
 namespace QLNhaTro.Service.LandlordService
@@ -45,6 +46,27 @@ namespace QLNhaTro.Service.LandlordService
                 Console.WriteLine(ex);
                 throw;
             }
+        }
+        public GetInfoPaymentResModel GetInfoPayment(long id) 
+        {
+            var landlord =  _Context.Landlords.Where(item => item.Id == id && !item.IsDeleted).Select(record => new GetInfoPaymentResModel
+            {
+                PaymentQRImageLink = ConverPathIMG(record.PaymentQRImageLink),
+                STK = record.STK
+            }).FirstOrDefault();
+            if (landlord == null) 
+            {
+                throw new NotFoundException("Chủ nhà không tồn tại");
+            }
+            return landlord;
+        }
+        public async Task UpdateInfoPayment(UpdateInfoPaymentReqModel input,IFormFile ImgQR)
+        {
+            var landlord = _Context.Landlords.GetAvailableById(input.Id);
+            landlord.STK = input.STK;
+            landlord.PaymentQRImageLink = SaveImgLocal(ImgQR, landlord.Id,landlord.PaymentQRImageLink);
+            _Context.Landlords.Update(landlord);
+            await _Context.SaveChangesAsync();
         }
         public async Task CreateLandlord(CreateEditLandlordReqModels input)
         {
@@ -147,6 +169,42 @@ namespace QLNhaTro.Service.LandlordService
             landlord.Password = input.PasswordNew;
             _Context.Landlords.Update(landlord);
             await _Context.SaveChangesAsync();
+        }
+        private string SaveImgLocal(IFormFile input,long userId,string PathImgQROld)
+        {
+            if (!string.IsNullOrEmpty(PathImgQROld))
+            {
+                File.Delete(PathImgQROld);
+            }
+            // Tạo GUID cho tên ảnh
+            string fileName = "Ảnh QR ngân hàng thanh toán"+ Path.GetExtension(input.FileName);
+
+            // Đường dẫn thư mục lưu ảnh
+            string directoryPath = Path.Combine(Directory.GetCurrentDirectory(), $@"D:\Code\BoardingHouseManagement\BoardingHouseManagement\FrontEnd\public\images\UserInformation\{userId}");
+
+            // Kiểm tra và tạo thư mục nếu chưa tồn tại
+            if (!Directory.Exists(directoryPath))
+            {
+                Directory.CreateDirectory(directoryPath);
+            }
+
+            // Đường dẫn đầy đủ của ảnh
+            string filePath = Path.Combine(directoryPath, fileName);
+
+            // Lưu file vào đường dẫn đã chỉ định
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                input.CopyTo(stream);
+            }
+
+            // Trả về đường dẫn ảnh đã lưu
+            return filePath;
+        }
+        private static string ConverPathIMG(string input)
+        {
+            string path =  Path.GetRelativePath(DefaultValue.DEFAULT_BASE_Directory_IMG, input);
+            var result =  path.Replace("\\", "/");
+            return "/" + result;
         }
     }
 }

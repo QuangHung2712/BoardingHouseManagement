@@ -12,6 +12,7 @@ namespace QLNhaTro.Moddel.Moddel.RequestModels
         public long TowerId { get; set; }
         public string Name { get; set; }
         public decimal Price { get; set; }
+        public string UnitOfCalculation { get; set; }
         public bool ApplyPriceServiceAllRoom { get; set; }
     }
 }

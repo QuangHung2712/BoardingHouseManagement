@@ -15,5 +15,6 @@ namespace QLNhaTro.Moddel.Moddel.ResponseModels
         public DateTime CreationDate { get; set; }
         public decimal Amount { get; set; }
         public string Reason { get; set; }
+        public bool StatusPay { get; set; }
     }
 }

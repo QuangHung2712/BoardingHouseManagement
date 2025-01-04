@@ -22,6 +22,7 @@ export default {
                     {title: 'STT', value: 'stt',sortable: true},
                     {title: 'Tên dịch vụ',value:'name',sortable: true},
                     {title: 'Giá',value: 'price',sortable: true},
+                    {title: 'Đơn vị tính',value: 'unitOfCalculation',sortable: true},
                     {title: 'Hành đồng',value: 'actions',sortable: false}
                 ],
             serviceData: [
@@ -106,6 +107,7 @@ export default {
             if(serviceId===0){
                 this.selectService.name = "";
                 this.selectService.price = "";
+                this.selectService.unitOfCalculation="",
                 this.form = false;
             }
             else{
@@ -237,18 +239,25 @@ export default {
                                 <BCol class="col-lg-6">
                                     <div class="form-group">
                                         <label class="form-label">Giá:</label>
-                                        <!-- <input type="email" class="form-control" placeholder="Nhập vào giá của dịch vụ"> -->
-                                        <v-text-field v-model="selectService.price" :rules="[requiredNumber]" type="text" @input="formatPrice" variant="outlined" clearable placeholder="Nhập vào tên dịch vụ" class="input-control"></v-text-field>
+                                        <v-text-field v-model="selectService.price" :rules="[requiredNumber]" type="text" @input="formatPrice" variant="outlined" clearable placeholder="Nhập vào giá dịch vụ" class="input-control"></v-text-field>
                                     </div>
                                 </BCol>
-                                <v-switch
-                                    v-show="selectService.id !== undefined"
-                                    v-model="selectService.applyPriceServiceAllRoom"
-                                    :label= "`Bạn có muốn áp dụng giá  ${selectService.price} cho tất cả các phòng đang dùng dịch vụ này không`" 
-                                    color="primary"
-                                    hide-details
-                                    :style="{ color: 'blue' }" 
-                                ></v-switch>
+                                <BCol class="col-lg-6">
+                                    <div class="form-group">
+                                        <label class="form-label">Đơn vị tính:</label>
+                                        <v-text-field v-model="selectService.unitOfCalculation" :rules="[required]" type="text" variant="outlined" clearable placeholder="Nhập vào đơn vị tính của dịch vụ" class="input-control"></v-text-field>
+                                    </div>
+                                </BCol>
+                                <BCol class="d-flex">
+                                    <v-switch
+                                        v-show="selectService.id !== undefined"
+                                        v-model="selectService.applyPriceServiceAllRoom"
+                                        :label= "`Bạn có muốn áp dụng giá  ${selectService.price} cho tất cả các phòng đang dùng dịch vụ này không`" 
+                                        color="primary"
+                                        hide-details
+                                        :style="{ color: 'blue' }" 
+                                    ></v-switch>
+                                </BCol>
                             </BRow>
                         </v-form>
                     </div>

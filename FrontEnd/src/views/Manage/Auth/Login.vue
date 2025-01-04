@@ -116,7 +116,7 @@ export default {
                             </div>
                         </v-form>
                         <div class="d-grid mt-4">
-                            <button type="button" @click="LogIn()" class="btn btn-primary" :disabled="!form">Đăng nhập</button>
+                            <button type="button" @click="LogIn()" class="btn btn-primary" :disabled="!form" :loading="loading">Đăng nhập</button>
                             <p v-if="errorMessage" class="text-danger mt-2">{{ errorMessage }}</p>
                         </div>
                         <div class="saprator my-3">

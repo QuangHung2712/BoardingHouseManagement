@@ -30,7 +30,8 @@ namespace QLNhaTro.Service.IncurService
                 CreationDate = i.CreationDate,
                 Amount = i.Amount,
                 Reason = i.Reason,
-            }).ToListAsync();
+                StatusPay = i.StatusPay
+            }).OrderByDescending(x=> x.CreationDate).ToListAsync();
             return incurData;
         }
         public async Task CreateEditIncur(CreateEditIncurReqModel input)
@@ -61,6 +62,7 @@ namespace QLNhaTro.Service.IncurService
                 try
                 {
                     var incur = _Context.Incurs.GetAvailableById(input.Id);
+                    if (incur.StatusPay == true) throw new Exception("Phát sinh đã được thanh toán không thể sửa");
                     incur.RoomId = input.RoomId;
                     incur.Amount = input.Amount;
                     incur.Reason = input.Reason;
@@ -76,7 +78,9 @@ namespace QLNhaTro.Service.IncurService
         }
         public async Task DeleteIncur(long Id)
         {
-            _Context.Incurs.Delete(Id);
+            var incur = _Context.Incurs.GetAvailableById(Id);
+            if (incur.StatusPay == true) throw new Exception("Phát sinh đã được thanh toán không thể xoá");
+            incur.IsDeleted = true;
             await _Context.SaveChangesAsync();
         }
     }

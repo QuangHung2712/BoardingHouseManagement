@@ -23,9 +23,11 @@ export default {
                     {title: 'Số tiền',value: 'amount',sortable: true},
                     {title: 'Ngày tạo',value: 'creationDate',sortable: true},
                     {title: 'Lý do',value: 'reason',sortable: true},
+                    {title: 'Trạng thái thanh toán',value: 'statusPay',sortable: true},
                     {title: 'Hành đồng',value: 'actions',sortable: false}
                 ],
             AriseData: [
+
             ],
             message: '',
             snackbar: false,
@@ -34,6 +36,7 @@ export default {
             roomData: [],
             searchCreationDate: '',
             searchRoom: null,
+            searchStatusPay: null,
         }
     },
 
@@ -51,17 +54,17 @@ export default {
                     ? a.roomName == this.searchRoom 
                     : true;
 
-                // Lọc theo tên khách hàng
-                // const matchesSearchCustomerName = this.searchCustomerName
-                //     ? contract.customerName?.toLowerCase().includes(this.searchCustomerName.toLowerCase())
-                //     : true;
-
                 // Lọc theo ngày thuê
                 const matchesSearchCreationDate = this.searchCreationDate
                     ? new Date(a.creationDate).toISOString().split('T')[0] === this.searchCreationDate
                     : true;
+
+                // Lọc theo tên khách hàng
+                const matchesSearchStatusPay = this.searchStatusPay !== undefined && this.searchStatusPay !== null
+                    ? (a.statusPay == this.searchStatusPay)
+                    : true;
                 // Kết hợp tất cả các điều kiện
-                return matchesSearchRoomName && matchesSearchCreationDate //&& matchesSearchCustomerName;
+                return matchesSearchRoomName && matchesSearchCreationDate && matchesSearchStatusPay;
 
             });
         }
@@ -120,7 +123,7 @@ export default {
                                     .catch(error =>{
                                         swalWithBootstrapButtons.fire(
                                             "Xóa không thành công",
-                                            ` ${error}`,
+                                            ` ${error.response.data.message}`,
                                             "error"
                                         );
                                     })
@@ -178,7 +181,6 @@ export default {
             }
             if(!/^\d+$/.test(this.arise.amount))
                 this.arise.amount = this.arise.amount.replace(/[^\d]/g, '');
-            console.log(this.arise)
             apiClient.post(`/Incur/CreateEditIncur`,this.arise)
                     .then(()=>{
                         this.message += "thành công"
@@ -188,11 +190,21 @@ export default {
                         this.GetAllArise();
                     })
                     .catch(error =>{
-                        this.message += "bị lỗi "+ error;
+                        this.message += "bị lỗi: "+ error.response.data.message;
                         this.snackbar = true;
                         this.snackbarColor = 'red';
                     })
-        }
+        },
+        getStatusClass(status) {
+            switch (status) {
+                case true:
+                    return 'badge bg-light-success ms-2'; // class dành cho trạng thái Active
+                case false:
+                    return 'badge bg-light-danger ms-2'; // class dành cho trạng thái Inactive
+                default:
+                    return 'badge bg-light-warning'; // class mặc định
+            }
+        },
     }
 }
 </script>
@@ -228,11 +240,18 @@ export default {
                                     clearable></v-select>
                             </BCol>
                             <BCol class="col-sm-3 col-6"><input type="date" class="form-control" id="example-datemin" v-model="searchCreationDate" min="2000-01-02"></BCol>
-                            <BCol class="col-sm-3 col-6"><v-select label="Trạng thái phí" hide-details clearable></v-select></BCol>
+                            <BCol class="col-sm-3 col-6">
+                                <v-select label="Trạng thái phí" 
+                                    hide-details 
+                                    :items="[ {title: 'Chưa thanh toán',value: false},
+                                        {title: 'Đã thanh toán',value: true},]" 
+                                    clearable
+                                    v-model="searchStatusPay"
+                                    ></v-select>
+                            </BCol>
                             <BCol class="col-sm-2 col-6"><v-btn @click="(viewdialog = !viewdialog) && (ViewEdit(0,'Thêm phát sinh'))" color="blue-lighten-1" class="mt-2"> Thêm phát sinh </v-btn></BCol>
                             <BCol class="col-sm-2 col-6"><v-btn color="blue-lighten-1" class="mt-2" > Xuất ra Excel </v-btn></BCol>
                         </BRow>
-                        
                         <v-data-table 
                             :headers = "headersTable"
                             :items="filteredArise"
@@ -247,6 +266,11 @@ export default {
                             <template v-slot:[`item.creationDate`]="{ item }">
                                 <!-- Hiển thị giá đã định dạng -->
                                 {{ formatDate(item.creationDate) }}
+                            </template>
+                            <template v-slot:[`item.statusPay`]="{ item }">
+                                <span :class="getStatusClass(item.statusPay)">
+                                    {{ item.statusPay ? 'Thanh toán' : 'Chưa thanh toán' }}
+                                </span>
                             </template>
                             <template v-slot:[`item.actions`]="{ item }">
                                 <v-icon class="ml-lg-3" small @click="(viewdialog = !viewdialog) && (ViewEdit(item.id,'Sửa phát sinh'))" >mdi-pencil-circle </v-icon>

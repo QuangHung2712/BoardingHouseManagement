@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace QLNhaTro.Moddel.Moddel.ResponseModels
 {
-    public class LandlordResModel : BaseEntity
+    public class LandlordResModel
     {
         public required string FullName { get; set; }
         public required DateTime DoB { get; set; }
@@ -22,7 +22,6 @@ namespace QLNhaTro.Moddel.Moddel.ResponseModels
         {
             return new LandlordResModel
             {
-                Id = landlord.Id,
                 FullName = landlord.FullName,
                 DoB = landlord.DoB,
                 PhoneNumber = landlord.PhoneNumber,

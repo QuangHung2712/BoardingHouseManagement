@@ -142,5 +142,31 @@ namespace QLNhaTro.API.Controllers
             }
 
         }
+        [HttpGet]
+        public ActionResult GetInfoPayment([FromQuery] long id)
+        {
+            try
+            {
+                return Ok(_Service.GetInfoPayment(id));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
+        }
+        [HttpPut]
+        public async Task<IActionResult> UpdateInfoPayment([FromForm] UpdateInfoPaymentReqModel data, [FromForm] IFormFile paymentQRImageLink)
+        {
+            try
+            {
+                await _Service.UpdateInfoPayment(data, paymentQRImageLink);
+                return Ok();
+            }
+            catch (Exception ex) 
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
+
+        }
     }
 }

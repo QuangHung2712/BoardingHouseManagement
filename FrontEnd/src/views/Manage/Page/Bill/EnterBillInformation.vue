@@ -18,7 +18,7 @@
         data(){
             return{
                 numberOfRoom: 102,
-                Status : false,
+                Status : true,
                 email: 'Quanghungksdtqn@gmail.com',
                 address: 'Số 11 Ngõ 91 Đường Cầu Diễn Phường Cầu Diễn Quận Nam Từ Liêm Thành phố Hà Nội',
                 qrPay: '/eb67b8edadf110af49e0.jpg',

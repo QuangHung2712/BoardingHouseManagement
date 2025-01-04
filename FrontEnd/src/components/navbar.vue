@@ -31,6 +31,23 @@ export default {
             message: '',
             snackbar: false,
             snackbarColor: '',
+            previewImage: null,
+            dataUpdatePayment:{
+                bank: null,
+                stk: '',
+                paymentQRImageLink: null
+            },
+            infoUser:{
+                fullName: '',
+                doB: '',
+                phoneNumber: '',
+                email: '',
+                cccd: '',
+                address: '',
+                sdtZalo: '',
+                pathAvatar: '',
+            },
+            form: false,
             rules: {
                 required: v => !!v || 'Vui lòng không để trống',
                 validEmail: v => /^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(v) || 'Email phải hợp lệ và kết thúc bằng @gmail.com',
@@ -66,10 +83,19 @@ export default {
             return !!v || 'Vui lòng không để trống'
         },
         btnInfo(){
-            
+            apiClient.get(`/Landlord/GetDetail/${1}`)
+                    .then(response=>{
+                        this.infoUser = response.data;
+                    })
+                    .catch(error=>{
+                        this.message = "Lấy thông tin người dùng bị lỗi: " + error.response.data.message;
+                        this.snackbar = true;
+                        this.snackbarColor = 'red';
+                    })
         },
-        btnEditBank(){
-            Axios.get(`https://api.vietqr.io/v2/banks`)
+        async btnEditBank(){
+            this.previewImage = null
+            await Axios.get(`https://api.vietqr.io/v2/banks`)
                     .then(response=>{
                         this.bankData = response.data.data.map(bank => ({
                             name: bank.name,
@@ -81,13 +107,21 @@ export default {
                         this.snackbar = true;
                         this.snackbarColor = 'red';
                     })
+            await apiClient.get(`/Landlord/GetInfoPayment?id=${4}`)
+                            .then(response=>{
+                                this.dataUpdatePayment = response.data;
+                            })
+                            .catch(error=>{
+                                this.message = "Lấy thông tin thanh toán bị lỗi: " + error.response.data.message;
+                                this.snackbar = true;
+                                this.snackbarColor = 'red';
+                            })
         },
         SignOut(){
             this.$store.dispatch('logout');
         },
         btnChangePassword(){
             this.changePassword.id = store.getters['getUserId'];
-            console.log(this.changePassword);
             apiClient.put(`/Landlord/ChangePassword`,this.changePassword)
                     .then(()=>{
                         this.message = "Đổi mật khẩu thành công ";
@@ -100,6 +134,41 @@ export default {
                         this.message = "Đổi mật khẩu bị lỗi: " + error.response.data.message;
                         this.snackbar = true;
                         this.snackbarColor = 'red';
+                    })
+        },
+        btnViewChangePass(){
+            this.changePassword.passwordOld ='';
+            this.changePassword.passwordNew='';
+            this.passwordConfirm = '';
+        },
+        onFileSelected(event) {
+            const file = event.target.files[0];
+            if (file) {
+                this.dataUpdatePayment.paymentQRImageLink = file;
+                this.previewImage = URL.createObjectURL(file); // Tạo URL để xem trước
+            }
+        },
+        UpdateInfoPayment(){
+            // Tạo FormData để gửi dữ liệu theo dạng multipart/form-data
+            const formData = new FormData();
+            formData.append("id",4);
+            formData.append("bank", this.dataUpdatePayment.bank);
+            formData.append("sTK", this.dataUpdatePayment.stk);
+            console.log(this.dataUpdatePayment)
+            if (this.dataUpdatePayment.paymentQRImageLink) {
+                formData.append("paymentQRImageLink", this.dataUpdatePayment.paymentQRImageLink);
+            }
+            apiClient.put(`/Landlord/UpdateInfoPayment`,formData)
+                    .then(()=>{
+                        this.snackbarColor = 'green';
+                        this.snackbar = true;
+                        this.message = 'Cập nhật thông tin thanh toán thành công!';
+                        this.viewdialogEditBank = false;
+                    })
+                    .catch(error=>{
+                        this.message = `Đã xảy ra lỗi: ${error.response?.data?.message || error.message}`;
+                        this.snackbarColor = 'red';
+                        this.snackbar = true;
                     })
         }
     },
@@ -279,7 +348,7 @@ export default {
                     </div>
                 </BDropdown>
                 <BDropdown variant="link-secondary" auto-close="outside" class="card-header-dropdown py-0" toggle-class="text-reset dropdown-btn arrow-none me-0" menu-class="dropdown-menu-end dropdown-user-profile dropdown-menu-end pc-h-dropdown" aria-haspopup="true" :offset="{ alignmentAxis: -145, crossAxis: 0, mainAxis: 20 }">
-                    <template #button-content><span class="text-muted"> <img src="/images/avatar/324413887_476531747779411_8255796672765316904_n.jpg" alt="user-image" class="user-avtar">
+                    <template #button-content><span class="text-muted"> <img src="/images/UserInformation/1/324413887_476531747779411_8255796672765316904_n.jpg" alt="user-image" class="user-avtar">
                         </span>
                     </template>
                     <div class="dropdown-header d-flex align-items-center justify-content-between">
@@ -292,7 +361,7 @@ export default {
                                     <li class="list-group-item">
                                         <div class="d-flex align-items-center">
                                             <div class="flex-shrink-0">
-                                                <img src="/images/avatar/324413887_476531747779411_8255796672765316904_n.jpg" alt="user-image" class="wid-50 rounded-circle">
+                                                <img src="/images/UserInformation/1/324413887_476531747779411_8255796672765316904_n.jpg" alt="user-image" class="wid-50 rounded-circle">
                                             </div>
                                             <div class="flex-grow-1 mx-3">
                                                 <h5 class="mb-0">Phạm Quang Hưng</h5>
@@ -301,7 +370,7 @@ export default {
                                         </div>
                                     </li>
                                     <li class="list-group-item">
-                                        <div class="dropdown-item" @click="viewdialogChangePassword = !viewdialogChangePassword">
+                                        <div class="dropdown-item" @click="(viewdialogChangePassword = !viewdialogChangePassword) && (btnViewChangePass())">
                                             <span class="d-flex align-items-center">
                                                 <i class="ph-duotone ph-key"></i>
                                                 <span>Đổi mật khẩu</span>
@@ -325,7 +394,7 @@ export default {
                                         <div @click="(viewdialogEditBank = !iewdialogEditBank) &&(btnEditBank())" class="dropdown-item">
                                             <span class="d-flex align-items-center">
                                                 <i class="ph-duotone ph-gear-six"></i>
-                                                <span>Cấu hình</span>
+                                                <span>Thông tin thanh toán</span>
                                             </span>
                                         </div>
                                         <router-link to="/login" class="dropdown-item" @click="SignOut()">
@@ -418,37 +487,38 @@ export default {
                     <BCol class="col-lg-6">
                         <div class="form-group">
                             <label class="form-label">Họ và tên:</label>
-                            <v-text-field v-model="changePassword.passwordOld" :rules="[required]" variant="outlined" clearable placeholder="Nhập vào họ và tên" class="input-control"></v-text-field>
+                            <v-text-field v-model="infoUser.fullName" :rules="[required]" variant="outlined" clearable placeholder="Nhập vào họ và tên" class="input-control"></v-text-field>
                         </div>
                     </BCol>
                     <BCol class="col-lg-6">
                         <div class="form-group">
                             <label class="form-label">Ngày sinh:</label>
-                            <input type="date" class="form-control" id="example-datemin" :rules="[required]" v-model="changePassword.doB" min="2000-01-02">
+                            <v-date-input clearable label="Date input" variant="outlined" :format="'DD/MM/YYYY'"></v-date-input>
+                            <!-- <input type="date"  id="example-datemin"   min="2000-01-02"> -->
                         </div>
                     </BCol>
                     <BCol class="col-lg-4">
                         <div class="form-group">
                             <label class="form-label">Số điện thoại:</label>
-                            <v-text-field v-model="changePassword.passwordNew" :rules="[required]" type="text" @input="formatPrice" variant="outlined" clearable placeholder="Nhập vào số điện thoại" class="input-control"></v-text-field>
+                            <v-text-field v-model="infoUser.phoneNumber" :rules="[required]" type="text" variant="outlined" clearable placeholder="Nhập vào số điện thoại"></v-text-field>
                         </div>
                     </BCol>
                     <BCol class="col-lg-4">
                         <div class="form-group">
                             <label class="form-label">Số điện thoại đăng ký Zalo:</label>
-                            <v-text-field v-model="changePassword.passwordNew" :rules="[required]" type="text" @input="formatPrice" variant="outlined" clearable placeholder="Nhập vào số điện thoại đăng ký zalo" class="input-control"></v-text-field>
+                            <v-text-field v-model="infoUser.sdtZalo" :rules="[required]" type="text" @input="formatPrice" variant="outlined" clearable placeholder="Nhập vào số điện thoại đăng ký zalo" class="input-control"></v-text-field>
                         </div>
                     </BCol>
                     <BCol class="col-lg-4">
                         <div class="form-group">
                             <label class="form-label">CCCD:</label>
-                            <v-text-field v-model="changePassword.passwordNew" :rules="[required]" type="text" @input="formatPrice" variant="outlined" clearable placeholder="Nhập vào căn cước công dân" class="input-control"></v-text-field>
+                            <v-text-field v-model="infoUser.cccd" :rules="[required]" type="text" @input="formatPrice" variant="outlined" clearable placeholder="Nhập vào căn cước công dân" class="input-control"></v-text-field>
                         </div>
                     </BCol>
                     <BCol class="col-lg-5">
                         <div class="form-group">
                             <label class="form-label">Email:</label>
-                            <v-text-field v-model="changePassword.passwordNew" :rules="[required]" type="text" @input="formatPrice" variant="outlined" clearable placeholder="Nhập vào email" class="input-control"></v-text-field>
+                            <v-text-field v-model="infoUser.email" :rules="[required]" type="text" @input="formatPrice" variant="outlined" clearable placeholder="Nhập vào email" class="input-control"></v-text-field>
                         </div>
                     </BCol>
                     <BCol class="col-lg-2 d-flex justify-center align-center">
@@ -463,10 +533,9 @@ export default {
                     <BCol class="col-lg-12">
                         <div class="form-group">
                             <label class="form-label">Địa chỉ:</label>
-                            <v-text-field v-model="passwordConfirm" :rules="[required]" type="text" @input="formatPrice" variant="outlined" clearable class="input-control"></v-text-field>
+                            <v-text-field v-model="infoUser.address" :rules="[required]" type="text" @input="formatPrice" variant="outlined" clearable class="input-control"></v-text-field>
                         </div>
                     </BCol>
-                    
                 </BRow>
             </v-form>
         </div>
@@ -485,7 +554,7 @@ export default {
                         <div class="form-group">
                             <label class="form-label">Ngân hàng:</label>
                             <v-autocomplete
-                                v-model="selectTinh"
+                                v-model="dataUpdatePayment.bank"
                                 :items="bankData"
                                 item-title="shortName"
                                 item-value="shortName"
@@ -499,11 +568,30 @@ export default {
                     <BCol class="col-lg-6">
                         <div class="form-group">
                             <label class="form-label">Số tài khoản:</label>
-                            <v-text-field v-model="changePassword.passwordNew" :rules="[required]" type="text" @input="formatPrice" variant="outlined" clearable placeholder="Nhập vào tên dịch vụ" class="input-control"></v-text-field>
+                            <v-text-field v-model="dataUpdatePayment.stk" :rules="[required]" type="text" @input="formatPrice" variant="outlined" clearable placeholder="Nhập vào tên dịch vụ" class="input-control"></v-text-field>
                         </div>
+                    </BCol>
+                    <BCol class="col-lg-12">
+                        <div class="form-group m-0">
+                            <label class="form-label w-100">Ảnh QR ngân hàng:</label>
+                            <input type="file" @change="onFileSelected" accept="image/*" class="input-control" />
+                        </div>
+                        <v-img
+                            :src="previewImage || dataUpdatePayment.paymentQRImageLink"
+                            alt="Ảnh QR thanh toán"
+                            max-height="300"
+                            max-width="100%"
+                            class="rounded-lg"
+                        ></v-img>
+                        
                     </BCol>
                 </BRow>
             </v-form>
+        </div>
+        <div class="modal-footer v-modal-footer">
+            <BButton type="button" variant="light" @click="viewdialogEditBank = false">Close
+            </BButton>
+            <BButton type="button" variant="primary" @click="UpdateInfoPayment()" :disabled="!form">Save Changes</BButton>
         </div>
     </BModal>
 </template>

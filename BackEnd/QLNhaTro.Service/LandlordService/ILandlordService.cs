@@ -1,4 +1,5 @@
-﻿using QLNhaTro.Moddel.Entity;
+﻿using Microsoft.AspNetCore.Http;
+using QLNhaTro.Moddel.Entity;
 using QLNhaTro.Moddel.Moddel.RequestModels;
 using QLNhaTro.Moddel.Moddel.RequestModels.Landlord;
 using QLNhaTro.Moddel.Moddel.ResponseModels;
@@ -20,5 +21,7 @@ namespace QLNhaTro.Service.LandlordService
         bool ForgotPassword(string inputEmail);
         Landlord GetById(long id);
         Task ChangePassword(ChangePasswordReqModel input);
+        GetInfoPaymentResModel GetInfoPayment(long id);
+        Task UpdateInfoPayment(UpdateInfoPaymentReqModel input, IFormFile ImgQR);
     }
 }

@@ -78,7 +78,7 @@ namespace QLNhaTro.Service.ContractService
                 EndDate = item.TerminationDate ?? item.EndDate,
                 Deposit = item.Deposit,
 
-            }).ToList();
+            }).OrderByDescending(c=>c.StartDate).ToList();
             if (result == null) throw new NotFoundException(nameof(towerId));
             return result;
         }
