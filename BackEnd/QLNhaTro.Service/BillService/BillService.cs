@@ -1,13 +1,19 @@
-﻿using DocumentFormat.OpenXml.Office2010.ExcelAc;
+﻿using DocumentFormat.OpenXml.Office2010.Excel;
+using DocumentFormat.OpenXml.Office2010.ExcelAc;
+using DocumentFormat.OpenXml.Spreadsheet;
+using DocumentFormat.OpenXml.VariantTypes;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QLNhaTro.Commons;
 using QLNhaTro.Commons.CustomException;
 using QLNhaTro.Moddel;
 using QLNhaTro.Moddel.Entity;
+using QLNhaTro.Moddel.Moddel.RequestModels;
+using QLNhaTro.Moddel.Moddel.ResponseModels;
 using QLNhaTro.Service.EmailService;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Drawing;
 using System.Linq;
 using System.Security.Cryptography;
@@ -15,6 +21,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
+using static QLNhaTro.Commons.CommonEnums;
 
 namespace QLNhaTro.Service.BillService
 {
@@ -30,19 +37,19 @@ namespace QLNhaTro.Service.BillService
         }
         public async Task SubmitRequesInformation()
         {
-            var contractStillValid = _Context.Contracts.Where(c=> c.TerminationDate == null && c.UserEnterInformation).Include(r => r.Room)
+            var contractStillValid = _Context.Contracts.Where(c => c.TerminationDate == null && c.UserEnterInformation).Include(r => r.Room)
                 .Select(c => new
                 {
                     Id = c.Id,
                     RoomId = c.RoomId,
                     PriceRoom = c.Room.PriceRoom
                 }).ToList();
-            foreach (var contract in contractStillValid) 
+            foreach (var contract in contractStillValid)
             {
-                var customer = _Context.Customers.Where(c=> c.ContractId == contract.Id && c.IsRepresentative).FirstOrDefault();
+                var customer = _Context.ContractCustomers.Where(c => c.ContractId == contract.Id && c.Customer.IsRepresentative).Select(record=>record.Customer).FirstOrDefault();
                 var ServiceFees = _Context.ServiceRooms.Where(sr => sr.ContractId == contract.Id).ToList();
-                if(customer==null || ServiceFees == null) throw new NotFoundException("Có hợp đồng không có khách hàng hoặc dịch vụ");
-                Bill newbill = new Bill() 
+                if (customer == null) throw new NotFoundException("Có hợp đồng không có khách hàng");
+                Bill newbill = new Bill()
                 {
                     CustomerId = customer.Id,
                     RoomId = contract.RoomId,
@@ -54,11 +61,310 @@ namespace QLNhaTro.Service.BillService
                 _Context.Bills.Add(newbill);
                 await _Context.SaveChangesAsync();
                 #region Gửi yêu cầu nhập thông tin đến khách thuê
-                string link = $"http://localhost:8080/vue/enterbill/{CommonFunctions.Decrypt(newbill.Id.ToString())}";
+                string link = $"http://localhost:8080/vue/enterbill/{CommonFunctions.Encryption(newbill.Id.ToString())}";
                 string EmailContent = $"Xin chào {customer.FullName}. Đã bắt đầu một tháng mới bạn vui lòng vào link này để nhập các thông tin cần thiết để tạo hóa đơn \nĐây là link: {link}";
                 await _Email.SendEmailAsync(customer.Email, "Nhập hóa đơn tháng mới", EmailContent);
                 #endregion
-            };  
+            };
+        }
+        public GetInfoBillResModel GetInfoBill(string Id)
+        {
+            var idbill = CommonFunctions.Decrypt(Id);
+            Bill infoBill = _Context.Bills.GetAvailableById(long.Parse(CommonFunctions.Decrypt(Id)));
+            var contractid = _Context.Contracts.Where(item=> item.RoomId == infoBill.RoomId && item.TerminationDate == null).Select(item=>item.Id).FirstOrDefault();
+            GetInfoBillResModel result = new GetInfoBillResModel();
+            if(infoBill.Status == StatusBill.ChuaDienThongTin)
+            {
+                var roomDetails = _Context.Rooms
+                    .Where(r => r.Id == infoBill.RoomId)
+                    .Include(r => r.Tower) // Bao gồm thông tin Tower
+                    .Select(r => new
+                    {
+                        Room = new
+                        {
+                            r.Id,
+                            r.Name,
+                            r.PriceRoom,
+                        },
+                        Tower = new
+                        {
+                            r.Tower.Id,
+                            r.Tower.Address,
+                        },
+                    }).FirstOrDefault();
+                if (roomDetails == null) throw new NotFoundException("Phòng");
+                result = new GetInfoBillResModel
+                {
+                    Id = infoBill.Id,
+                    NumberOfRoom = roomDetails.Room.Name,
+                    PriceRoom = roomDetails.Room.PriceRoom,
+                    Date = infoBill.CreationDate.AddMonths(-1).ToString("MM/yyyy"),
+                    AddressTower = roomDetails.Tower.Address,
+                    Status = infoBill.Status,
+
+                };
+                result.Service = _Context.ServiceRooms.Where(item => item.ContractId == contractid).Include(s => s.Service).Select(record => new NameServiceBillResModel
+                {
+                    Id = record.ServiceId,
+                    Name = record.Service.Name,
+                    UnitPrice = record.Service.UnitPrice,
+                    UsageNumber = record.Number,
+                    IsOldNewNumber = record.IsOldNewNumber,
+                    OldNumber = 0,
+                }).ToList();
+            }
+            else
+            {
+                var roomDetails = _Context.Rooms
+                    .Where(r => r.Id == infoBill.RoomId)
+                    .Include(r => r.Tower) // Bao gồm thông tin Tower
+                    .ThenInclude(t => t.Landlord) // Bao gồm thông tin Landlord thông qua Tower
+                    .Select(r => new
+                    {
+                        Room = new
+                        {
+                            r.Id,
+                            r.Name,
+                            r.PriceRoom,
+                        },
+                        Tower = new
+                        {
+                            r.Tower.Id,
+                            r.Tower.Address,
+                            r.Tower.LandlordId
+                        },
+                        Landlord = new
+                        {
+                            r.Tower.Landlord.STK,
+                            r.Tower.Landlord.PaymentQRImageLink
+                        }
+                    }).FirstOrDefault();
+                    if (roomDetails == null) throw new NotFoundException("Phòng");
+                    result = new GetInfoBillResModel
+                    {
+                        Id = infoBill.Id,
+                        NumberOfRoom = roomDetails.Room.Name,
+                        PriceRoom = roomDetails.Room.PriceRoom,
+                        Date = infoBill.CreationDate.AddMonths(-1).ToString("MM/yyyy"),
+                        AddressTower = roomDetails.Tower.Address,
+                        STK = roomDetails.Landlord.STK,
+                        PathImgQRPay = CommonFunctions.ConverPathIMG(roomDetails.Landlord.PaymentQRImageLink),
+                        Status = infoBill.Status,
+                        Amount = infoBill.TotalAmount,
+                    };
+                result.Service = _Context.ServiceInvoiceDetails.Where(item => item.BillId == infoBill.Id).Include(s => s.Service).Select(record => new NameServiceBillResModel
+                {
+                    Id = record.ServiceId,
+                    Name = record.Service.Name,
+                    UnitPrice = record.UnitPrice,
+                    UsageNumber = record.UsageNumber,
+                    OldNumber = record.OldNumber,
+                    NewNumber = record.NewNumber,
+                    IsOldNewNumber = record.Service.IsOldNewNumber,
+                }).ToList();
+            }
+            
+            result.Arises = _Context.Incurs.Where(item=> item.RoomId == infoBill.RoomId && item.StatusPay == false).Select(record => new AriseBillResModel
+            {
+                Id = record.Id,
+                Amount = record.Amount, 
+                Reason = record.Reason,
+            }).ToList();
+            return result;
+        }
+        public async Task CalculateInvoice(GetInfoBillResModel input)
+        {
+            var bill = _Context.Bills.GetAvailableById(input.Id);
+            var contractService = input.Service.Select(s => new ServiceInvoiceDetails
+            {
+                ServiceId = s.Id,
+                BillId = input.Id,
+                OldNumber = s.OldNumber,
+                NewNumber = s.NewNumber,
+                UnitPrice = s.UnitPrice,
+                UsageNumber = s.IsOldNewNumber == false ? s.UsageNumber : s.NewNumber.Value - s.OldNumber.Value,
+            }).ToList();
+            await _Context.ServiceInvoiceDetails.AddRangeAsync(contractService);
+            bill.Status = StatusBill.ChuaThanhToan;
+            bill.CreationDate = DateOnly.FromDateTime(DateTime.Now);
+            bill.TotalAmount = bill.PriceRoom + input.Arises.Sum(item => item.Amount) + contractService.Sum(item => item.UnitPrice * item.UsageNumber);
+            _Context.Bills.Update(bill);
+            await _Context.SaveChangesAsync();
+        }
+        public async Task PayBill(long id)
+        {
+            var infoBill = _Context.Bills.Where(item=> item.Id == id).FirstOrDefault();
+            if(infoBill == null)
+            {
+                throw new Exception("Hoá đơn không tồn tại");
+            }
+            var Landlord = _Context.Rooms
+                    .Where(r => r.Id == infoBill.RoomId)
+                    .Include(r => r.Tower) // Bao gồm thông tin Tower
+                    .ThenInclude(t => t.Landlord) // Bao gồm thông tin Landlord thông qua Tower
+                    .Select(r => new
+                    {
+                        Room = new
+                        {
+                            r.Id,
+                            r.Name,
+                        },
+                        Tower = new
+                        {
+                            r.Tower.Id,
+                            r.Tower.LandlordId
+                        },
+                        Landlord = new
+                        {
+                            r.Tower.Landlord.Id,
+                            r.Tower.Landlord.Email,
+                        }
+                    }).FirstOrDefault();
+            if(Landlord == null)
+            {
+                throw new Exception("Chủ nhà không tồn tại");
+            }
+            //Thêm thông báo 
+            string content = $"Phòng {Landlord.Room.Name} đã thanh toán hoá đơn tháng {infoBill.CreationDate.AddMonths(-1).ToString("MM/yyyy")} vào ngày {DateTime.Now} với số tiền {infoBill.TotalAmount}. Bạn thử kiểm tra tài khoản xem đã nhận được số tiền chưa. ";
+            Notification notification = new Notification() 
+            {
+                LandlordId = Landlord.Landlord.Id,
+                Content = content ,
+                NotificationType = NotificationType.XacNhanHoaDon,
+                BillId = infoBill.Id,
+                ReadStatus = false,
+            };
+            _Context.Notifications.Add(notification);
+
+            //Cập nhận thông tin hoá đơn
+            infoBill.PaymentDate = DateTime.Now;
+            infoBill.Status = StatusBill.ChuaXacNhanThanhToan;
+            _Context.Bills.Update(infoBill);
+
+            await _Context.SaveChangesAsync();
+
+            await _Email.SendEmailAsync(Landlord.Landlord.Email, $"Xác nhận thanh toán hoá của phòng {Landlord.Room.Name}", content + "Bạn vui lòng vào hệ thống để xác nhận thanh toán.");
+        }
+        public List<GetRequestPaymentConfirmationResModel> GetRequestPayment(long landlordId)
+        {
+            var result = _Context.Notifications.Where(item=> item.LandlordId == landlordId && !item.ReadStatus).Include(n=> n.Bill).Select(record => new GetRequestPaymentConfirmationResModel
+            {
+                Id = record.Id,
+                BillId= record.BillId,
+                NgayThanhToan = record.Bill.PaymentDate.ToString("HH:mm - dd/MM/yyyy"),
+                NumberOfRoom = record.Bill.Room.Name,
+                SoTien = record.Bill.TotalAmount,
+            }).ToList();
+            return result;
+        }
+        public async Task RefusePay(RefusePayReqModel input)
+        {
+            var bill = _Context.Bills.Where(item => item.Id == input.BillId).Include(item=> item.Customer).FirstOrDefault();
+            var notifications = _Context.Notifications.Where(item => item.Id == input.Id).FirstOrDefault();
+            string link = $"http://localhost:8080/vue/enterbill/{CommonFunctions.Encryption(bill.Id.ToString())}";
+            string content = $"Hoá đơn phòng {input.NumberOfRoom} được thanh toán vào ngày {bill.PaymentDate} đã bị từ chối do chủ nhà chưa nhận được tiền. " +
+                $"Bạn hãy kiểm tra lại xem giao dịch đã được thực hiện thành công hay chưa." +
+                $"Kiểm tra xong bạn vui lòng truy cập vào đường link {link} để xác nhận thanh toán lại. Xin cảm ơn!";
+            await _Email.SendEmailAsync(bill.Customer.Email, "Từ chối thanh toán hoá đơn", content);
+            bill.Status = StatusBill.ChuaThanhToan;
+            _Context.Bills.Update(bill);
+            notifications.ReadStatus = true;
+            _Context.Notifications.Update(notifications);
+
+            await _Context.SaveChangesAsync();
+            
+        }
+        public async Task AcceptPayments(RefusePayReqModel input)
+        {
+            var bill = _Context.Bills.Where(item => item.Id == input.BillId).Include(item => item.Customer).FirstOrDefault();
+            var notifications = _Context.Notifications.Where(item => item.Id == input.Id).FirstOrDefault();
+            var arise = _Context.Incurs.Where(item => item.RoomId == bill.RoomId);
+
+            string content = $"Hoá đơn phòng {input.NumberOfRoom} được thanh toán vào ngày {bill.PaymentDate} đã thanh toán thành công. ";
+            await _Email.SendEmailAsync(bill.Customer.Email, "Thanh toán hoá đơn thành công", content);
+            bill.Status = StatusBill.DaXacNhanThanhToan;
+            _Context.Bills.Update(bill);
+            notifications.ReadStatus = true;
+            _Context.Notifications.Update(notifications);
+
+            await _Context.SaveChangesAsync();
+
+        }
+        public List<GetAllBillByTowerResModel> GetAll(long towerId)
+        {
+            var billData = _Context.Bills.Include(b => b.Room).Where(item => item.Room.TowerId == towerId && item.Status != StatusBill.ChuaDienThongTin).Select(record => new GetAllBillByTowerResModel
+            {
+                Id = record.Id,
+                NumberOfRoom = record.Room.Name,
+                PaymentDate = record.PaymentDate.ToString("dd/MM/yyyy"),
+                Time = record.CreationDate.AddMonths(-1).ToString("MM/yyyy"),
+                TotalAmount = record.TotalAmount,
+                CustomerName = record.Customer.FullName,
+                Status = record.Status.GetDescription(),
+            }).ToList();
+            return billData;
+        }
+        public async Task DeleteBill(long billId) 
+        {
+            var bill = _Context.Bills.GetAvailableById(billId);
+            if(bill.Status != StatusBill.ChuaThanhToan)
+            {
+                throw new Exception("Hoá đơn đã được thanh toán không thể xoá");
+            }
+            bill.IsDeleted = true;
+            _Context.Bills.Update(bill);
+            await _Context.SaveChangesAsync();
+        }
+        public GetDetailBillResModel GetDetail(long billId) 
+        {
+            Bill infoBill = _Context.Bills.Where(item => item.Id == billId && !item.IsDeleted).Include(item => item.Customer).FirstOrDefault();
+            var contractid = _Context.Contracts.Where(item => item.RoomId == infoBill.RoomId && item.TerminationDate == null).Select(item => item.Id).FirstOrDefault();
+            var roomDetails = _Context.Rooms
+                   .Where(r => r.Id == infoBill.RoomId)
+                   .Include(r => r.Tower) // Bao gồm thông tin Tower
+                   .Select(r => new
+                   {
+                       Room = new
+                       {
+                           r.Id,
+                           r.Name,
+                           r.PriceRoom,
+                       },
+                       Tower = new
+                       {
+                           r.Tower.Id,
+                           r.Tower.Address,
+                           r.Tower.LandlordId
+                       },
+                   }).FirstOrDefault();
+            if (roomDetails == null) throw new NotFoundException("Phòng");
+            var result = new GetDetailBillResModel
+            {
+                NumberOfRoom = roomDetails.Room.Name,
+                PriceRoom = roomDetails.Room.PriceRoom,
+                Date = infoBill.CreationDate.AddMonths(-1).ToString("MM/yyyy"),
+                Status = infoBill.Status,
+                Amount = infoBill.TotalAmount,
+                DatePayment = infoBill.PaymentDate.ToString("HH:mm - dd/MM/yyyy"),
+                CustomerName = infoBill.Customer.FullName,
+                
+            };
+            result.Service = _Context.ServiceInvoiceDetails.Where(item => item.BillId == infoBill.Id).Include(s => s.Service).Select(record => new NameServiceBillResModel
+            {
+                Id = record.ServiceId,
+                Name = record.Service.Name,
+                UnitPrice = record.UnitPrice,
+                UsageNumber = record.UsageNumber,
+                OldNumber = record.OldNumber,
+                NewNumber = record.NewNumber,
+            }).ToList();
+            result.Arises = _Context.Incurs.Where(item => item.RoomId == infoBill.RoomId && item.StatusPay == false).Select(record => new AriseBillResModel
+            {
+                Id = record.Id,
+                Amount = record.Amount,
+                Reason = record.Reason,
+            }).ToList();
+            return result;
         }
     }
 }

@@ -172,8 +172,11 @@ export default {
             </div>
             <div class="mx-sm-3 ListRoom">
                 <v-container class="pt-0">
-                    <h3>Danh sách các phòng trọ</h3>
-                        <BCard no-body>
+                    <v-row>
+                        <v-col md="1"></v-col>
+                        <v-col cols="12" md="10">
+                            <h3>Danh sách các phòng trọ</h3>
+                    <BCard no-body>
                             <BCardBody class="p-0">
                                 <BRow>
                                     <BCol class="col-md-4 col-12">
@@ -290,6 +293,9 @@ export default {
                                 </BRow>
                             </BCardBody>
                         </BCard>
+                        </v-col>
+                        <v-col xl="1"></v-col>
+                    </v-row>
                 </v-container>
             </div>
 

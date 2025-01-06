@@ -186,11 +186,11 @@ namespace QLNhaTro.Service.LandlordService
             {
                 File.Delete(PathImgQROld);
             }
-            // Tạo GUID cho tên ảnh
+            // Tạo tên ảnh
             string fileName = nameFile + Path.GetExtension(input.FileName);
 
             // Đường dẫn thư mục lưu ảnh
-            string directoryPath = Path.Combine(Directory.GetCurrentDirectory(), $@"D:\Code\BoardingHouseManagement\BoardingHouseManagement\FrontEnd\public\images\UserInformation\{userId}");
+            string directoryPath = Path.Combine(Directory.GetCurrentDirectory(), $@"{DefaultValue.DEFAULT_BASE_Directory_IMG}\images\UserInformation\{userId}");
 
             // Kiểm tra và tạo thư mục nếu chưa tồn tại
             if (!Directory.Exists(directoryPath))

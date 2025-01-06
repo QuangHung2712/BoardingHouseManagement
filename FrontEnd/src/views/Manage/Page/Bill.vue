@@ -5,8 +5,11 @@
 </style>
 
 <script>
-import pageheader from "@/components/page-header.vue"
-import Swal from "sweetalert2";
+    import pageheader from "@/components/page-header.vue"
+    import apiClient from "@/plugins/axios";
+    import Swal from "sweetalert2";
+    import CryptoJS from 'crypto-js';
+    import common from "@/components/common/JavaScripCommon"
 
 
 export default {
@@ -21,23 +24,45 @@ export default {
             form: false,
             headersTable:[
                     {title: 'STT', value: 'stt',sortable: true},
-                    {title: 'Tên khách thuê',value:'customer',sortable: true},
-                    {title: 'Số phòng',value: 'numberName',sortable: true},
-                    {title: 'Số tiền',value: 'UnitPrice',sortable: true},
-                    {title: 'Tháng',value: 'month',sortable: true},
+                    {title: 'Tên khách thuê',value:'customerName',sortable: true},
+                    {title: 'Số phòng',value: 'numberOfRoom',sortable: true},
+                    {title: 'Số tiền',value: 'totalAmount',sortable: true},
+                    {title: 'Tháng',value: 'time',sortable: true},
                     {title: 'Ngày thanh toán',value: 'paymentDate',sortable: true},
                     {title: 'Trạng thái',value: 'status',sortable: true},
                     {title: 'Hành đồng',value: 'actions',sortable: false}
                 ],
             billData: [
-                {id: 1,customer: 'Phạm Văn A',numberName: '101',UnitPrice: '3.800.000 VNĐ',month: '12/2024',paymentDate:'21/12/2024',status: 'Đã thanh toán'},
-                {id: 2,customer: 'Phạm Văn B',numberName: '102',UnitPrice: '4.800.000 VNĐ',month: '11/2024',paymentDate:'20/12/2024',status: 'Chưa thanh toán'}
-
             ],
-            selectBill: [
-                { serviceName: "Điện", oldNumber: 10, newNumber: 30 },
-                { serviceName: "Nước", oldNumber: 20, newNumber: 50 },
-            ],
+            selectBill: {
+                id: 0,
+                numberOfRoom:'',
+                priceRoom: 0,
+                addressTower: '',
+                amount: 0,
+                date: '',
+                pathImgQRPay:'',
+                stk: '',
+                status: 0,
+                service: [
+                    {
+                        id: 0,
+                        isOldNewNumber: false,
+                        name: '',
+                        newNumber: null,
+                        oldNumber: null,
+                        unitPrice: 0,
+                        usageNumber: 1,
+                    }
+                ],
+                arises:[
+                    {
+                        id: 0,
+                        amount: 0,
+                        reason: '',
+                    }
+                ]
+            },
             CalculateRoom:[
                 {roomName:'101',newElectricity: null,newCountries: null },
                 {roomName:'102',newElectricity: null,newCountries: null },
@@ -48,17 +73,27 @@ export default {
             searchStatus: null,
             viewdialogEdit:false,
             viewdialogCalculateRoomCharges: false,
+            towerId: 0,
+            message: '',
+            snackbar: false,
+            snackbarColor: '',
         }
+    },
+    created(){
+        const idtower = this.$route.params.idtower;
+        const DecodingIdTower = CryptoJS.enc.Utf8.stringify(CryptoJS.enc.Base64.parse(idtower));
+        this.towerId = DecodingIdTower;
+        this.getAllBill();
     },
     computed: {
         filteredBills() {
             return this.billData.filter((bill) => {
                 const matchesCustomer = this.searchCustomer
-                    ? bill.customer?.toLowerCase().includes(this.searchCustomer.toLowerCase())
+                    ? bill.customerName?.toLowerCase().includes(this.searchCustomer.toLowerCase())
                     : true;
 
                 const matchesRoom = this.searchRoom
-                    ? bill.numberName?.toLowerCase().includes(this.searchRoom.toLowerCase())
+                    ? bill.numberOfRoom?.toLowerCase().includes(this.searchRoom.toLowerCase())
                     : true;
 
                 const matchesDate = this.searchDate
@@ -74,7 +109,7 @@ export default {
     },
     methods:{
         deleteBill(id,name) {
-            const swalWithBootstrapButtons = Swal.mixin({
+                const swalWithBootstrapButtons = Swal.mixin({
                 customClass: {
                     confirmButton: "btn btn-success",
                     cancelButton: "btn btn-danger ml-2",
@@ -91,29 +126,42 @@ export default {
                     cancelButtonText: "Không!",
                     showCancelButton: true,
                 })
-                .then((result) => {
-                    if (result.value) {
-                        swalWithBootstrapButtons.fire(
-                            "Xóa thành công!",
-                            `Đã xóa hoá đơn của phòng thành công: ${name}`,
-                            "success"
-                        );
-                    } else if (
-                        /* Read more about handling dismissals below */
-                        result.dismiss === Swal.DismissReason.cancel
-                    ) {
-                        swalWithBootstrapButtons.fire(
-                            "Xóa không thành công",
-                            `Đã xảy ra lỗi khi xóa hoá đơn của phòng: ${name}`,
-                            "error"
-                        );
-                    }
+                .then((confirm) => {
+                    if (confirm.value) {
+                            apiClient.delete(`/Bill/Delete/${id}`)
+                                    .then(reponse=> {
+                                        if(reponse.status){
+                                            swalWithBootstrapButtons.fire(
+                                            "Xóa thành công!",
+                                            `Đã xóa thành công hoá đơn của phòng: ${name}`,
+                                            "success")
+                                            this.getAllBill();
+                                        }
+                                    })
+                                    .catch(error =>{
+                                        swalWithBootstrapButtons.fire(
+                                            "Xóa không thành công",
+                                            ` ${error.response?.data?.message || error.message}`,
+                                            "error"
+                                        );
+                                    })
+                    } else if ( /* Read more about handling dismissals below */ confirm.dismiss === Swal.DismissReason.cancel) return
                 });
-        },
+            },
         required (v) {
             return !!v || 'Vui lòng không để trống'
         },
-        DetailBill(){
+        DetailBill(idBill){
+            apiClient.get(`/Bill/GetDetail?billId=${idBill}`)
+                    .then(response=>{
+                        this.selectBill = response.data;
+                        console.log(this.selectBill);
+                    })
+                    .catch(error=>{
+                        this.message = "Lấy thông tin hoá đơn bị lỗi: " + error.response?.data?.message || error.message;
+                        this.snackbar = true;
+                        this.snackbarColor = 'red';
+                    })
         },
         getStatusClass(status) {
             switch (status) {
@@ -122,7 +170,7 @@ export default {
                 case 'Chưa thanh toán':
                     return 'badge bg-light-danger ms-2'; // class dành cho trạng thái Inactive
                 default:
-                    return 'badge bg-light-warning'; // class mặc định
+                    return 'badge bg-light-warning' ; // class mặc định
             }
         },
         formatDate(dateString) {
@@ -132,6 +180,21 @@ export default {
             console.log(`${year}-${month.padStart(2, '0')}`)
             return `${year}-${month.padStart(2, '0')}`; // Trả về định dạng YYYY-MM
         },
+        getAllBill(){
+            apiClient.get(`/Bill/GetAll?towerId=${this.towerId}`)
+                    .then(response=>{
+                        this.billData = response.data;
+                    })
+                    .catch(error=>{
+                        this.snackbar = true;
+                        this.message = 'Lấy hoá đơn bị lỗi ' + error.response?.data?.message || error.message;
+                        this.snackbarColor = 'red';
+                    })
+        },
+        FormatTablePrice(price) {
+            if(price)
+            return common.formatTablePrice(price);
+        },
     }
 }
 </script>
@@ -139,6 +202,14 @@ export default {
 <template>
         <pageheader title="" pageTitle="Hoá đơn" />
         <BRow>
+            <v-snackbar
+                v-model="snackbar"
+                :timeout="10000"
+                class="custom-snackbar"
+                :color="snackbarColor"
+            >
+                <h5 class="text-center">{{ message }}</h5>
+            </v-snackbar>
             <BCol class="col-sm-12">
                 <BCard>
                     <BCardBody class="p-0">
@@ -163,78 +234,73 @@ export default {
                             <template v-slot:[`item.stt`]="{ index }">
                                 {{ index + 1 }}
                             </template>
+                            <template v-slot:[`item.totalAmount`]="{ item }">
+                                <!-- Hiển thị giá đã định dạng -->
+                                {{ FormatTablePrice(item.totalAmount) }}
+                            </template>
                             <template v-slot:[`item.status`]="{ item }">
                                 <span :class="getStatusClass(item.status)">
                                     {{ item.status }}
                                 </span>
                             </template>
                             <template v-slot:[`item.actions`]="{ item }">
-                                <v-icon small @click="(viewdialog = !viewdialog)">mdi-eye</v-icon>
-                                <v-icon class="ml-lg-3" small @click="(viewdialogEdit = !viewdialogEdit)" >mdi-pencil-circle </v-icon>
-                                <v-icon class="ml-lg-3" small @click="deleteBill(item.id,item.numberName)" >mdi-delete-empty </v-icon>
+                                <v-icon small @click="(viewdialog = !viewdialog) &&(DetailBill(item.id))">mdi-eye</v-icon>
+                                <v-icon class="ml-lg-3" small @click="(viewdialogEdit = !viewdialogEdit) " >mdi-pencil-circle </v-icon>
+                                <v-icon class="ml-lg-3" small @click="deleteBill(item.id,item.numberOfRoom)" >mdi-delete-empty </v-icon>
                             </template>
                         </v-data-table>
                     </BCardBody>
                 </BCard>
-                <BModal v-model="viewdialog" hide-footer title="Chi tiết hoá đơn phòng 101" modal-class="fadeInRight"
+                <BModal v-model="viewdialog" hide-footer :title="`Chi tiết hoá đơn phòng ${selectBill.numberOfRoom} tháng ${selectBill.date} `" modal-class="fadeInRight"
                     class="v-modal-custom" centered size="lg" >
-                    <h6>Tên khách hàng: Phạm Văn A</h6>
-                    <h6>Hoá đơn đã được thanh toán vào ngày 21/12/2024</h6>
+                    <h6>Tên khách hàng: {{ selectBill.customerName }}</h6>
+                    <h6 v-show="selectBill.status == 4">Hoá đơn đã được thanh toán vào ngày: {{ selectBill.datePayment}}</h6>
+                    <h6 v-show="selectBill.status == 3">Hoá đơn đã được thanh toán vào ngày: {{ selectBill.datePayment}} và đang chờ xác nhận thanh toán</h6>
+                    <h6 v-show="selectBill.status == 2">Hoá đơn chưa được thanh toán</h6>
                     <h4>Chi tiết hoá đơn:</h4>
-                    <table class="table Info">
-                    <thead>
-                        <tr>
-                            <th>STT</th>
-                            <th style="width: 40%;">Tên dịch vụ</th>
-                            <th>Số tiền</th>
-                            <th>Sử dụng</th>
-                            <th>Thành tiền</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+                    <table class="table Info" >
+                        <thead>
                             <tr>
-                                <td>1</td>
-                                <td>Tiền phòng</td>
-                                <td>3.000.000 VNĐ</td>
-                                <td>1</td>
-                                <td>3.000.000 VNĐ</td>
+                                <th style="width: 40%;">Tên dịch vụ</th>
+                                <th>Số tiền</th>
+                                <th>Sử dụng</th>
+                                <th>Thành tiền</th>
                             </tr>
+                        </thead>
+                        <tbody>
                             <tr>
-                                <td>2</td>
+                                <td>Tiền phòng</td>
+                                <td>{{ FormatTablePrice(selectBill.priceRoom)}}</td>
+                                <td>1</td>
+                                <td>{{ FormatTablePrice(selectBill.priceRoom)}}</td>
+                            </tr>
+                            <tr v-for="(serviceItem, index) in selectBill.service" :key="index">
                                 <td>
-                                    <div>Tiền điện</div> 
-                                    <div>(Số cũ: 100 - Số mới: 1000)</div>
+                                    <div>Tiền {{ serviceItem.name }}</div> 
+                                    <div v-show="serviceItem.newNumber != null">(Số cũ: {{ serviceItem.oldNumber }} - Số mới: {{ serviceItem.newNumber }})</div>
                                 </td>
-                                <td>3.000 VNĐ</td>
+                                <td>{{FormatTablePrice(serviceItem.unitPrice) }}</td>
+                                <td>{{ serviceItem.usageNumber }}</td>
+                                <td>{{FormatTablePrice(serviceItem.unitPrice * serviceItem.usageNumber) }}</td>
+                            </tr>
+                            <tr v-for="(arise, index) in selectBill.arises" :key="index" v-show="selectBill.arises.length > 0">
+                                <td>Phát sinh({{ arise.reason }})</td>
+                                <td>{{ arise.amount }}</td>
                                 <td>1</td>
-                                <td>3.000.000 VNĐ</td>
+                                <td>{{ arise.amount }}</td>
                             </tr>
                             <tr>
-                                <td>3</td>
-                                <td>Tiền nước</td>
-                                <td>30.000 VNĐ</td>
-                                <td>1</td>
-                                <td>3.000.000 VNĐ</td>
+                                <td colspan="3"><h4>Tổng tiền</h4></td>
+                                <td><h4>{{FormatTablePrice(selectBill.amount) }}</h4></td>
                             </tr>
-                            <tr>
-                                <td>4</td>
-                                <td>Tiền phòng</td>
-                                <td>3.000.000 VNĐ</td>
-                                <td>1</td>
-                                <td>3.000.000 VNĐ</td>
-                            </tr>
-                            <tr>
-                                <th colspan="4">Tổng</th>
-                                <td>3.000.000 VNĐ</td>
-                            </tr>
-                    </tbody>
-                </table>
+                        </tbody>
+                    </table>
                 </BModal>
                 <BModal v-model="viewdialogEdit" hide-footer title="Sửa hoá đơn phòng 101" modal-class="fadeInRight"
                     class="v-modal-custom" centered size="lg">
                     <div class="card-body">
                         <v-form v-model="form">
-                            <div class="card" v-for="(Service,index) in selectBill " :key="index">
+                            <!-- <div class="card" v-for="(Service,index) in selectBill " :key="index">
                                 <div class="card-header">
                                     <h4>Dịch vụ {{ Service.serviceName }}</h4>
                                 </div>
@@ -254,7 +320,7 @@ export default {
                                         </BCol>
                                     </BRow>
                                 </div>
-                            </div>
+                            </div> -->
                         </v-form>
                     </div>
                     <div class="modal-footer v-modal-footer">
@@ -267,7 +333,7 @@ export default {
                     class="v-modal-custom" centered size="lg">
                     <div class="card-body">
                         <v-form v-model="form">
-                            <div class="card" v-for="(Calculate,index) in CalculateRoom " :key="index">
+                            <!-- <div class="card" v-for="(Calculate,index) in CalculateRoom " :key="index">
                                 <div class="card-header">
                                     <h4>Phòng {{ Calculate.roomName }}</h4>
                                 </div>
@@ -287,7 +353,7 @@ export default {
                                         </BCol>
                                     </BRow>
                                 </div>
-                            </div>
+                            </div> -->
                         </v-form>
                     </div>
                     <div class="modal-footer v-modal-footer">

@@ -2,9 +2,11 @@
 using QLNhaTro.Moddel.Entity;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Contract = QLNhaTro.Moddel.Entity.Contract;
 
 namespace QLNhaTro.Moddel.SeedData
 {
@@ -196,16 +198,16 @@ namespace QLNhaTro.Moddel.SeedData
                     {
                         var NewCustomer = new List<Customers>
                         {
-                            new Customers {Id = 1,FullName = "Phạm Quang Hưng",DoB = new DateTime(2002,12,27), PhoneNumber = "0359988934", CCCD = "022202001454",Address = "Kim Sơn Đông Triều Quảng Ninh",ContractId = 1,IsDeleted = false,Email = "quanghungksdtqn@gmail.com",IsRepresentative = true,},
-                            new Customers {Id = 2,FullName = "Phạm Văn A",DoB = new DateTime(2002,12,27), PhoneNumber = "0363317140", CCCD = "386751689273",Address = "Đường Phan Chu Trinh, Quận 7, Vũng Tàu",ContractId = 1,IsDeleted = false,Email = "Khachhangso1@gmail.com",IsRepresentative = false},
-                            new Customers {Id = 3,FullName = "Phạm Thị Minh Trang",DoB = new DateTime(2002,04,23), PhoneNumber = "0886682304", CCCD = "282721999505",Address = "Găng Thép Thái Nguyên",ContractId = 2,IsDeleted = false,Email = "phamquanghungksdtqn@gmail.com",IsRepresentative = true},
-                            new Customers {Id = 4,FullName = "Phạm Thị B",DoB = new DateTime(2002,12,27), PhoneNumber = "0882320612", CCCD = "445804496623",Address = "Đường Hoàng Diệu, Quận 9, Vũng Tàu",ContractId = 2,IsDeleted = false,Email = "Khachhangso2@gmail.com",IsRepresentative = false},
-                            new Customers {Id = 5,FullName = "Phạm Minh C",DoB = new DateTime(2002,12,27), PhoneNumber = "0372602489", CCCD = "112053382362",Address = "Đường Trần Phú, Quận Cầu Giấy, Vũng Tàu",ContractId = 2,IsDeleted = false,Email = "Khachhangso3@gmail.com",IsRepresentative = false},
-                            new Customers {Id = 6,FullName = "Phạm Văn Thu",DoB = new DateTime(1966,12,27), PhoneNumber = "0333378465", CCCD = "664972286351",Address = "Đường Nguyễn Văn Linh, Quận 1, Quảng Ninh",ContractId = 3,IsDeleted = false,Email = "vu24593@gmail.com",IsRepresentative = true},
-                            new Customers {Id = 7,FullName = "Phạm Thị Bích Hà",DoB = new DateTime(1967,02,14), PhoneNumber = "0342550359", CCCD = "610525008965",Address = "Đường Phan Chu Trinh, Quận 10, Hà Nội",ContractId = 4,IsDeleted = false,Email = "fbminhtrang@gmail.com",IsRepresentative = true},
-                            new Customers {Id = 8,FullName = "Nguyễn Văn D",DoB = new DateTime(2000,02,14), PhoneNumber = "0327786189", CCCD = "800095517479",Address = "Đường Nguyễn Văn Linh, Quận 9, Huế",ContractId = 4,IsDeleted = false,Email = "Khachhang4@gmail.com",IsRepresentative = false},
-                            new Customers {Id = 9,FullName = "Lê Thị E",DoB = new DateTime(2000,5,14), PhoneNumber = "0329391131", CCCD = "373072204337",Address = "Đường Nguyễn Văn Linh, Quận 7, Huế",ContractId = 5,IsDeleted = false,Email = "Khachhang5@gmail.com",IsRepresentative = true},
-                            new Customers {Id = 10,FullName = "Lê Thị G",DoB = new DateTime(2004,8,20), PhoneNumber = "0916124628", CCCD = "047784617208",Address = "Đường Võ Nguyên Giáp, Quận 9, Hà Nội",ContractId = 5,IsDeleted = false,Email = "Khachhang6@gmail.com",IsRepresentative = false},
+                            new Customers {Id = 1,FullName = "Phạm Quang Hưng",DoB = new DateTime(2002,12,27), PhoneNumber = "0359988934", CCCD = "022202001454",Address = "Kim Sơn Đông Triều Quảng Ninh",IsDeleted = false,Email = "quanghungksdtqn@gmail.com",IsRepresentative = true,},
+                            new Customers {Id = 2,FullName = "Phạm Văn A",DoB = new DateTime(2002,12,27), PhoneNumber = "0363317140", CCCD = "386751689273",Address = "Đường Phan Chu Trinh, Quận 7, Vũng Tàu",IsDeleted = false,Email = "Khachhangso1@gmail.com",IsRepresentative = false},
+                            new Customers {Id = 3,FullName = "Phạm Thị Minh Trang",DoB = new DateTime(2002,04,23), PhoneNumber = "0886682304", CCCD = "282721999505",Address = "Găng Thép Thái Nguyên",IsDeleted = false,Email = "phamquanghungksdtqn@gmail.com",IsRepresentative = true},
+                            new Customers {Id = 4,FullName = "Phạm Thị B",DoB = new DateTime(2002,12,27), PhoneNumber = "0882320612", CCCD = "445804496623",Address = "Đường Hoàng Diệu, Quận 9, Vũng Tàu",IsDeleted = false,Email = "Khachhangso2@gmail.com",IsRepresentative = false},
+                            new Customers {Id = 5,FullName = "Phạm Minh C",DoB = new DateTime(2002,12,27), PhoneNumber = "0372602489", CCCD = "112053382362",Address = "Đường Trần Phú, Quận Cầu Giấy, Vũng Tàu",IsDeleted = false,Email = "Khachhangso3@gmail.com",IsRepresentative = false},
+                            new Customers {Id = 6,FullName = "Phạm Văn Thu",DoB = new DateTime(1966,12,27), PhoneNumber = "0333378465", CCCD = "664972286351",Address = "Đường Nguyễn Văn Linh, Quận 1, Quảng Ninh",IsDeleted = false,Email = "vu24593@gmail.com",IsRepresentative = true},
+                            new Customers {Id = 7,FullName = "Phạm Thị Bích Hà",DoB = new DateTime(1967,02,14), PhoneNumber = "0342550359", CCCD = "610525008965",Address = "Đường Phan Chu Trinh, Quận 10, Hà Nội",IsDeleted = false,Email = "fbminhtrang@gmail.com",IsRepresentative = true},
+                            new Customers {Id = 8,FullName = "Nguyễn Văn D",DoB = new DateTime(2000,02,14), PhoneNumber = "0327786189", CCCD = "800095517479",Address = "Đường Nguyễn Văn Linh, Quận 9, Huế",IsDeleted = false,Email = "Khachhang4@gmail.com",IsRepresentative = false},
+                            new Customers {Id = 9,FullName = "Lê Thị E",DoB = new DateTime(2000,5,14), PhoneNumber = "0329391131", CCCD = "373072204337",Address = "Đường Nguyễn Văn Linh, Quận 7, Huế",IsDeleted = false,Email = "Khachhang5@gmail.com",IsRepresentative = true},
+                            new Customers {Id = 10,FullName = "Lê Thị G",DoB = new DateTime(2004,8,20), PhoneNumber = "0916124628", CCCD = "047784617208",Address = "Đường Võ Nguyên Giáp, Quận 9, Hà Nội",IsDeleted = false,Email = "Khachhang6@gmail.com",IsRepresentative = false},
                         };
                         context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT [dbo].[Customers] ON");
                         context.Customers.AddRange(NewCustomer);
@@ -275,6 +277,39 @@ namespace QLNhaTro.Moddel.SeedData
                         context.Incurs.AddRange(NewIncur);
                         context.SaveChanges();
                         context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT [dbo].[Incurs] OFF");
+                        transaction.Commit();
+                    }
+                    catch (Exception)
+                    {
+                        transaction.Rollback();
+                        throw;
+                    }
+                }
+            }
+            if (!context.ContractCustomers.Any())
+            {
+                using (var transaction = context.Database.BeginTransaction())
+                {
+                    try
+                    {
+                        var NewContractCustomers = new List<ContractCustomer>
+                        {
+                            new ContractCustomer {Id = 1,ContractId = 1,CustomerId = 1},
+                            new ContractCustomer {Id = 2,ContractId = 1,CustomerId = 2},
+                            new ContractCustomer {Id = 3,ContractId = 2,CustomerId = 3},
+                            new ContractCustomer {Id = 4,ContractId = 2,CustomerId = 4},
+                            new ContractCustomer {Id = 5,ContractId = 2,CustomerId = 5},
+                            new ContractCustomer {Id = 6,ContractId = 3,CustomerId = 6},
+                            new ContractCustomer {Id = 7,ContractId = 4,CustomerId = 7},
+                            new ContractCustomer {Id = 8,ContractId = 4,CustomerId = 8},
+                            new ContractCustomer {Id = 9,ContractId = 5,CustomerId = 9},
+                            new ContractCustomer {Id = 10,ContractId = 5,CustomerId = 10},
+                            new ContractCustomer {Id = 11,ContractId = 6,CustomerId = 11},
+                        };
+                        context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT [dbo].[ContractCustomers] ON");
+                        context.ContractCustomers.AddRange(NewContractCustomers);
+                        context.SaveChanges();
+                        context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT [dbo].[ContractCustomers] OFF");
                         transaction.Commit();
                     }
                     catch (Exception)

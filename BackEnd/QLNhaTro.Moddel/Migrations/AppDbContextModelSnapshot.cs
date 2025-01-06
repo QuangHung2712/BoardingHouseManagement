@@ -42,6 +42,9 @@ namespace QLNhaTro.Moddel.Migrations
                     b.Property<string>("Note")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime>("PaymentDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<decimal>("PriceRoom")
                         .HasColumnType("decimal(18,2)");
 
@@ -102,6 +105,29 @@ namespace QLNhaTro.Moddel.Migrations
                     b.ToTable("Contracts");
                 });
 
+            modelBuilder.Entity("QLNhaTro.Moddel.Entity.ContractCustomer", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("ContractId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("CustomerId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ContractId");
+
+                    b.HasIndex("CustomerId");
+
+                    b.ToTable("ContractCustomers");
+                });
+
             modelBuilder.Entity("QLNhaTro.Moddel.Entity.Customers", b =>
                 {
                     b.Property<long>("Id")
@@ -117,9 +143,6 @@ namespace QLNhaTro.Moddel.Migrations
                     b.Property<string>("CCCD")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<long?>("ContractId")
-                        .HasColumnType("bigint");
 
                     b.Property<DateTime>("DoB")
                         .HasColumnType("datetime2");
@@ -151,8 +174,6 @@ namespace QLNhaTro.Moddel.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ContractId");
 
                     b.ToTable("Customers");
                 });
@@ -258,7 +279,6 @@ namespace QLNhaTro.Moddel.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PaymentQRImageLink")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PhoneNumber")
@@ -269,11 +289,9 @@ namespace QLNhaTro.Moddel.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("STK")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SampleContractLink")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -301,6 +319,44 @@ namespace QLNhaTro.Moddel.Migrations
                     b.HasIndex("NewId");
 
                     b.ToTable("NewRoomPhotos");
+                });
+
+            modelBuilder.Entity("QLNhaTro.Moddel.Entity.Notification", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("BillId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long?>("CustomerId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("LandlordId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("NotificationType")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("ReadStatus")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BillId");
+
+                    b.HasIndex("CustomerId");
+
+                    b.HasIndex("LandlordId");
+
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("QLNhaTro.Moddel.Entity.Room", b =>
@@ -477,6 +533,9 @@ namespace QLNhaTro.Moddel.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsOldNewNumber")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -521,6 +580,9 @@ namespace QLNhaTro.Moddel.Migrations
                         .HasColumnType("int");
 
                     b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsFound")
                         .HasColumnType("bit");
 
                     b.Property<string>("Name")
@@ -596,13 +658,23 @@ namespace QLNhaTro.Moddel.Migrations
                     b.Navigation("Room");
                 });
 
-            modelBuilder.Entity("QLNhaTro.Moddel.Entity.Customers", b =>
+            modelBuilder.Entity("QLNhaTro.Moddel.Entity.ContractCustomer", b =>
                 {
                     b.HasOne("QLNhaTro.Moddel.Entity.Contract", "Contract")
-                        .WithMany("Customers")
-                        .HasForeignKey("ContractId");
+                        .WithMany("ContractCustomers")
+                        .HasForeignKey("ContractId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("QLNhaTro.Moddel.Entity.Customers", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Contract");
+
+                    b.Navigation("Customer");
                 });
 
             modelBuilder.Entity("QLNhaTro.Moddel.Entity.ImgRoom", b =>
@@ -644,6 +716,29 @@ namespace QLNhaTro.Moddel.Migrations
                         .IsRequired();
 
                     b.Navigation("New");
+                });
+
+            modelBuilder.Entity("QLNhaTro.Moddel.Entity.Notification", b =>
+                {
+                    b.HasOne("QLNhaTro.Moddel.Entity.Bill", "Bill")
+                        .WithMany()
+                        .HasForeignKey("BillId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("QLNhaTro.Moddel.Entity.Customers", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId");
+
+                    b.HasOne("QLNhaTro.Moddel.Entity.Landlord", "Landlord")
+                        .WithMany()
+                        .HasForeignKey("LandlordId");
+
+                    b.Navigation("Bill");
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("Landlord");
                 });
 
             modelBuilder.Entity("QLNhaTro.Moddel.Entity.Room", b =>
@@ -768,7 +863,7 @@ namespace QLNhaTro.Moddel.Migrations
 
             modelBuilder.Entity("QLNhaTro.Moddel.Entity.Contract", b =>
                 {
-                    b.Navigation("Customers");
+                    b.Navigation("ContractCustomers");
 
                     b.Navigation("ServiceMotels");
                 });

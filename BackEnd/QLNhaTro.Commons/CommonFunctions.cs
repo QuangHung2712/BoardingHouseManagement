@@ -3,7 +3,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -46,7 +48,7 @@ namespace QLNhaTro.Commons
                 entity.Update(record);
             }
         }
-        public static string Decrypt(string plainText)
+        public static string Encryption(string plainText)
         {
             using (Aes aes = Aes.Create())
             {
@@ -66,11 +68,36 @@ namespace QLNhaTro.Commons
                 }
             }
         }
+        public static string Decrypt(string cipherText)
+        {
+            using (Aes aes = Aes.Create())
+            {
+                aes.Key = Encoding.UTF8.GetBytes(Key);
+                aes.IV = Encoding.UTF8.GetBytes(IV);
+
+                using (MemoryStream ms = new MemoryStream(Convert.FromBase64String(cipherText)))
+                {
+                    using (CryptoStream cs = new CryptoStream(ms, aes.CreateDecryptor(), CryptoStreamMode.Read))
+                    {
+                        using (StreamReader sr = new StreamReader(cs))
+                        {
+                            return sr.ReadToEnd();
+                        }
+                    }
+                }
+            }
+        }
         public static string ConverPathIMG(string input)
         {
             string path = Path.GetRelativePath(DefaultValue.DEFAULT_BASE_Directory_IMG, input);
             var result = path.Replace("\\", "/");
             return "/" + result;
+        }
+        public static string GetDescription(this Enum value)
+        {
+            var field = value.GetType().GetField(value.ToString());
+            var attribute = field.GetCustomAttribute<DescriptionAttribute>();
+            return attribute?.Description ?? value.ToString();
         }
     }
 }

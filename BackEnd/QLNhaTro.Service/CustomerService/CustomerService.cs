@@ -23,20 +23,20 @@ namespace QLNhaTro.Service.CustomerService
         }
         public List<CustomerResModel> GetCustomerByContract(long contractId)
         {
-            var customerData = _Context.Customers.Where(c=>c.ContractId == contractId && !c.IsDeleted).Select(c=> CustomerResModel.Mapping(c)).ToList();
+            var customerData = _Context.ContractCustomers.Where(c=>c.ContractId == contractId && !c.Contract.IsDeleted).Select(c=> CustomerResModel.Mapping(c.Customer)).ToList();
             return customerData;
         }
         public string GetCustomerNameByContract(long contractId)
         {
-            var customerData = _Context.Customers.Where(c => c.ContractId == contractId && !c.IsDeleted).Select(c => c.FullName).ToList();
+            var customerData = _Context.ContractCustomers.Where(c => c.ContractId == contractId && !c.Contract.IsDeleted).Select(c => c.Customer.FullName).ToList();
             return string.Join(", ", customerData);
         }
         public string GetCustomerPhoneByContract(long contractId)
         {
-            var customerData = _Context.Customers.Where(c => c.ContractId == contractId && !c.IsDeleted).Select(c => c.PhoneNumber).ToList();
+            var customerData = _Context.ContractCustomers.Where(c => c.ContractId == contractId && !c.Contract.IsDeleted).Select(c => c.Customer.PhoneNumber).ToList();
             return string.Join(", ", customerData);
         }
-        public async Task CreateEditCustomer(CreateEditCustomerReqModel input,long contractId)
+        public async Task CreateEditCustomer(CreateEditCustomerReqModel input)
         {
             if (input.Id <= 0)
             {
@@ -51,10 +51,10 @@ namespace QLNhaTro.Service.CustomerService
                         Email = input.Email,
                         Address = input.Address,
                         CCCD = input.CCCD,
-                        ContractId = contractId,
 
                     };
                     _Context.Customers.Add(result);
+                    await _Context.SaveChangesAsync();
                 }
                 catch (Exception ex)
                 {
@@ -77,18 +77,14 @@ namespace QLNhaTro.Service.CustomerService
                     Email = input.Email,
                     Address = input.Address,
                     CCCD = input.CCCD,
-                    ContractId = contractId,
                 };
                 _Context.Customers.Update(customer);
+                await _Context.SaveChangesAsync();
             }
         }
         public void DeteleCustomer(long contractId)
         {
-            var customerData = _Context.Customers.Where(c => c.ContractId == contractId && !c.IsDeleted).ToList();
-            foreach (var customer in customerData) 
-            {
-                _Context.Customers.Delete(customer.Id);
-            }
+            
         }
     }
 }

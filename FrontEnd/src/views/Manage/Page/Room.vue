@@ -34,7 +34,19 @@
                 form: false,
                 towerId: 0,
                 RoomData: [],
-                selectRoom: {},
+                selectRoom: {
+                    id: 0,
+                    numberOfRoom: '',
+                    equipment: '',
+                    noPStaying: 0,
+                    priceRoom: 0,
+                    numberElectric: 0,
+                    numberCountries: 0,
+                    note: '',
+                    imgRoom:[
+
+                    ]
+                },
                 message: '',
                 snackbar: false,
                 snackbarColor: '',
@@ -57,6 +69,7 @@
                 searchName: '',
                 searchRoomName: '',
                 servicedata: [],
+                previewUrls: [],
             }
         },
         created(){
@@ -94,34 +107,54 @@
             },
         },
         methods:{
+            async loadImages(){
+                this.selectRoom.imgRoom = [];
+                for (let url of this.selectRoom.pathImgRoom) {
+                    try {
+                    
+                        const response = await fetch(url);
+                        
+                        const blob = await response.blob(); // Chuyển phản hồi thành Blob
+                        const file = new File([blob], url.split('/').pop(), { type: blob.type }); // Tạo File từ Blob
+                        // Lưu vào mảng imgRoom
+                    this.selectRoom.imgRoom.push(file);
+                        console.log(`Ảnh từ ${url} đã được tải và lưu vào imgRoom.`);
+                    } catch (error) {
+                        console.error(`Lỗi khi tải ảnh từ ${url}:`, error);
+                    }
+                }
+                console.log('Tất cả ảnh đã được tải:', this.selectRoom.imgRoom);
+            },
             async GetRoomByTowerId(){
                 await apiClient.get(`Room/GetAllRoom/${this.towerId}`)
                     .then(reponse =>{
                         this.RoomData =reponse.data;
                     })
                     .catch(error =>{
-                        this.message = "Lấy danh sách phòng bị lỗi " + error;
+                        this.message = "Lấy danh sách phòng bị lỗi " + error.response?.data?.message || error.message;
                         this.snackbar = true;
                         this.snackbarColor = 'red';
                     })
             },
-            EditRoom(roomId,title){
+            async EditRoom(roomId,title){
                 this.titleDialog = title;
                 if(roomId ===0){
                     this.selectRoom = {};
                     this.form = false;
                 }
                 else{
-                    apiClient.get(`Room/GetDetail?roomId=${roomId}`)
+                    await apiClient.get(`Room/GetDetail?roomId=${roomId}`)
                             .then(reponse => {
                                 this.selectRoom = reponse.data;
                             })
                             .catch(error=>{
                                 this.viewdialogEdit = false;
                                 this.snackbar = true;
-                                this.message = 'Lấy thông tin của phòng bị lỗi ' + error;
+                                this.message = 'Lấy thông tin của phòng bị lỗi ' + error.response?.data?.message || error.message;
                                 this.snackbarColor = 'red';
                             })
+                    this.loadImages();
+                    this.handleFileChange();
                 }
             },
             async DetailRoom(roomId){
@@ -134,10 +167,10 @@
                             .catch(error=>{
                                 this.viewdialogEdit = false;
                                 this.snackbar = true;
-                                this.message = 'Lấy thông tin của phòng bị lỗi ' + error;
+                                this.message = 'Lấy thông tin của phòng bị lỗi ' + error.response?.data?.message || error.message;
                                 this.snackbarColor = 'red';
                             })
-                if(this.selectRoom.customerName != ''){
+                if(this.selectRoom.isCustomer == true){
                     await apiClient.get(`Room/GetContractByRoomId?roomId=${roomId}`)
                     .then(reponse => {
                         this.contractData = reponse.data;
@@ -145,12 +178,10 @@
                     .catch(error=>{
                         this.viewdialogEdit = false;
                         this.snackbar = true;
-                        this.message = 'Lấy thông tin hợp đồng của phòng bị lỗi ' + error;
+                        this.message = 'Lấy thông tin hợp đồng của phòng bị lỗi ' + error.response?.data?.message || error.message;
                         this.snackbarColor = 'red';
                     })
                 }
-                
-
             },
             deleteRoom(id,name) {
                 const swalWithBootstrapButtons = Swal.mixin({
@@ -193,7 +224,7 @@
                                     .catch(error =>{
                                         swalWithBootstrapButtons.fire(
                                             "Xóa không thành công",
-                                            ` ${error}`,
+                                            ` ${error.response?.data?.message || error.message}`,
                                             "error"
                                         );
                                     })
@@ -234,7 +265,7 @@
                             this.towerData = response.data;
                         })
                         .catch(error =>{
-                            this.message = 'Đã xảy ra lỗi ' + error;
+                            this.message = 'Đã xảy ra lỗi ' + error.response?.data?.message || error.message;
                             this.snackbarColor = 'red'
                             this.snackbar = true
                         })
@@ -259,7 +290,6 @@
                 this.changeRoom.services.splice(index, 1);
             },
             createEditRoom(){
-                this.selectRoom.towerid = this.towerId;
                 if(this.selectRoom.id === undefined){
                     this.message = 'Thêm thành công'
                     this.selectRoom.id = 0;
@@ -269,7 +299,21 @@
                 }
                 if(!/^\d+$/.test(this.selectRoom.priceRoom))
                 this.selectRoom.priceRoom =  this.selectRoom.priceRoom.replace(/[^\d]/g, '');
-                apiClient.post(`/Room/CreateEditRoom`,this.selectRoom)
+                const formData = new FormData();
+                formData.append("id",this.selectRoom.id);
+                formData.append("numberOfRoom", this.selectRoom.numberOfRoom);
+                formData.append("towerId", this.towerId);
+                formData.append("equipment",this.selectRoom.equipment);
+                formData.append("noPStaying", this.selectRoom.noPStaying);
+                formData.append("priceRoom", this.selectRoom.priceRoom);
+                formData.append("numberElectric",this.selectRoom.numberElectric ?? "");
+                formData.append("numberCountries", this.selectRoom.numberCountries ?? "");
+                formData.append("note", this.selectRoom.note ?? "");
+                this.selectRoom.imgRoom.forEach((File)=>{
+                    formData.append("ImgRoom", File);
+                })
+                console.log(this.selectRoom);
+                apiClient.post(`/Room/CreateEditRoom`,formData)
                 .then(response => {
                     if(response.status){
                         this.snackbarColor = 'green'
@@ -284,7 +328,7 @@
                     }
                 })
                 .catch(error =>{
-                    this.message = 'Đã xảy ra lỗi ' + error
+                    this.message = 'Đã xảy ra lỗi ' + error.response?.data?.message || error
                     this.snackbarColor = 'red'
                     this.snackbar = true
                 })
@@ -299,7 +343,7 @@
                         this.roomDataChange =reponse.data;
                     })
                     .catch(error =>{
-                        this.message = "Lấy danh sách phòng để đổi bị lỗi " + error;
+                        this.message = "Lấy danh sách phòng để đổi bị lỗi " + error.response?.data?.message || error.message;
                         this.snackbar = true;
                         this.snackbarColor = 'red';
                     })
@@ -308,7 +352,7 @@
                     this.servicedata = reponse.data;
                 })
                 .catch(error =>{
-                    this.message = "Lấy danh sách dịch vụ bị lỗi "+ error;
+                    this.message = "Lấy danh sách dịch vụ bị lỗi "+ error.response?.data?.message || error.message;
                     this.snackbar = true;
                     this.snackbarColor = 'red';
                 })
@@ -342,11 +386,56 @@
                             }
                         })
                         .catch(error =>{
-                            this.message = 'Đã xảy ra lỗi ' + error
+                            this.message = 'Đã xảy ra lỗi ' + error.response?.data?.message || error.message
                             this.snackbarColor = 'red'
                             this.snackbar = true
                         })
                 }
+            },
+            addCustomer(id){
+                this.$store.commit('setRoom', id);
+                const encryptedId = CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(0));
+                this.$router.push({ name: 'createEdit', params: { idcontract: encryptedId } });
+            },
+            handleFileChange() {
+                this.previewUrls = [];
+                if (this.selectRoom.imgRoom) {
+                    for (let file of this.selectRoom.imgRoom) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        this.previewUrls.push(e.target.result);
+                    };
+                    reader.readAsDataURL(file);
+                    }
+                }
+            },
+            FineNewCustomers(roomid,roomName){
+                apiClient.put(`/Room/FineNewCustomers/${roomid}`)
+                        .then(()=>{
+                            this.message = `Tìm khách mới cho phòng ${roomName} thành công!`
+                            this.snackbarColor = 'green'
+                            this.snackbar = true
+                            this.GetRoomByTowerId();
+                        })
+                        .catch(error=>{
+                            this.message = 'Đã xảy ra lỗi ' + error.response?.data?.message || error
+                            this.snackbarColor = 'red'
+                            this.snackbar = true
+                        })
+            },
+            CancelFineNewCustomers(roomid,roomName){
+                apiClient.put(`/Room/CancelFineNewCustomers?roomId=${roomid}`)
+                        .then(()=>{
+                            this.message = `Huỷ khách mới cho phòng ${roomName} thành công!`
+                            this.snackbarColor = 'green'
+                            this.snackbar = true
+                            this.GetRoomByTowerId();
+                        })
+                        .catch(error=>{
+                            this.message = 'Đã xảy ra lỗi ' + error.response?.data?.message || error
+                            this.snackbarColor = 'red'
+                            this.snackbar = true
+                        })
             }
         }
 }
@@ -416,7 +505,7 @@
                                     {{ item.customerName }}
                                     </template>
                                     <template v-else>
-                                    <v-btn color="primary" @click="addCustomer(item)">
+                                    <v-btn color="primary" @click="addCustomer(item.id)">
                                         Thêm khách
                                     </v-btn>
                                     </template>
@@ -432,7 +521,8 @@
                                 <v-icon class="ml-lg-3" v-show="!item.customerName" small @click="deleteRoom(item.id,item.numberOfRoom)" title="Xoá phòng" >mdi-delete-empty </v-icon>
                                 <v-icon class="ml-lg-3" v-show="item.customerName" small @click="(viewdialogCheckOut = !viewdialogCheckOut) && (CheckOutRoom(item.id))" title="Trả phòng">mdi-refresh</v-icon>
                                 <v-icon class="ml-lg-3" v-show="item.customerName" small @click="(viewdialogChangeRoom = !viewdialogChangeRoom) && (ChangeRoom(item.id))" title="Đổi phòng">mdi-swap-horizontal</v-icon>
-                                <v-icon class="ml-lg-3" v-show="item.customerName" small @click="(viewdialogChangeRoom = !viewdialogChangeRoom) && (ChangeRoom(item.id))" title="Tìm khách mới   ">mdi-account-plus</v-icon>
+                                <v-icon class="ml-lg-3" v-show="item.status == false" small @click="FineNewCustomers(item.id,item.numberOfRoom)">mdi-account-multiple-plus</v-icon>
+                                <v-icon class="ml-lg-3" v-show="item.status == true" small @click="CancelFineNewCustomers(item.id,item.numberOfRoom)">mdi-account-multiple-remove</v-icon>
                             </template>
                         </v-data-table>
                     </BCardBody>
@@ -478,17 +568,45 @@
                                         <v-text-field v-model="selectRoom.numberCountries" type="number" variant="outlined" clearable placeholder="Nhập vào số người tối đa được ở" class="input-control"></v-text-field>
                                     </div>
                                 </BCol>
-                                <BCol class="col-lg-6">
+                                <BCol class="col-lg-12">
                                     <div class="form-group">
                                         <label class="form-label">Ghi chú:</label>
-                                        <v-text-field v-model="selectRoom.note" type="number" variant="outlined" clearable placeholder="Nhập vào số người tối đa được ở" class="input-control"></v-text-field>
+                                        <v-text-field v-model="selectRoom.note" type="text" variant="outlined" clearable placeholder="Nhập vào số người tối đa được ở" class="input-control"></v-text-field>
                                     </div>
                                 </BCol>
+                                <BCol class="col-lg-12">
+                                    <div class="form-group">
+                                        <label class="form-label">Ảnh phòng:</label>
+                                        <v-file-input
+                                            v-model="selectRoom.imgRoom"
+                                            multiple
+                                            accept="image/*"
+                                            show-size
+                                            @change="handleFileChange"
+                                        ></v-file-input>
+                                    </div>
+                                </BCol>
+                                <v-row>
+                                    <v-col
+                                        v-for="(file, index) in selectRoom.imgRoom"
+                                        :key="index"
+                                        cols="12"
+                                        sm="6"
+                                        md="3"
+                                    >
+                                        <v-img
+                                            :src="previewUrls[index] || selectRoom.pathImgRoom[index]"
+                                            aspect-ratio="1"
+                                            class="mb-4"
+                                        ></v-img>
+                                        <p>{{ file.name }}</p>
+                                    </v-col>
+                                </v-row>
                             </BRow>
                         </v-form>
                     </div>
                     <div class="modal-footer v-modal-footer">
-                        <BButton type="button" variant="light" @click="viewdialog = false">Close
+                        <BButton type="button" variant="light" @click="viewdialogEdit = false">Close
                         </BButton>
                         <BButton type="button" variant="primary" @click="createEditRoom()" :disabled="!form">Save Changes</BButton>
                     </div>
@@ -504,50 +622,68 @@
                                             <BCol class="col-lg-4">
                                                 <div class="form-group">
                                                     <label class="form-label">Số phòng:</label>
-                                                    <v-text-field v-model="selectRoom.numberOfRoom" :rules="[required]" variant="outlined" placeholder="Nhập vào số phòng" readonly class="input-control"></v-text-field>
+                                                    <v-text-field v-model="selectRoom.numberOfRoom" :rules="[required]" variant="outlined"  readonly class="input-control"></v-text-field>
                                                 </div>
                                             </BCol>
                                             <BCol class="col-lg-4">
                                                 <div class="form-group">
                                                     <label class="form-label">Thiết bị:</label>
-                                                    <v-text-field v-model="selectRoom.equipment" :rules="[required]" type="text" variant="outlined" readonly placeholder="Nhập vào các thiết bị có trong phòng" class="input-control"></v-text-field>
+                                                    <v-text-field v-model="selectRoom.equipment" :rules="[required]" type="text" variant="outlined" readonly class="input-control"></v-text-field>
                                                 </div>
                                             </BCol>
                                             <BCol class="col-lg-4">
                                                 <div class="form-group">
                                                     <label class="form-label">Số người ở:</label>
-                                                    <v-text-field v-model="selectRoom.noPStaying" :rules="[requiredNumber]" type="number" variant="outlined" readonly placeholder="Nhập vào số người tối đa được ở" class="input-control"></v-text-field>
+                                                    <v-text-field v-model="selectRoom.noPStaying" :rules="[requiredNumber]" type="number" variant="outlined" readonly  class="input-control"></v-text-field>
                                                 </div>
                                             </BCol>
                                             <BCol class="col-lg-4">
                                                 <div class="form-group">
                                                     <label class="form-label">Giá:</label>
-                                                    <v-text-field v-model="selectRoom.priceRoom" :rules="[requiredNumber]" type="text" @input="FormatPrice" variant="outlined" readonly placeholder="Nhập vào giá phòng" class="input-control"></v-text-field>
+                                                    <v-text-field v-model="selectRoom.priceRoom" :rules="[requiredNumber]" type="text" @input="FormatPrice" variant="outlined" readonly  class="input-control"></v-text-field>
                                                 </div>
                                             </BCol>
                                             <BCol class="col-lg-4">
                                                 <div class="form-group">
                                                     <label class="form-label">Số điện(nếu có):</label>
-                                                    <v-text-field v-model="selectRoom.numberElectric"  type="number" variant="outlined" readonly placeholder="Nhập vào số người tối đa được ở" class="input-control"></v-text-field>
+                                                    <v-text-field v-model="selectRoom.numberElectric"  type="number" variant="outlined" readonly  class="input-control"></v-text-field>
                                                 </div>
                                             </BCol>
                                             <BCol class="col-lg-4">
                                                 <div class="form-group">
                                                     <label class="form-label">Số nước(nếu có):</label>
-                                                    <v-text-field v-model="selectRoom.numberCountries" type="number" variant="outlined" readonly placeholder="Nhập vào số người tối đa được ở" class="input-control"></v-text-field>
+                                                    <v-text-field v-model="selectRoom.numberCountries" type="number" variant="outlined" readonly  class="input-control"></v-text-field>
                                                 </div>
                                             </BCol>
-                                            <BCol class="col-lg-4">
+                                            <BCol class="col-lg-12">
                                                 <div class="form-group">
                                                     <label class="form-label">Ghi chú:</label>
-                                                    <v-text-field v-model="selectRoom.note" type="number" variant="outlined" readonly placeholder="Nhập vào số người tối đa được ở" class="input-control"></v-text-field>
+                                                    <v-text-field v-model="selectRoom.note" type="number" variant="outlined" readonly class="input-control"></v-text-field>
                                                 </div>
                                             </BCol>
+                                            <div class="form-group">
+                                                <label class="form-label">Ảnh phòng:</label>
+                                                <v-row>
+                                                    <v-col
+                                                        v-for="(file, index) in selectRoom.pathImgRoom"
+                                                        :key="index"
+                                                        cols="12"
+                                                        sm="6"
+                                                        md="3"
+                                                    >
+                                                        <v-img
+                                                            :src="selectRoom.pathImgRoom[index]"
+                                                            aspect-ratio="1"
+                                                            class="mb-4"
+                                                        ></v-img>
+                                                    </v-col>
+                                                </v-row>
+                                            </div>
                                         </BRow>
                                     </v-form>
                                 </div>
                             </BTab>
-                            <BTab title="Thông tin hợp đồng" v-if="selectRoom.customerName != ''">
+                            <BTab title="Thông tin hợp đồng" v-if="selectRoom.isCustomer == true">
                                 <div class="card-body" >
                                     <BRow>
                                         <BCol class="col-lg-4">
@@ -577,7 +713,7 @@
                                     </BRow>
                                 </div>
                             </BTab>
-                            <BTab title="Thông tin khách hàng" v-if="selectRoom.customerName != ''">
+                            <BTab title="Thông tin khách hàng" v-if="selectRoom.isCustomer == true">
                                 <div class="card" v-for="(customer,index) in contractData.customers " :key="index">
                                     <div class="card-header">
                                         <h4>Khách hàng {{ index + 1 }}</h4>

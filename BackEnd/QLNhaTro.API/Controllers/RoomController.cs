@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
+﻿using DocumentFormat.OpenXml.Drawing.Spreadsheet;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using QLNhaTro.Commons;
+using QLNhaTro.Moddel.Entity;
 using QLNhaTro.Moddel.Moddel.RequestModels;
 using QLNhaTro.Moddel.Moddel.ResponseModels;
 using QLNhaTro.Service.ContractService;
@@ -25,68 +27,170 @@ namespace QLNhaTro.API.Controllers
         [HttpGet("{towerId}")]
         public async Task<ActionResult<List<GetAllRoomResModel>>> GetAllRoom(long towerId)
         {
-            return await roomService.GellAllRoomByTower(towerId);
+            try
+            {
+                var result = await roomService.GellAllRoomByTower(towerId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+
+            }
         }
 
         [HttpGet]
-        public async Task<GetRoomDetailByIdResModel> GetDetail([FromQuery] long roomId)
+        public async Task<ActionResult<GetRoomDetailByIdResModel>> GetDetail([FromQuery] long roomId)
         {
-            return await roomService.GetDetailRoomById(roomId);
+
+            try
+            {
+                var result = await roomService.GetDetailRoomById(roomId);
+                return Ok(result);
+            }
+            catch (Exception ex) 
+            {
+                return StatusCode(500, new { Message = ex.Message });
+
+            }
         }
 
         [HttpGet]
-        public async Task<GetContractByRoomIDResModel> GetContractByRoomId([FromQuery] long roomId)
+        public async Task<ActionResult<GetContractByRoomIDResModel>> GetContractByRoomId([FromQuery] long roomId)
         {
-            return await contractService.GetContractByRoomId(roomId);
+            try
+            {
+                var result = await contractService.GetContractByRoomId(roomId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+
+            }
         }
 
         [HttpGet]
         public async Task<ActionResult<List<GetDropDownRoom>>> GetDropDown([FromQuery] long towerId)
         {
-            return await roomService.GetDropDownRooms(towerId);
+            try
+            {
+                var result = await roomService.GetDropDownRooms(towerId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+
+            }
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateEditRoom([FromBody] CreateEditRoomReqModel data)
+        public async Task<IActionResult> CreateEditRoom([FromForm] CreateEditRoomReqModel data,[FromForm] List<IFormFile> ImgRoom)
         {
-            await roomService.CreateEditRoom(data);
-            return Ok();
+            try
+            {
+                await roomService.CreateEditRoom(data, ImgRoom);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+
+            }
         }
 
         [HttpPut("{roomId}")]
         public async Task<IActionResult> FineNewCustomers(long roomId)
         {
-            await roomService.FineNewCustomers(roomId);
-            return Ok();
+            try
+            {
+                await roomService.FineNewCustomers(roomId);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+
+            }
+        }
+        [HttpPut]
+        public async Task<IActionResult> CancelFineNewCustomers([FromQuery]long roomId)
+        {
+            try
+            {
+                await roomService.CancelFineNewCustomers(roomId);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+
+            }
         }
 
         [HttpDelete("{RoomId}")]
         public IActionResult DeleteRoom(long RoomId) 
         {
-            roomService.DeleteRoom(RoomId);
-            return Ok();
+            try
+            {
+                roomService.DeleteRoom(RoomId);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+
+            }
         }
 
         [HttpPut]
         public async Task<IActionResult> CheckOutRoom([FromBody] CheckOutRoomReqModel data)
         {
-            await roomService.CheckOut(data);
-            //Thực hiện việc quyết toán tiền cho khách
-            return Ok();
+            try
+            {
+                await roomService.CheckOut(data);
+                //Thực hiện việc quyết toán tiền cho khách
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+
+            }
         }
 
         [HttpPut]
         public async Task<IActionResult> ChangeRoom([FromBody] ChangeRoomReqModel data)
         {
-            await roomService.ChangeRoom(data);
-            //Xử lý việc chênh tiền trọ
-            return Ok();
+            try
+            {
+                await roomService.ChangeRoom(data);
+                //Xử lý việc chênh tiền trọ
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+
+            }
         }
 
         [HttpGet]
         public async Task<ActionResult<List<GetDropDownRoom>>> GetRoomNoContract([FromQuery] long towerID)
         {
-            return await roomService.GetRoomNoContract(towerID);
+            
+            try
+            {
+                var result = await roomService.GetRoomNoContract(towerID);
+                //Xử lý việc chênh tiền trọ
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+
+            }
         }
 
         [HttpGet]

@@ -11,7 +11,7 @@ export function formatTablePrice(price) {
 }
 export function formatPrice(inputPrice) {
     // Loại bỏ tất cả các ký tự không phải là số
-    let price = inputPrice.replace(/[^\d]/g, '');
+    let price = inputPrice.toString().replace(/[^\d]/g, '');
     // Chia chuỗi thành các nhóm ba chữ số và nối lại bằng dấu chấm
     if (price) {
         price = price.replace(/\B(?=(\d{3})+(?!\d))/g, '.');

@@ -14,6 +14,7 @@
     import pageheader from "@/components/page-header.vue"
     import apiClient from "@/plugins/axios";
     import CryptoJS from 'crypto-js';
+    import common from "@/components/common/JavaScripCommon"
 
 
     export default {
@@ -39,6 +40,18 @@
                     roomPaid: 0,
                     roomUnpaid: 0
                 },
+                headersTable:[
+                    {title: 'Số phòng',value:'numberOfRoom',sortable: true},
+                    {title: 'Số tiền',value: 'soTien',sortable: true},
+                    {title: 'Ngày thanh toán', value: 'ngayThanhToan',sortable: true},
+                    {title: '',value: 'actions',sortable: false}
+                ],
+                RequestPaymentConfirmation: [
+                    
+                ],
+                message: '',
+                snackbar: false,
+                snackbarColor: '',
             }
         },
         created(){
@@ -46,6 +59,7 @@
             const DecodingIdTower = CryptoJS.enc.Utf8.stringify(CryptoJS.enc.Base64.parse(idtower));
             this.towerId = DecodingIdTower;
             this.getInfo();
+            this.GetRequestPaymentConfirmation();
         },
         methods:{
             getInfo(){
@@ -58,7 +72,57 @@
                             this.snackbar = true;
                             this.snackbarColor = 'red';
                         })
-            }
+            },
+            GetRequestPaymentConfirmation(){
+                apiClient.get(`/Bill/GetRequestPayment?landlordId=${1}`)
+                        .then(response=>{
+                            this.RequestPaymentConfirmation = response.data;
+                            console.log(this.RequestPaymentConfirmation);
+                        })
+                        .catch(error=>{
+                            this.message = "Lấy thông tin bị lỗi " + error.response?.data?.message || error.message;
+                            this.snackbar = true;
+                            this.snackbarColor = 'red';
+                        })
+            },
+            FormatPrice(price) {
+                if(price)
+                return common.formatTablePrice(price);
+            },
+            Refuse(id){
+                const RequestPayment = this.RequestPaymentConfirmation.find(item => item.id === id);
+                apiClient.put(`/Bill/RefusePay`,RequestPayment)
+                    .then(()=>{
+                        this.message = "Từ chối hoá đơn thành công!";
+                        this.snackbar = true;
+                        this.snackbarColor = 'green';
+                    })
+                    .catch(error=>{
+                        this.message = "Từ chối hoá đơn bị lỗi: " + error.response?.data?.message || error;
+                        this.snackbar = true;
+                        this.snackbarColor = 'red';
+                    })
+            },
+            Received(id){
+                const RequestPayment = this.RequestPaymentConfirmation.find(item => item.id === id);
+                apiClient.put(`/Bill/AcceptPayments`,RequestPayment)
+                    .then(()=>{
+                        this.message = "Xác nhận hoá đơn thành công!";
+                        this.snackbar = true;
+                        this.snackbarColor = 'green';
+                        this.GetRequestPaymentConfirmation();
+                        this.getInfo();
+                    })
+                    .catch(error=>{
+                        this.message = "Xác nhận hoá đơn bị lỗi: " + error.response?.data?.message || error;
+                        this.snackbar = true;
+                        this.snackbarColor = 'red';
+                    })
+            },
+            formatPrice(price) {
+                if(price)
+                return common.formatPrice(price);
+            },
         }
 }
 </script>
@@ -66,6 +130,14 @@
 <template>
     <pageheader title="" pageTitle="Trang chủ" />
     <BRow>
+        <v-snackbar
+            v-model="snackbar"
+            :timeout="10000"
+            class="custom-snackbar"
+            :color="snackbarColor"
+        >
+            <h5 class="text-center">{{ message }}</h5>
+        </v-snackbar>
         <BCol class="col-sm-4">
             <BCard class="statistics-card-1" no-body>
                 <BCardHeader class="d-flex align-items-center justify-content-between py-2">
@@ -165,7 +237,7 @@
                         <div>
                             <p class="text-muted mb-0">Tổng số tiền đã thu được</p>
                             <div class="d-flex align-items-end">
-                                <h2 class="mb-0 f-w-500">4 <small class="text-muted">VND</small></h2>
+                                <h2 class="mb-0 f-w-500">{{ formatPrice(dataInfo.totalAmount) }} <small class="text-muted">VND</small></h2>
                             </div>
                         </div>
                     </div>
@@ -183,6 +255,10 @@
                         :items="RequestPaymentConfirmation"
                         class="border-sm rounded-lg custom-table"
                         hide-default-footer>
+                        <template v-slot:[`item.soTien`]="{ item }">
+                                <!-- Hiển thị giá đã định dạng -->
+                                {{ FormatPrice(item.soTien) }}
+                            </template>
                         <template v-slot:[`item.actions`]="{ item }">
                             <button class="btn btn-sm btn-link-danger" @click="Refuse(item.id)">Từ chối</button>
                             <button class="btn btn-sm btn-primary ms-1" @click="Received(item.id)">Đã nhận</button>

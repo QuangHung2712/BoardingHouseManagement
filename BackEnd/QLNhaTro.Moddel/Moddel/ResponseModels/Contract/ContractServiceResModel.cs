@@ -13,5 +13,6 @@ namespace QLNhaTro.Moddel.Moddel.ResponseModels
         public string ServiceName { get; set; }
         public decimal Price { get; set; }
         public int Number { get; set; }
+        public bool IsOldNewNumber { get; set; }
     }
 }

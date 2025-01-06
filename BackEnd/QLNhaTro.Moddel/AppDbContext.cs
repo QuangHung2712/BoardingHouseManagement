@@ -29,5 +29,7 @@ namespace QLNhaTro.Moddel
         public DbSet<SaveNews> SaveNews { get; set; }
         public DbSet<SaveRoom> SaveRooms { get; set; }
         public DbSet<SharedResidents> SharedResidents { get; set; }
+        public DbSet<ContractCustomer> ContractCustomers { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
     }
 }

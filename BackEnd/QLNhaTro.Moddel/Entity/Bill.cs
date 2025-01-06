@@ -17,6 +17,7 @@ namespace QLNhaTro.Moddel.Entity
         public DateOnly CreationDate { get; set; }
         public decimal PriceRoom { get; set; }
         public decimal TotalAmount { get; set; }
+        public DateTime PaymentDate { get; set; }
         public CommonEnums.StatusBill Status { get; set; }
         public string? Note { get; set; }
     }

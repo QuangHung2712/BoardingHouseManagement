@@ -48,7 +48,7 @@ export default {
             await apiClient.get(`/Service/GetAll?towerId=${this.towerId}`)
             .then(reponse =>{
                 this.serviceData = reponse.data;
-            })
+                console.log(reponse.data);            })
             .catch(error =>{
                 console.error('Lấy thông tin của dịch vụ: ',error);
             })
@@ -105,9 +105,11 @@ export default {
         DetailService(serviceId,title){
             this.titleDialog = title;
             if(serviceId===0){
+                this.selectService.id = undefined;
                 this.selectService.name = "";
                 this.selectService.price = "";
                 this.selectService.unitOfCalculation="",
+                this.selectService.isOldNewNumber=false,
                 this.form = false;
             }
             else{
@@ -248,7 +250,14 @@ export default {
                                         <v-text-field v-model="selectService.unitOfCalculation" :rules="[required]" type="text" variant="outlined" clearable placeholder="Nhập vào đơn vị tính của dịch vụ" class="input-control"></v-text-field>
                                     </div>
                                 </BCol>
-                                <BCol class="d-flex">
+                                <BCol>
+                                    <v-switch
+                                        v-model="selectService.isOldNewNumber"
+                                        :label= "`Cần nhập vào số cũ và mới`" 
+                                        color="primary"
+                                        hide-details
+                                        :style="{ color: 'blue' }" 
+                                    ></v-switch>
                                     <v-switch
                                         v-show="selectService.id !== undefined"
                                         v-model="selectService.applyPriceServiceAllRoom"

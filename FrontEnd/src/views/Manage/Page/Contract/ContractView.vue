@@ -92,7 +92,7 @@ export default {
                     this.contractData =reponse.data;
                 })
                 .catch(error =>{
-                    this.message = "Lấy danh sách hợp đồng bị lỗi " + error;
+                    this.message = "Lấy danh sách hợp đồng bị lỗi " + error.response?.data?.message || error.message;
                     this.snackbar = true;
                     this.snackbarColor = 'red';
                 })
@@ -153,7 +153,7 @@ export default {
                         console.log(response.data);
                     })
                     .catch(error=>{
-                        this.message = "Lấy thông tin của hợp đồng bị lỗi " + error;
+                        this.message = "Lấy thông tin của hợp đồng bị lỗi " + error.response?.data?.message || error.message;
                         this.snackbar = true;
                         this.snackbarColor = 'red';
                     })
@@ -162,6 +162,7 @@ export default {
             return !!v || 'Vui lòng không để trống'
         },
         CreateEditContract(id){
+            this.$store.commit('setRoom', null);
             const encryptedId = CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(id));
             this.$router.push({ name: 'createEdit', params: { idcontract: encryptedId } });
         },
@@ -175,7 +176,7 @@ export default {
                                 this.roomData = response.data;
                             })
                             .catch(error=>{
-                                this.message = "Lấy thông tin của hợp đồng bị lỗi " + error;
+                                this.message = "Lấy thông tin của hợp đồng bị lỗi " + error.response?.data?.message || error.message;
                                 this.snackbar = true;
                                 this.snackbarColor = 'red';
                             })
@@ -195,7 +196,8 @@ export default {
                 document.body.removeChild(fileLink);
             })
             .catch((error) => {
-                this.message = "Tải hợp đồng bị lỗi: " + error.message;
+                this.message = "Tải hợp đồng bị lỗi: " + error.response?.data?.message || error.message;
+                console.log(error.response);
                 this.snackbar = true;
                 this.snackbarColor = "red";
             });
@@ -219,7 +221,7 @@ export default {
                         swalWithBootstrapButtons
                             .fire({
                                 title: "Bạn có muốn sửa thông tin của hợp đồng không?",
-                                text: `Gia hạn hợp đồng thành công. Bạn có muốn sửa thông tin của hợp : ${this.contractExtension.contractId}`,
+                                text: `Gia hạn hợp đồng thành công. Bạn có muốn sửa thông tin của hợp đồng`,
                                 icon: "warning",
                                 confirmButtonText: "Có!",
                                 cancelButtonText: "Không!",
@@ -245,7 +247,7 @@ export default {
                     }
                 })
                 .catch(error =>{
-                    this.message = 'Đã xảy ra lỗi ' + error
+                    this.message = 'Đã xảy ra lỗi ' + error.response?.data?.message || error.message
                     this.snackbarColor = 'red'
                     this.snackbar = true
                 })

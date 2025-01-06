@@ -1,7 +1,9 @@
 ﻿using DocumentFormat.OpenXml.Drawing.Spreadsheet;
 using DocumentFormat.OpenXml.InkML;
+using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.Vml.Office;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MimeKit.Encodings;
 using QLNhaTro.Commons;
@@ -16,6 +18,7 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static QLNhaTro.Commons.CommonConstants;
 using static System.Net.Mime.MediaTypeNames;
 using Contract = QLNhaTro.Moddel.Entity.Contract;
 
@@ -47,10 +50,9 @@ namespace QLNhaTro.Service.RoomService
         }
         private string GetCustomerByRoom(long roomId)
         {
-            var data = _Context.Contracts.Where(record=> record.RoomId == roomId && record.TerminationDate ==null && !record.IsDeleted)
-                                .SelectMany(record=> record.Customers)
-                                .Select(item=> item.FullName).ToList();
-            if(data.Count > 0)
+            var data = _Context.ContractCustomers.Where(record => record.Contract.RoomId == roomId && record.Contract.TerminationDate == null && !record.Contract.IsDeleted)
+                                  .Select(item => item.Customer.FullName).ToList();
+            if (data.Count > 0)
             {
                 return string.Join(",", data);
             }
@@ -63,10 +65,7 @@ namespace QLNhaTro.Service.RoomService
                 Id = item.Id,
                 NumberOfRoom = item.Name,
                 Equipment = item.Equipment,
-                CustomerName = _Context.Contracts.Where(c=> c.RoomId == roomId && c.TerminationDate == null && !c.IsDeleted)
-                                                .SelectMany(c=> c.Customers)
-                                                .Select(c=> CustomerResModel.Mapping(c))
-                                                .ToList(),
+                IsCustomer = _Context.Contracts.Any(item=> item.RoomId == roomId && !item.IsDeleted && item.TerminationDate == null),
                 NoPStaying = item.NoPStaying,
                 PriceRoom  = item.PriceRoom,
                 NumberElectric = item.NumberElectric,
@@ -74,6 +73,7 @@ namespace QLNhaTro.Service.RoomService
                 Note = item.Note,
                 Status = item.StatusNewCustomer,
             }).FirstOrDefaultAsync();
+            roomdata.PathImgRoom= ConverPathListIMG(_Context.ImgRooms.Where(img => img.RoomId == roomdata.Id).Select(img => img.Path).ToList());
             if (roomdata == null) throw new NotFoundException(nameof(roomId));
             return roomdata;
         }
@@ -86,7 +86,7 @@ namespace QLNhaTro.Service.RoomService
             }).ToListAsync();
             return roomdata;
         }
-        public async Task CreateEditRoom(CreateEditRoomReqModel input)
+        public async Task CreateEditRoom(CreateEditRoomReqModel input, List<IFormFile> ImgRoom)
         {
             if (input.Id <= 0)
             {
@@ -102,11 +102,11 @@ namespace QLNhaTro.Service.RoomService
                         NumberElectric = input.NumberElectric,
                         NumberCountries = input.NumberCountries,
                         Note = input.Note,
-                        StatusNewCustomer = false,
+                        StatusNewCustomer = true,
                     };
                     _Context.Rooms.Add(newRoom);
-
-                    //SaveImgToDB(imgs, newRoom.Id, input.TowerId);
+                    await _Context.SaveChangesAsync();
+                    SaveImgToDB(ImgRoom, newRoom.Id, input.TowerId);
                     await _Context.SaveChangesAsync();
                 }
                 catch (Exception ex)
@@ -127,9 +127,10 @@ namespace QLNhaTro.Service.RoomService
                     room.NumberElectric = input.NumberElectric;
                     room.NumberCountries = input.NumberCountries;
                     room.Note = input.Note;
+                    string path = @$"{DefaultValue.DEFAULT_BASE_Directory_IMG}\images\Room\{room.TowerId}\{room.Id}";
+                    DeleteImgRoomByRoomId(path, room.Id);
+                    SaveImgToDB(ImgRoom, input.Id, input.TowerId);
                     _Context.Rooms.Update(room);
-                    //DeleteImgRoomByRoomId(input.Id, input.TowerId);
-                    //SaveImgToDB(imgs, input.Id, input.TowerId);
                     await _Context.SaveChangesAsync();
                 }
                 catch (Exception ex)
@@ -139,43 +140,35 @@ namespace QLNhaTro.Service.RoomService
                 }
             }
         }
-        private async void SaveImgToDB(List<IFormFile> Imgs, long roomId, long towerId)
+        private void SaveImgToDB(List<IFormFile> Imgs, long roomId, long towerId)
         {
-            // Tạo thư mục lưu ảnh dựa trên TowerId và RoomId
-            var folderPath = Path.Combine("D:/QuanLyNhaTro", towerId.ToString(), roomId.ToString());
             try
             {
-                if (Imgs != null && Imgs.Count > 0)
+                // Đường dẫn thư mục lưu ảnh
+                string directoryPath = Path.Combine(Directory.GetCurrentDirectory(), $@"{DefaultValue.DEFAULT_BASE_Directory_IMG}\images\Room\{towerId}\{roomId}");
+                if (!Directory.Exists(directoryPath))
                 {
-                    // Kiểm tra và tạo thư mục nếu chưa tồn tại
-                    if (!Directory.Exists(folderPath))
+                    Directory.CreateDirectory(directoryPath);
+                }
+                foreach (var img in Imgs)
+                {
+                    if (img.Length > 0)
                     {
-                        Directory.CreateDirectory(folderPath);
-                    }
-                    foreach (var img in Imgs)
-                    {
-                        if (img.Length > 0)
+                        // Đặt tên file duy nhất
+                        var fileName = Guid.NewGuid() + Path.GetExtension(img.FileName);
+
+                        // Đường dẫn đầy đủ của ảnh
+                        var filePath = Path.Combine(directoryPath, fileName);
+
+                        // Lưu file vào đường dẫn đã chỉ định
+                        using (var stream = new FileStream(filePath, FileMode.Create))
                         {
-                            // Đặt tên file duy nhất
-                            var fileName = Guid.NewGuid() + Path.GetExtension(img.FileName);
-                            var filePath = Path.Combine(folderPath, fileName);
-
-                            // Lưu ảnh vào thư mục
-                            using (var stream = new FileStream(filePath, FileMode.Create))
-                            {
-                                await img.CopyToAsync(stream);
-                            }
-
-                            // Lưu đường dẫn ảnh vào database
-                            var contractImage = new ImgRoom
-                            {
-                                RoomId = roomId,
-                                Path = "images/" + fileName
-                            };
-
-                            //Lưu đường dẫn vào database
-                            _Context.ImgRooms.Add(contractImage);
+                            img.CopyTo(stream);
                         }
+
+                        var imgRoom = new ImgRoom { RoomId = roomId,Path = filePath };
+                        _Context.ImgRooms.Add(imgRoom);
+
                     }
                 }
             }
@@ -193,24 +186,22 @@ namespace QLNhaTro.Service.RoomService
             _Context.SaveChanges();
             //DeleteImgRoomByRoomId(roomId, towerId);
         }
-        private void DeleteImgRoomByRoomId(long roomId,long towerId)
+        private void DeleteImgRoomByRoomId(string path,long roomId)
         {
-            // Tạo thư mục lưu ảnh dựa trên TowerId và RoomId
-            var folderPath = Path.Combine("D:/QuanLyNhaTro", towerId.ToString(), roomId.ToString());
             try
             {
                 // Kiểm tra xem thư mục có tồn tại không
-                if (Directory.Exists(folderPath))
+                if (Directory.Exists(path))
                 {
                     // Lấy tất cả các file trong thư mục
-                    var files = Directory.GetFiles(folderPath);
+                    var files = Directory.GetFiles(path);
 
-                    Directory.Delete(folderPath, true);
-                    Console.WriteLine("Đã xóa thư mục và tất cả nội dung trong: " + folderPath);
+                    Directory.Delete(path, true);
+                    Console.WriteLine("Đã xóa thư mục và tất cả nội dung trong: " + path);
                 }
                 else
                 {
-                    throw new NotFoundException(nameof(roomId.ToString));
+                    return;
                 }
             }
             catch (Exception ex) 
@@ -220,12 +211,20 @@ namespace QLNhaTro.Service.RoomService
             }
             var imgRoom = _Context.ImgRooms.Where(record => record.RoomId == roomId).ToList();
             _Context.ImgRooms.RemoveRange(imgRoom);    
-            _Context.SaveChangesAsync();
         }
         public async Task FineNewCustomers(long roomId)
         {
             var room = _Context.Rooms.GetAvailableById(roomId);
+            if (room.StatusNewCustomer == true) throw new Exception("Phòng đang được tìm khách mới rồi");
             room.StatusNewCustomer = true;
+            _Context.Rooms.Update(room);
+            await _Context.SaveChangesAsync();
+        }
+        public async Task CancelFineNewCustomers(long roomId)
+        {
+            var room = _Context.Rooms.GetAvailableById(roomId);
+            if (room.StatusNewCustomer == false) throw new Exception("Phòng đang không tìm khách mới");
+            room.StatusNewCustomer = false;
             _Context.Rooms.Update(room);
             await _Context.SaveChangesAsync();
         }
@@ -268,12 +267,7 @@ namespace QLNhaTro.Service.RoomService
             await _Context.SaveChangesAsync();
 
             //Cập nhập lại hợp đồng ở bảng khách hàng
-            var customer = _Context.Customers.Where(c => c.ContractId == contractOld.Id && c!.IsDeleted).ToList();
-            foreach (var item in customer)
-            {
-                item.ContractId = contractNew.Id;
-            }
-            _Context.Customers.UpdateRange(customer);
+
 
             //Thêm lại các dịch vụ
             var contractService = input.Services.Select(s => new ServiceRoom
@@ -340,19 +334,35 @@ namespace QLNhaTro.Service.RoomService
             }).ToList();
             int RoomAvailable = availableRooms.Count();
             string InfoRoomAvailable = string.Join(", ", availableRooms.Select(item=> item.name));
+
+            var bills = _Context.Bills.Include(item => item.Room ).Where(item => item.CreationDate.Month == DateTime.Now.Month && item.Room.TowerId == towerId).ToList();
+            var RoomUnpaid = bills.Where(item => item.Status == CommonEnums.StatusBill.DaXacNhanThanhToan).Select(item =>new { item.Room.Name }).ToList();
+            var RoomPaid = bills.Where(item => item.Status == CommonEnums.StatusBill.ChuaThanhToan || item.Status == CommonEnums.StatusBill.ChuaXacNhanThanhToan).Select(item => new { item.Room.Name }).ToList();
+            string InfoRoomNoInvoice = string.Join(", ", (bills.Where(item => item.Status == CommonEnums.StatusBill.ChuaDienThongTin).Select(item => new { item.Room.Name }).ToList()).Select(item => item.Name));
             return new GetInfomationHomeResModel
             {
-                RoomUnpaid = 5,
-                InfoRoomUnpaid = "102, 103, 104",
-                RoomPaid = 5,
-                InfoRoomPaid = "102, 103, 104",
-                RoomNoInvoice = 5,
-                InfoRoomNoInvoice = "102, 103, 104",
+                RoomUnpaid = RoomUnpaid.Count,
+                InfoRoomUnpaid = string.Join(", ", RoomUnpaid.Select(item => item.Name)),
+                RoomPaid = RoomPaid.Count,
+                InfoRoomPaid = string.Join(", ", RoomPaid.Select(item => item.Name)),
+                RoomNoInvoice = bills.Count - RoomUnpaid.Count - RoomPaid.Count,
+                InfoRoomNoInvoice = InfoRoomNoInvoice,
                 RoomAvailable = RoomAvailable,
                 InfoRoomAvailable = InfoRoomAvailable,
                 RoomExpireContract = 5,
-                InfoRoomExpireContract = "102, 103, 104"
+                InfoRoomExpireContract = "",
+                TotalAmount = bills.Where(item => item.Status == CommonEnums.StatusBill.DaXacNhanThanhToan).Sum(item => item.TotalAmount),
+
             };
+        }
+        private List<string> ConverPathListIMG(List<string> input)
+        {
+            List<string> result = new List<string>();
+            foreach (var item in input) 
+            {
+                result.Add(CommonFunctions.ConverPathIMG(item));
+            }
+            return result;
         }
     }
 }

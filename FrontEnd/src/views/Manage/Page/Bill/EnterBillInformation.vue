@@ -4,134 +4,209 @@
     }
 </style>
 <script>
-    import CryptoJS from "crypto-js";
-    const key = CryptoJS.enc.Utf8.parse("kkFVQVMYIdJglUxs"); // Trùng với key backend
-    const iv = CryptoJS.enc.Utf8.parse("dLnolzxmIyvmcfSD"); // Trùng với IV backend
+    import common from "@/components/common/JavaScripCommon"
+    import apiClient from '@/plugins/axios';
+
     export default {
         name: "Enter-Bill-Information",
         components: {
         },
         created(){
             const idBill = this.$route.params.idbill;
-            console.log(this.Decrypt(idBill));
+            console.log(idBill);
+            this.getinfoBill(idBill);
         },
         data(){
             return{
-                numberOfRoom: 102,
-                Status : true,
+                Status : false,
                 email: 'Quanghungksdtqn@gmail.com',
                 address: 'Số 11 Ngõ 91 Đường Cầu Diễn Phường Cầu Diễn Quận Nam Từ Liêm Thành phố Hà Nội',
                 qrPay: '/eb67b8edadf110af49e0.jpg',
+                BillData:{
+                    id: 0,
+                    numberOfRoom:'',
+                    priceRoom: 0,
+                    addressTower: '',
+                    amount: 0,
+                    date: '',
+                    pathImgQRPay:'',
+                    stk: '',
+                    status: 0,
+                    service: [
+                        {
+                            id: 0,
+                            isOldNewNumber: false,
+                            name: '',
+                            newNumber: null,
+                            oldNumber: null,
+                            unitPrice: 0,
+                            usageNumber: 1,
+                        }
+                    ],
+                    arises:[
+                        {
+                            id: 0,
+                            amount: 0,
+                            reason: '',
+                        }
+                    ]
+                },
+                message: '',
+                snackbar: false,
+                snackbarColor: '',
                 
             }
         },
+        computed: {
+            filteredServicesFalse() {
+                return this.BillData.service.filter(item => !item.isOldNewNumber);
+            },
+            filteredServicesTrue() {
+                return this.BillData.service.filter(item => item.isOldNewNumber);
+            },
+        },
         methods:{
-            Decrypt(cipherText) {
-                const bytes = CryptoJS.AES.decrypt(cipherText, key, {
-                    iv: iv,
-                    mode: CryptoJS.mode.CBC,
-                    padding: CryptoJS.pad.Pkcs7,
-                });
-                return bytes.toString(CryptoJS.enc.Utf8);
+            FormatPrice(price) {
+                if(price)
+                return common.formatTablePrice(price);
+            },
+            getinfoBill(idBill){
+                apiClient.get(`/Bill/GetInfoBill/${idBill}`)
+                        .then(response=>{
+                            this.BillData = response.data;
+                            console.log(response.data);
+                        })
+                        .catch(error=>{
+                            this.message = "Lấy thông tin hoá đơn bị lỗi: " + error.response?.data?.message || error.message;
+                            this.snackbar = true;
+                            this.snackbarColor = 'red';
+                        })
+            },
+            btnCalculateInvoice(){
+                apiClient.put(`/Bill/CalculateInvoice`,this.BillData)
+                        .then(()=>{
+                            this.message = "Tính tiền hoá đơn thành công. Đây là hoá đơn của bạn";
+                            this.snackbar = true;
+                            this.snackbarColor = 'green';
+                            window.location.reload();
+                        })
+                        .catch(error=>{
+                            this.message = "Tính tiền hoá đơn bị lỗi: " + error.response?.data?.message || error.message;
+                            this.snackbar = true;
+                            this.snackbarColor = 'red';
+                        })
+            },
+            PayBill(){
+                apiClient.put(`/Bill/PayBill?biilId=${this.BillData.id}`)
+                        .then(()=>{
+                            this.message = "Thanh toán hoá đơn thành công. Bạn vui lòng chờ chủ nhà xác nhận thanh toán. Có gì chúng tôi sẽ liên hệ qua Email.";
+                            this.snackbar = true;
+                            this.snackbarColor = 'green';
+                            window.location.reload();
+                        })
+                        .catch(error=>{
+                            this.message = "Thanh toán hoá đơn bị lỗi: " + error.response?.data?.message || error.message;
+                            this.snackbar = true;
+                            this.snackbarColor = 'red';
+                        })
             }
         }
     }
 </script>
 <template>
     <v-container>
+        <v-snackbar
+            v-model="snackbar"
+            :timeout="10000"
+            class="custom-snackbar"
+            :color="snackbarColor"
+        >
+            <h5 class="text-center">{{ message }}</h5>
+        </v-snackbar>
         <div class="d-flex justify-center" >
-            <BCard v-if="!Status" >
-                <BCardHeader class="p-0 p-md-3">
-                    <h3 class="px-lg-16 text-center">Nhập thông tin hoá đơn tháng 12 của phòng {{ numberOfRoom }}</h3>
+            <BCard  >
+                <BCardHeader class="p-0 ">
+                    <h3 class="px-lg-16 text-center">Nhập thông tin hoá đơn tháng {{ BillData.date }} của phòng {{ BillData.numberOfRoom }}</h3>
+                    <p class="text-center"> <v-icon>mdi-map-marker</v-icon>Địa chỉ: {{ BillData.addressTower }}</p>
                 </BCardHeader>
                 <BCardBody>
                     <BRow>
-                        <BCol class="col-lg-6">
+                        <table class="table Info" >
+                            <thead>
+                                <tr>
+                                    <th style="width: 40%;">Tên dịch vụ</th>
+                                    <th>Số tiền</th>
+                                    <th>Sử dụng</th>
+                                    <th>Thành tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Tiền phòng</td>
+                                    <td>{{ FormatPrice(BillData.priceRoom)}}</td>
+                                    <td>1</td>
+                                    <td>{{ FormatPrice(BillData.priceRoom)}}</td>
+                                </tr>
+                                <tr v-for="(serviceItem, index) in filteredServicesFalse" :key="index">
+                                    <td>Tiền {{ serviceItem.name }}</td>
+                                    <td>{{ FormatPrice(serviceItem.unitPrice) }}</td>
+                                    <td>{{ serviceItem.usageNumber }}</td>
+                                    <td>{{ FormatPrice(serviceItem.unitPrice * serviceItem.usageNumber) }}</td>
+                                </tr>
+                                <tr v-for="(arise, index) in BillData.arises" :key="index">
+                                    <td>Phát sinh({{ arise.reason }})</td>
+                                    <td>{{ FormatPrice(arise.amount) }}</td>
+                                    <td>1</td>
+                                    <td>{{ FormatPrice(arise.amount) }}</td>
+                                </tr>
+                                <tr v-for="(serviceItem, index) in filteredServicesTrue" :key="index" v-show="BillData.status != 1">
+                                    <td>
+                                        <div>Tiền {{ serviceItem.name }}</div> 
+                                        <div>(Số cũ: {{ serviceItem.oldNumber }} - Số mới: {{ serviceItem.newNumber }})</div>
+                                    </td>
+                                    <td>{{ FormatPrice(serviceItem.unitPrice) }}</td>
+                                    <td>{{ serviceItem.usageNumber }}</td>
+                                    <td>{{ FormatPrice(serviceItem.unitPrice * serviceItem.usageNumber) }}</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3"><h4>Tổng tiền</h4></td>
+                                    <td><h4>{{FormatPrice(BillData.amount) }}</h4></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <BRow v-show="BillData.status == 2">
+                            <BCol class="col-lg-6 d-flex justify-content-center align-items-center">
+                                <div>
+                                    <h4 class="text-center">Ngân hàng MB</h4>
+                                    <h4 class="text-center">STK: {{ BillData.stk }}</h4>
+                                    <h4 class="text-center">Chủ tài khoản: Phạm Quang Hưng</h4>
+                                </div>
+                            </BCol>
+                            <BCol class="col-lg-6">
+                                <h4 class="text-center">QR Ngân Hàng</h4>
+                                <div class="d-flex justify-center">
+                                    <img :src="BillData.pathImgQRPay" alt="Ảnh QR ngân hàng">
+                                </div>
+                            </BCol>
+                        </BRow>
+
+                        <div v-for="(serviceItem, index) in filteredServicesTrue" :key="index" v-show="BillData.status == 1">
+                            <BCol class="col-lg-6">
                             <div class="form-group">
-                                <label class="form-label">Nhập vào số điện:</label>
-                                <v-text-field type="number" variant="outlined" clearable placeholder="Nhập số điện mới" class="input-control"></v-text-field>
+                                <label class="form-label">Nhập vào số {{ serviceItem.name }} (số cũ {{ serviceItem.oldNumber }}):</label>
+                                <v-text-field type="number" v-model="serviceItem.newNumber" variant="outlined" :rules="[v => !!v || 'Trường này là bắt buộc']" clearable placeholder='Nhập số mới' class="input-control"></v-text-field>
                             </div>
                         </BCol>
-                        <BCol class="col-lg-6">
-                            <div class="form-group">
-                                <label class="form-label">Nhập vào số nước:</label>
-                                <v-text-field type="number" variant="outlined" clearable placeholder="Nhập số nước mới" class="input-control"></v-text-field>
-                            </div>
-                        </BCol>
+                        </div>
                     </BRow>
                 </BCardBody>
                 <BCardFooter class="d-flex justify-center">
-                    <v-btn>Tính hoá đơn</v-btn>
+                    <v-btn @click="btnCalculateInvoice" v-show="BillData.status === 1">Tính hoá đơn</v-btn>
+                    <v-btn @click="PayBill" v-show="BillData.status === 2">Thanh toán hoá đơn</v-btn>
+                    <h3 v-show="BillData.status === 3" >Hoá đơn đã được thanh toán. Đang chờ chủ nhà xác nhận thanh toán</h3>
                 </BCardFooter>
             </BCard>
-            <BCard v-else>
-                <BCardHeader class="p-0">
-                    <h3 class="text-center">Thông tin hoá đơn tháng 12 của phòng {{ numberOfRoom }}</h3>
-                    <p class="text-center"> <v-icon>mdi-map-marker</v-icon>Địa chỉ: {{ address }}</p>
-                </BCardHeader>
-                <table class="table Info">
-                    <thead>
-                        <tr>
-                            <th>STT</th>
-                            <th style="width: 40%;">Tên dịch vụ</th>
-                            <th>Số tiền</th>
-                            <th>Sử dụng</th>
-                            <th>Thành tiền</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>Tiền phòng</td>
-                                <td>3.000.000 VNĐ</td>
-                                <td>1</td>
-                                <td>3.000.000 VNĐ</td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td>
-                                    <div>Tiền điện</div> 
-                                    <div>(Số cũ: 100 - Số mới: 1000)</div>
-                                </td>
-                                <td>3.000 VNĐ</td>
-                                <td>1</td>
-                                <td>3.000.000 VNĐ</td>
-                            </tr>
-                            <tr>
-                                <td>3</td>
-                                <td>Tiền nước</td>
-                                <td>30.000 VNĐ</td>
-                                <td>1</td>
-                                <td>3.000.000 VNĐ</td>
-                            </tr>
-                            <tr>
-                                <td>4</td>
-                                <td>Tiền phòng</td>
-                                <td>3.000.000 VNĐ</td>
-                                <td>1</td>
-                                <td>3.000.000 VNĐ</td>
-                            </tr>
-                    </tbody>
-                </table>
-                <BCardBody>
-                    <BRow>
-                        <BCol class="col-lg-6">
-                            <h4 class="text-center">Ngân hàng MB</h4>
-                            <h4 class="text-center">STK: 0080127122002</h4>
-                            <h4 class="text-center">Chủ tài khoản: Phạm Quang Hưng</h4>
-                        </BCol>
-                        <BCol class="col-lg-6">
-                            <h4 class="text-center">QR Ngân Hàng</h4>
-                            <div class="d-flex justify-center">
-                                <img :src="qrPay" alt="">
-                            </div>
-                        </BCol>
-                    </BRow>
-                </BCardBody>
-                <BCardFooter class="d-flex justify-center">
-                    <v-btn>Đã Thanh toán</v-btn>
-                </BCardFooter>
-            </BCard>
+
         </div>
     </v-container>
     

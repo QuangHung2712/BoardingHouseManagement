@@ -15,6 +15,7 @@ const store = createStore({
         isFixedWidth: false,
         token: null,
         userId: null,
+        roomId: null,
     },
     mutations: {
         toggleSidebar(state) {
@@ -42,6 +43,9 @@ const store = createStore({
             state.token = null;
             state.userId = null;
         },
+        setRoom(state,roomId){
+            state.roomId = roomId;
+        }
     },
     actions: {
         login({ commit }, Userformation) {
@@ -86,6 +90,9 @@ const store = createStore({
         getUserId(state) {
             return state.userId;
         },
+        GetRoomId(state){
+            return state.roomId;
+        }
     },
 });
 

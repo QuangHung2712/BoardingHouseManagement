@@ -14,5 +14,6 @@ namespace QLNhaTro.Moddel.Entity
         public decimal UnitPrice { get; set; }
         public bool IsActive { get; set; }
         public string UnitOfCalculation { get; set; } //Đơn vị tính
+        public bool IsOldNewNumber { get; set; } // Có cần nhập số mới và cũ không
     }
 }

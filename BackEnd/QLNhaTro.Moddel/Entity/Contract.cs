@@ -11,13 +11,13 @@ namespace QLNhaTro.Moddel.Entity
     {
         public long RoomId { get; set; }
         public virtual Room Room { get; set; }
-        public ICollection<Customers> Customers { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public decimal Deposit {  get; set; }
+        public virtual ICollection<ContractCustomer> ContractCustomers { get; set; }
         public virtual ICollection<ServiceRoom> ServiceMotels { get; set; }
         public DateTime? TerminationDate { get; set; }
-        public bool UserEnterInformation { get; set; }
+        public bool UserEnterInformation { get; set; } // Người dùng nhận thông tin
         public string? Note { get; set; }
     }
 }

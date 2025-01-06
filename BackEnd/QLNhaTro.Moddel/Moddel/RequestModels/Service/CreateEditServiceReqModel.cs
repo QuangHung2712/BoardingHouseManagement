@@ -13,6 +13,7 @@ namespace QLNhaTro.Moddel.Moddel.RequestModels
         public string Name { get; set; }
         public decimal Price { get; set; }
         public string UnitOfCalculation { get; set; }
+        public bool IsOldNewNumber { get; set; }
         public bool ApplyPriceServiceAllRoom { get; set; }
     }
 }

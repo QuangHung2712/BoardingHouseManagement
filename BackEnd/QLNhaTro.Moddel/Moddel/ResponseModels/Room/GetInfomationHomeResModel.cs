@@ -18,5 +18,6 @@ namespace QLNhaTro.Moddel.Moddel.ResponseModels
         public string InfoRoomAvailable { get; set; }
         public int RoomExpireContract { get; set; }
         public string InfoRoomExpireContract { get; set; }
+        public decimal TotalAmount { get; set; }
     }
 }

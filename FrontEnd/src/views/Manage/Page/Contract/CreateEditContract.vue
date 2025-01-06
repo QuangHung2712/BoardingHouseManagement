@@ -1,8 +1,8 @@
 <script>
 import pageheader from "@/components/page-header.vue"
-import common from "@/components/common/JavaScripCommon"
 import apiClient from "@/plugins/axios";
 import CryptoJS from 'crypto-js';
+import store from "../../../../state/store";
 
 export default {
     name: "wizard",
@@ -22,7 +22,8 @@ export default {
             form1: false,
             form2: false,
             form3: false,
-            
+            IsRoom : false,
+            isRepresentativeSelected: false,
             contractData: {
                 id: 0,
                 customers: [
@@ -31,9 +32,10 @@ export default {
                         fullName: "",
                         doB: null,
                         phoneNumber: "",
-                        email: "",
+                        email: null,
                         cCCD: "",
                         address: "",
+                        isRepresentative : true,
                     },
                 ],
                 services:[
@@ -68,6 +70,11 @@ export default {
             this.titlePage ="Sửa hợp đồng"
             this.getContract();
         }
+        const roomid = store.getters['GetRoomId'];
+        if(roomid) {
+            this.IsRoom = true;
+            this.contractData.roomId = roomid
+        }
         this.GetAllServiceByTower();
         this.getRoombyTower();
     },
@@ -79,9 +86,10 @@ export default {
                 fullName: "",
                 doB: "",
                 phoneNumber: "",
-                email: "",
+                email: null,
                 cCCD: "",
                 address: "",
+                isRepresentative : false,
             });
         },
         addService(){
@@ -96,12 +104,6 @@ export default {
         },
         closeCustomer(index){
             this.contractData.customers.splice(index, 1);
-        },
-        FormatPrice(index){
-            this.contractData.services[index].price = common.formatPrice(this.contractData.services[index].price);
-        },
-        FormatpriceDeposit(){
-            this.contractData.deposit = common.formatPrice(this.contractData.deposit)
         },
         goToFirstTab() {
             this.currentTab = this.tabs[0];
@@ -123,10 +125,11 @@ export default {
                                 this.selectRoom =reponse.data;
                             })
                             .catch(error =>{
-                                this.message = "Lấy danh sách phòng bị lỗi " + error;
+                                this.message = "Lấy danh sách phòng bị lỗi " + error.response?.data?.message || error.message;
                                 this.snackbar = true;
                                 this.snackbarColor = 'red';
                             })
+                            
         },
         async GetAllServiceByTower(){
             await apiClient.get(`/Service/GetAll?towerId=${this.towerid}`)
@@ -134,7 +137,7 @@ export default {
                                 this.servicedata = reponse.data;
                             })
                             .catch(error =>{
-                                this.message = "Lấy danh sách dịch vụ bị lỗi "+ error;
+                                this.message = "Lấy danh sách dịch vụ bị lỗi "+ error.response?.data?.message || error.message;
                                 this.snackbar = true;
                                 this.snackbarColor = 'red';
                             })
@@ -143,10 +146,10 @@ export default {
             apiClient.get(`/Contract/GetDetail?contractId=${this.contractId}`)
                     .then(reponse=>{
                         this.contractData = reponse.data;
-                        console.log(reponse.data)
+                        this.handleRepresentativeChange();
                     })
                     .catch(error =>{
-                        this.message = "Lấy thông tin hợp đồng bị lỗi "+ error;
+                        this.message = "Lấy thông tin hợp đồng bị lỗi "+ error.response?.data?.message || error.message;
                         this.snackbar = true;
                         this.snackbarColor = 'red';
                     })
@@ -155,23 +158,30 @@ export default {
             const selectedService = this.servicedata.find(item => item.id === service.serviceId);
             if (selectedService) {
                 service.price = selectedService.price;
+                service.isOldNewNumber = selectedService.isOldNewNumber;
             } else {
                 service.price = ''; // Xóa giá nếu không có dịch vụ
             }
         },
         CreateEditContract(){
+            console.log(this.contractData);
             apiClient.post(`/Contract/CreateEdit`,this.contractData)
                     .then(()=>{
-                        this.message = "Thêm thành công"
+                        this.message = "Thao tác thành công"
                         this.snackbar = true;
                         this.snackbarColor = 'green';
                     })
                     .catch(error =>{
-                        this.message = "Thêm hợp đồng bị lỗi "+ error;
+                        this.message = "Đã xảy ra lỗi: "+ error.response?.data?.message || error.message;
                         this.snackbar = true;
                         this.snackbarColor = 'red';
                     })
         },
+        handleRepresentativeChange() {
+            // Kiểm tra xem có checkbox nào được chọn là người đại diện hay không
+            this.isRepresentativeSelected = this.contractData.customers.some(customer => customer.isRepresentative);
+        },
+
     }
 }
 </script>
@@ -242,13 +252,14 @@ export default {
                                         <div class="form-group">
                                             <label class="form-label">Số phòng: </label>
                                             <v-select
-                                                clearable
+                                                :clearable="IsRoom ==false"
                                                 :items="selectRoom"
                                                 item-title="name"
                                                 item-value="id"
                                                 variant="outlined"
                                                 v-model="contractData.roomId"
-                                                :rules="[required]">
+                                                :readonly="IsRoom ==true"
+                                                >
                                             </v-select>
                                         </div>
                                     </div>
@@ -273,7 +284,7 @@ export default {
                                     <div class="col-sm-6" v-show="contractId == 0">
                                         <div class="form-group">
                                             <label class="form-label">Thời hạn hợp đồng(tháng): </label>
-                                            <v-text-field variant="outlined" type="number" :rules="[requiredNumber]" v-model="contractData.contractPeriod" clearable></v-text-field>
+                                            <v-text-field variant="outlined" type="number" v-model="contractData.contractPeriod" clearable></v-text-field>
                                         </div>
                                     </div>
                                     <div class="col-sm-6">
@@ -301,46 +312,55 @@ export default {
                                 <div v-for="(customer, index) in contractData.customers" :key="index" class="row mt-4">
                                     <div class="col card mb-3">
                                         <div class="card-header d-flex justify-content-between">
-                                            <h4 class="card-title">Thông tin của khách hàng {{ index + 1 }}</h4>
-                                            <v-btn v-show="index >= 1" class="btn btn-primary" @click="closeCustomer(index)">Đóng</v-btn>
+                                            <h4 class="card-title d-flex">
+                                                <span>Thông tin của khách hàng {{ index + 1 }}</span>
+                                                <v-checkbox label="Là người đại diện"
+                                                    hide-details 
+                                                    v-model="customer.isRepresentative"
+                                                    :disabled="isRepresentativeSelected && !customer.isRepresentative"
+                                                    @change="handleRepresentativeChange">
+                                                </v-checkbox>
+                                            </h4>
+                                            
+                                            <v-btn v-show="index >= 1" class="btn btn-primary" @click="closeCustomer(index)">Xoá</v-btn>
                                         </div>
                                         <div class="row card-body">
-                                        <div class="col-sm-4">
-                                            <div class="form-group">
-                                                <label class="form-label">Họ và tên: </label>
-                                                <v-text-field variant="outlined" :rules="[required]" clearable v-model="customer.fullName"></v-text-field>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label class="form-label">Họ và tên: </label>
+                                                    <v-text-field variant="outlined" :rules="[required]" clearable v-model="customer.fullName"></v-text-field>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="col-sm-4">
-                                            <div class="form-group">T
-                                                <label class="form-label">Ngày sinh: </label>
-                                                <input type="date" class="form-control" id="example-datemin" :rules="[required]" v-model="customer.doB" min="2000-01-02">
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label class="form-label">Ngày sinh: </label>
+                                                    <input type="date" class="form-control" id="example-datemin" :rules="[required]" v-model="customer.doB" min="2000-01-02">
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="col-sm-4">
-                                            <div class="form-group">
-                                                <label class="form-label">Số điện thoại: </label>
-                                                <v-text-field variant="outlined" :rules="[required]" clearable v-model="customer.phoneNumber"></v-text-field>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label class="form-label">Số điện thoại: </label>
+                                                    <v-text-field variant="outlined" :rules="[required]" clearable v-model="customer.phoneNumber"></v-text-field>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="col-sm-4">
-                                            <div class="form-group">
-                                                <label class="form-label">Email: </label>
-                                                <v-text-field variant="outlined" :rules="[required]" clearable v-model="customer.email"></v-text-field>
+                                            <div class="col-sm-4" v-show="index ===0">
+                                                <div class="form-group">
+                                                    <label class="form-label">Email: </label>
+                                                    <v-text-field variant="outlined" :rules="[index === 0 ? required : null]" clearable v-model="customer.email"></v-text-field>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="col-sm-4">
-                                            <div class="form-group">
-                                                <label class="form-label">Số CCCD: </label>
-                                                <v-text-field variant="outlined" type="number" :rules=" [required]" clearable v-model="customer.cccd"></v-text-field>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label class="form-label">Số CCCD: </label>
+                                                    <v-text-field variant="outlined" type="number" :rules=" [required]" clearable v-model="customer.cccd"></v-text-field>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="col-sm-4">
-                                            <div class="form-group">
-                                                <label class="form-label">Địa chỉ: </label>
-                                                <v-text-field variant="outlined" :rules="[required]" clearable v-model="customer.address"></v-text-field>
+                                            <div class="col-sm-4">
+                                                <div class="form-group">
+                                                    <label class="form-label">Địa chỉ: </label>
+                                                    <v-text-field variant="outlined" :rules="[required]" clearable v-model="customer.address"></v-text-field>
+                                                </div>
                                             </div>
-                                        </div>
                                         </div>
                                     </div>
                                 </div>
@@ -356,7 +376,7 @@ export default {
                                 </div>
                                 <div class="card" v-for="(service, index) in contractData.services" :key="index">
                                     <div class="card-header d-flex justify-content-between">
-                                        <h4 class="card-title">Thông tin của dịch vụ {{ index + 1 }}</h4>
+                                        <h4 class="card-title">Thông tin của dịch vụ {{ index + 1 }} {{ service.isOldNewNumber == true ? "(Cần nhập vào số mới và cũ)" : "" }}</h4>
                                         <v-btn v-show="index >= 1" class="btn btn-primary" @click="closeService(index)">Đóng</v-btn>
                                     </div>
                                     <div class="row mt-4 card-body">
@@ -378,7 +398,7 @@ export default {
                                         <div class="col-sm-4">
                                             <div class="form-group">
                                             <label class="form-label">Giá: </label>
-                                            <v-text-field variant="outlined" clearable @input="FormatPrice(index)" :rules="[requiredNumber]" v-model="service.price" ></v-text-field>
+                                            <v-text-field variant="outlined" clearable :rules="[requiredNumber]" v-model="service.price" ></v-text-field>
                                             </div>
                                         </div>
                                         <div class="col-sm-3">

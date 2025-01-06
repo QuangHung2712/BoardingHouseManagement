@@ -35,7 +35,8 @@ export default {
             dataUpdatePayment:{
                 bank: null,
                 stk: '',
-                paymentQRImageLink: null
+                paymentQRImageLink: null,
+                img: null
             },
             infoUser:{
                 fullName: '',
@@ -85,7 +86,7 @@ export default {
         required (v) {
             return !!v || 'Vui lòng không để trống'
         },
-        btnInfo(){
+        async btnInfo(){
             this.previewImage = null
             apiClient.get(`/Landlord/GetDetail/${1}`)
                     .then(response=>{
@@ -96,6 +97,7 @@ export default {
                         this.snackbar = true;
                         this.snackbarColor = 'red';
                     })
+            this.imgAvatar = await this.loadImages(this.infoUser.pathAvatar);
         },
         async btnEditBank(){
             this.previewImage = null
@@ -120,6 +122,8 @@ export default {
                                 this.snackbar = true;
                                 this.snackbarColor = 'red';
                             })
+                            console.log(this.dataUpdatePayment.paymentQRImageLink);
+            this.dataUpdatePayment.img = await this.loadImages(this.dataUpdatePayment.paymentQRImageLink)
         },
         SignOut(){
             this.$store.dispatch('logout');
@@ -148,7 +152,7 @@ export default {
         onFileSelected(event) {
             const file = event.target.files[0];
             if (file) {
-                this.dataUpdatePayment.paymentQRImageLink = file;
+                this.dataUpdatePayment.img = file;
                 this.imgAvatar = file;
                 this.previewImage = URL.createObjectURL(file); // Tạo URL để xem trước
             }
@@ -159,9 +163,10 @@ export default {
             formData.append("id",4);
             formData.append("bank", this.dataUpdatePayment.bank);
             formData.append("sTK", this.dataUpdatePayment.stk);
-            if (this.dataUpdatePayment.paymentQRImageLink) {
-                formData.append("paymentQRImageLink", this.dataUpdatePayment.paymentQRImageLink);
+            if (this.dataUpdatePayment.img) {
+                formData.append("paymentQRImageLink", this.dataUpdatePayment.img);
             }
+            console.log(this.dataUpdatePayment.img);
             apiClient.put(`/Landlord/UpdateInfoPayment`,formData)
                     .then(()=>{
                         this.snackbarColor = 'green';
@@ -211,7 +216,21 @@ export default {
                         this.snackbar = true;
                     })
         },
-    },
+        async loadImages(path){
+            try {
+                const response = await fetch(path);
+                const blob = await response.blob(); // Chuyển phản hồi thành Blob
+                const file = new File([blob], path.split('/').pop(), { type: blob.type }); // Tạo File từ Blob
+                return file;
+            } catch (error) {
+                this.message = `Lỗi khi tải ảnh :`, error;
+                this.snackbarColor = 'red';
+                this.snackbar = true;
+                return null; // Trả về null nếu lỗi
+            }
+        },
+    }
+            
 }
 </script>
 

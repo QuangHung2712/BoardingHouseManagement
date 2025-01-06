@@ -104,7 +104,8 @@ namespace QLNhaTro.Service.ContractService
                             ServiceId = x.ServiceId,
                             ServiceName = x.Service.Name,
                             Price = x.Price,
-                            Number = x.Number
+                            Number = x.Number,
+                            IsOldNewNumber = x.IsOldNewNumber,
                         }).ToList(),
                     }).FirstOrDefaultAsync();
                 if (contractData == null) throw new NotFoundException(nameof(id));
@@ -119,6 +120,10 @@ namespace QLNhaTro.Service.ContractService
         }
         public async Task CreateEditContract(CreateEditContractReqModel input)
         {
+            if(!input.Customers.Any(item=> item.IsRepresentative == true))
+            {
+                throw new Exception("Vui lòng chọn người đại diện");
+            }
             //Kiểm tra xem dịch vụ có tồn tại không
             var invalidService = input.Services.Any(service =>
                 !_Context.Services.Any(item => item.Id == service.ServiceId && !item.IsDeleted));
@@ -143,20 +148,20 @@ namespace QLNhaTro.Service.ContractService
                     _Context.Contracts.Add(contract);
                     await _Context.SaveChangesAsync();
 
+                    //Thêm mới các khách hàng
+                    await CreateEditCustomer(input.Customers, contract.Id);
+
                     var contractService = input.Services.Select(s => new ServiceRoom
                     {
                         ContractId = contract.Id,
                         ServiceId = s.ServiceId,
                         Price = s.Price,
                         Number = s.Number,
+                        IsOldNewNumber = s.IsOldNewNumber,
                     }).ToList();
                     await _Context.ServiceRooms.AddRangeAsync(contractService);
                     await _Context.SaveChangesAsync(); // Lưu ServiceRoom
 
-
-                    var customer =  input.Customers.Select(c => _Customer.CreateEditCustomer(c, contract.Id));
-                    await Task.WhenAll(customer);
-                    await _Context.SaveChangesAsync();
                 }
                 catch (Exception ex)
                 {
@@ -169,7 +174,6 @@ namespace QLNhaTro.Service.ContractService
                 try
                 {
                     Contract contractUpdate = _Context.Contracts.GetAvailableById(input.Id);
-                    contractUpdate.RoomId = input.RoomId;
                     contractUpdate.Deposit = input.Deposit;
                     contractUpdate.Note = input.Note;
                     _Context.Update(contractUpdate);
@@ -183,17 +187,22 @@ namespace QLNhaTro.Service.ContractService
                         ServiceId = s.ServiceId,
                         Price = s.Price,
                         Number = s.Number,
+                        IsOldNewNumber = s.IsOldNewNumber,
                     });
                     var serviceRoomTask = _Context.ServiceRooms.AddRangeAsync(serviceRoom);
 
-                    var invalidCustomer = input.Customers.Any(customer =>
-                        !_Context.Customers.Any(item => item.Id == customer.Id && !item.IsDeleted));
-                    if (invalidCustomer) throw new NotFoundException(nameof(input.Customers));
-                    var customerRemove = _Context.Customers.Where(item => input.Customers.Any(data => data.Id == item.Id)).ToList();
-                    _Context.Customers.RemoveRange(customerRemove);
-                    var customer = input.Customers.Select(c => _Customer.CreateEditCustomer(c, contractUpdate.Id));
+                    //Xoá các khách hàng cũ nếu không phải tài khoản được tạo
+                    var lstCustomer = input.Customers.Select(item => item.Id);
+                    var removeCustomer = _Context.ContractCustomers.Where(item => item.ContractId == contractUpdate.Id && !lstCustomer.Contains(item.CustomerId) && item.Customer.Password == null).Select(record =>record.Customer).ToList();
+                    _Context.Customers.RemoveRange(removeCustomer);
 
-                    await Task.WhenAll(serviceRoomTask, Task.WhenAll(customer));
+                    //Xoá các bảng liên kết nhiều nhiều
+                    var contractCustomer = _Context.ContractCustomers.Where(item => item.ContractId == contractUpdate.Id).ToList();
+                    _Context.ContractCustomers.RemoveRange(contractCustomer);
+
+                    //Thực hiện cập nhận các khách hàng
+                    await CreateEditCustomer(input.Customers, contractUpdate.Id);
+
 
                     await _Context.SaveChangesAsync();
                 }
@@ -258,7 +267,6 @@ namespace QLNhaTro.Service.ContractService
                     }
                 }).FirstOrDefault();
             if(roomDetails == null) throw new NotFoundException(nameof(contractId));
-            //var roomData = _Context.Rooms.GetAvailableById(contractData.RoomId);
             var serviecData = _Context.ServiceRooms.Where(item => item.ContractId == contractId).Include(sr => sr.Service).ToList();
             var serviceLines = serviecData
                    .Select((service, index) => new { service, index })
@@ -272,6 +280,10 @@ namespace QLNhaTro.Service.ContractService
             {
                 // Xóa khách hàng đại diện khỏi danh sách
                 customerData.Remove(customerDaiDien);
+            }
+            else
+            {
+                throw new NotFoundException("Người đại diện");
             }
             System.IO.File.Copy(SampleContract, outputPath, true);
             using (WordprocessingDocument doc = WordprocessingDocument.Open(outputPath, true))
@@ -301,7 +313,7 @@ namespace QLNhaTro.Service.ContractService
                                          .Replace("{GiaThueChu}", NumberToWords(roomDetails.Room.PriceRoom) +" đồng")
                                          .Replace("{TienCoc}", FormartPrice(contractData.Deposit))
                                          .Replace("{TienCocBangChu}", NumberToWords(contractData.Deposit) + " đồng")
-                                         ; // Xóa placeholder {DichVu}
+                                         ;
                     if (text.Text.Contains("{ThueKem}"))
                     {
                         // Xóa placeholder {DichVu}
@@ -530,5 +542,49 @@ namespace QLNhaTro.Service.ContractService
         {
             return Math.Floor(input).ToString("#,##0", new System.Globalization.CultureInfo("vi-VN"));
         }
+        private async Task CreateEditCustomer(List<CreateEditCustomerReqModel> data,long contractId)
+        {
+            foreach (var item in data)
+            {
+                var customer = new Customers();
+                if (item.Id == 0)
+                {
+                    //Thêm mới khách hàng
+                    customer = new Customers
+                    {
+                        FullName = item.FullName,
+                        DoB = item.DoB,
+                        PhoneNumber = item.PhoneNumber,
+                        CCCD = item.CCCD,
+                        Address = item.Address,
+                        Email = item.Email,
+                        IsRepresentative = item.IsRepresentative,
+                    };
+                    _Context.Customers.Add(customer);
+                    await _Context.SaveChangesAsync();
+                }
+                else
+                {
+                    //Update thông tin khách hàng
+                    customer = _Context.Customers.GetAvailableById(item.Id);
+                    customer.FullName = item.FullName;
+                    customer.DoB = item.DoB;
+                    customer.PhoneNumber = item.PhoneNumber;
+                    customer.CCCD = item.CCCD;
+                    customer.Address = item.Address;
+                    customer.Email = item.Email;
+                    customer.IsRepresentative = item.IsRepresentative;
+                    _Context.Customers.Update(customer);
+                }
+                //Thêm các bảng liên kết nhiều nhiều của hợp đồng với khách hàng
+                var contractCustomer = new ContractCustomer
+                {
+                    ContractId = contractId,
+                    CustomerId = customer.Id,
+                };
+                _Context.ContractCustomers.Add(contractCustomer);
+            }
+        }
+
     }
 }
