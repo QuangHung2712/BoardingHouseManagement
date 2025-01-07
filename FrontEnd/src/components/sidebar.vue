@@ -1,3 +1,12 @@
+<style scoped>
+    .navbar-wrapper{
+        background-color: #023573;
+    }
+    .pc-link{
+        color: azure;
+        font-size: 20px;
+    }
+</style>
 <script>
 import { ref } from 'vue';
 import simplebar from "simplebar-vue"
@@ -97,17 +106,17 @@ export default {
 <template>
     <div class="navbar-wrapper" id="navbar-wrapper">
         <div class="m-header">
-            <router-link to="/" class="b-brand text-primary">
+            <router-link to="/" class="b-brand text-primary mt-lg-4">
                 <!-- ========   Change your logo from here   ============ -->
                 <!-- <img ref="logo" alt="logo image" class="logo-lg custom_logo"> -->
                 <!-- <img :src="isDarkTheme ? '@/assets/images/logo-dark.svg' : '@/assets/images/logo-white.svg'" alt="logo image" class="logo-lg custom_logo"> -->
                 <!-- <img src="@/assets/images/logo-dark.svg" alt="" class="logo logo-lg">
                 <img src="@/assets/images/logo-white.svg" alt="" class="logo logo-lg"> -->
                 <!-- <img src="@/assets/images/favicon.svg" alt="" class="logo logo-sm"> <span class="badge bg-brand-color-2 rounded-pill ms-2 theme-version">v1.0</span> -->
-                <h4>QUẢN LÝ NHÀ TRỌ</h4>
+                <h3 style="color: azure ;">QUẢN LÝ NHÀ TRỌ</h3>
             </router-link>
         </div>
-        <simplebar data-simplebar style="height: 760px">
+        <simplebar data-simplebar style="height: 760px" class="mt-4">
             <div class="navbar-content">
                 <ul class="pc-navbar">
                     <!-- <li class="pc-item" :class="{ 'active': this.$route.path === '/dashboard' }">
@@ -115,8 +124,8 @@ export default {
                             <span class="pc-micon"><i class="ph-duotone ph-gauge"></i></span><span class="pc-mtext"> Dashboard</span><span class="pc-badge">2</span>
                         </router-link>
                     </li> -->
-                    <li class="pc-item" :class="{ 'active': this.$route.path === `/${towerId}/homepage` }">
-                        <router-link :to="`/${towerId}/homepage`" class="pc-link">
+                    <li class="pc-item " :class="{ 'active': this.$route.path === `/${towerId}/homepage` }">
+                        <router-link :to="`/${towerId}/homepage`" class="pc-link white">
                             <span class="pc-micon">
                                 <v-icon>mdi-car-cruise-control</v-icon>
                             </span>

@@ -57,7 +57,8 @@
                 snackbar: false,
                 snackbarColor: '',
                 viewdialogEdit: false,
-                tower:{},
+                tower:{
+                },
                 tinhData: [
                     
                 ],
@@ -113,9 +114,9 @@
                 if(id != 0){
                     this.titleDialog = 'Sửa toà nhà';
                     const result = this.towerData.find(a => a.id === id);
-                    const { towerName, address } = result;
+                    const { towerName, address,userEnterInformation } = result;
                     // Gán các giá trị này vào this.tower
-                    this.tower = { towerName, address };
+                    this.tower = { towerName, address,userEnterInformation };
                 }
                 else{
                     this.titleDialog = 'Thêm toà nhà';
@@ -318,12 +319,12 @@
                             <BCol class="col-lg-6">
                                 <div class="form-group">
                                     <label class="form-label">Tên tòa nhà:</label>
-                                    <v-text-field v-model="tower.towerName" :rules="[required]" variant="outlined" clearable placeholder="Nhập vào tên dịch vụ" class="input-control"></v-text-field>
+                                    <v-text-field v-model="tower.userEnterInformation" :rules="[required]" variant="outlined" clearable placeholder="Nhập vào tên dịch vụ" class="input-control"></v-text-field>
                                 </div>
                             </BCol>
                             <BCol class="col-lg-6 d-flex align-items-center">
                                 <div class="form-group">
-                                    <v-checkbox label="Tự động gửi yêu cầu nhập vào các số mới của các dịch vụ cần" v-model="tower.userEnterInformation"></v-checkbox>
+                                    <v-checkbox v-model="tower.userEnterInformation" label="Tự động gửi yêu cầu nhập vào các số mới của các dịch vụ cần"></v-checkbox>
                                 </div>
                             </BCol>
                             <div v-show="handleIconClick" v-cloak>

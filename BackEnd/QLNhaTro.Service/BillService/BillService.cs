@@ -62,6 +62,14 @@ namespace QLNhaTro.Service.BillService
                 };
                 _Context.Bills.Add(newbill);
                 await _Context.SaveChangesAsync();
+
+                var arise = _Context.Incurs.Where(item =>item.RoomId == newbill.RoomId && item.StatusPay == false && !item.IsDeleted).ToList();
+                foreach (var item in arise)
+                {
+                    item.BillId = newbill.Id;
+                }
+                _Context.Incurs.UpdateRange(arise);
+                await _Context.SaveChangesAsync();
                 #region Gửi yêu cầu nhập thông tin đến khách thuê
                 string link = $"http://localhost:8080/vue/enterbill/{CommonFunctions.Encryption(newbill.Id.ToString())}";
                 string EmailContent = $"Xin chào {customer.FullName}. Đã bắt đầu một tháng mới bạn vui lòng vào link này để nhập các thông tin cần thiết để tạo hóa đơn \nĐây là link: {link}";
@@ -165,8 +173,7 @@ namespace QLNhaTro.Service.BillService
                     IsOldNewNumber = record.Service.IsOldNewNumber,
                 }).ToList();
             }
-            
-            result.Arises = _Context.Incurs.Where(item=> item.RoomId == infoBill.RoomId && item.StatusPay == false).Select(record => new AriseBillResModel
+            result.Arises = _Context.Incurs.Where(item=> (item.RoomId == infoBill.RoomId && item.StatusPay == false) || item.BillId == infoBill.Id).Select(record => new AriseBillResModel
             {
                 Id = record.Id,
                 Amount = record.Amount, 
@@ -470,12 +477,12 @@ namespace QLNhaTro.Service.BillService
                 });
                 _Context.ServiceInvoiceDetails.AddRange(service);
 
-                var arise = _Context.Incurs.Where(item => item.RoomId == room.RoomId && item.StatusPay == false).Select(record => new AriseBillResModel
+                var arise = _Context.Incurs.Where(item => (item.RoomId == room.RoomId && item.StatusPay == false) || item.BillId == newBiil.Id).ToList();
+                foreach (var item in arise)
                 {
-                    Id = record.Id,
-                    Amount = record.Amount,
-                    Reason = record.Reason,
-                }).ToList();
+                    item.BillId = newBiil.Id;
+                }
+                _Context.Incurs.UpdateRange(arise);
 
                 newBiil.TotalAmount = newBiil.PriceRoom + arise.Sum(item => item.Amount) + service.Sum(item => item.UnitPrice * item.UsageNumber);
                 _Context.Bills.Update(newBiil);

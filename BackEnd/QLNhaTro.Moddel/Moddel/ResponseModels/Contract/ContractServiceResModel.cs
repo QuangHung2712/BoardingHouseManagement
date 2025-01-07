@@ -14,5 +14,6 @@ namespace QLNhaTro.Moddel.Moddel.ResponseModels
         public decimal Price { get; set; }
         public int Number { get; set; }
         public bool IsOldNewNumber { get; set; }
+        public int CurrentNumber { get; set; } // Số ban đầu 
     }
 }

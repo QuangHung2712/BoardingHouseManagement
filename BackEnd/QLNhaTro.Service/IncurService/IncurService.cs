@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using QLNhaTro.Commons;
+using QLNhaTro.Commons.CustomException;
 using QLNhaTro.Moddel;
 using QLNhaTro.Moddel.Entity;
 using QLNhaTro.Moddel.Moddel.RequestModels;
@@ -40,6 +41,7 @@ namespace QLNhaTro.Service.IncurService
             {
                 try
                 {
+                    
                     var newIncur = new Incur
                     {
                         RoomId = input.RoomId,
@@ -48,6 +50,15 @@ namespace QLNhaTro.Service.IncurService
                         Reason = input.Reason,
                         TowerId = input.TowerId,
                     };
+                    
+                    var bill = _Context.Bills.Where(item => item.RoomId == input.RoomId && !item.IsDeleted && item.Status == CommonEnums.StatusBill.ChuaThanhToan && item.Status == CommonEnums.StatusBill.ChuaDienThongTin).FirstOrDefault();
+
+                    if (bill != null)
+                    {
+                        newIncur.BillId = bill.Id;
+                        bill.TotalAmount += newIncur.Amount;
+                        _Context.Bills.Update(bill);
+                    }
                     _Context.Incurs.Add(newIncur);
                     await _Context.SaveChangesAsync();
                 }
@@ -63,6 +74,24 @@ namespace QLNhaTro.Service.IncurService
                 {
                     var incur = _Context.Incurs.GetAvailableById(input.Id);
                     if (incur.StatusPay == true) throw new Exception("Phát sinh đã được thanh toán không thể sửa");
+                    if(incur.Amount != input.Amount && incur.Bill != null)
+                    {
+                        var bill = _Context.Bills.Where(item => item.RoomId == input.RoomId && !item.IsDeleted).FirstOrDefault();
+                        if (bill == null) 
+                        {
+                            throw new NotFoundException("Hoá đơn");
+                        }
+                        if (incur.Amount - input.Amount < 0)
+                        {
+                            bill.TotalAmount += input.Amount - incur.Amount;
+                        }
+                        else
+                        {
+                            bill.TotalAmount -= incur.Amount - input.Amount;
+                        }
+                        _Context.Bills.Update(bill);
+
+                    }
                     incur.RoomId = input.RoomId;
                     incur.Amount = input.Amount;
                     incur.Reason = input.Reason;

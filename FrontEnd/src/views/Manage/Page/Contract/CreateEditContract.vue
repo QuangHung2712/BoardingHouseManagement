@@ -3,7 +3,6 @@ import pageheader from "@/components/page-header.vue"
 import apiClient from "@/plugins/axios";
 import CryptoJS from 'crypto-js';
 import store from "../../../../state/store";
-import router from "@/router";
 
 export default {
     name: "wizard",
@@ -184,8 +183,7 @@ export default {
                         this.message = "Thao tác thành công"
                         this.snackbar = true;
                         this.snackbarColor = 'green';
-                        this.$router.push({ name: 'createEdit', params: { idcontract: encryptedId } });
-
+                        this.$router.push({ name: 'contract'});
                     })
                     .catch(error =>{
                         this.message = "Đã xảy ra lỗi: "+ error.response?.data?.message || error.message;
@@ -416,13 +414,13 @@ export default {
                                             <v-text-field variant="outlined" clearable :rules="[requiredNumber]" v-model="service.price" ></v-text-field>
                                             </div>
                                         </div>
-                                        <div class="col-sm-3" v-if="!service.isOldNewNumber">
+                                        <div class="col-sm-3" v-if="!service.isOldNewNumber" v-show="service.serviceId">
                                             <div class="form-group">
                                             <label class="form-label">Số lượng người dùng: </label>
                                             <v-text-field type="number" variant="outlined" :rules="[requiredNumber]" v-model="service.number" clearable></v-text-field>
                                             </div>
                                         </div>
-                                        <div class="col-sm-3" v-else>
+                                        <div class="col-sm-3" v-else v-show="service.serviceId">
                                             <div class="form-group">
                                             <label class="form-label">Số ban đầu: </label>
                                             <v-text-field type="number" variant="outlined" :rules="[requiredNumber]" v-model="service.currentNumber" clearable></v-text-field>

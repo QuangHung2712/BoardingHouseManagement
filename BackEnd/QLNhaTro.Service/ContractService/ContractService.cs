@@ -106,7 +106,7 @@ namespace QLNhaTro.Service.ContractService
                             Price = x.Price,
                             Number = x.Number,
                             IsOldNewNumber = x.IsOldNewNumber,
-                            
+                            CurrentNumber = x.CurrentNumber,
                         }).ToList(),
                     }).FirstOrDefaultAsync();
                 if (contractData == null) throw new NotFoundException(nameof(id));
@@ -157,7 +157,7 @@ namespace QLNhaTro.Service.ContractService
                         ContractId = contract.Id,
                         ServiceId = s.ServiceId,
                         Price = s.Price,
-                        Number = s.CurrentNumber ?? 0,
+                        Number = s.Number ?? 0,
                         CurrentNumber = s.CurrentNumber ?? 0,
                         IsOldNewNumber = s.IsOldNewNumber,
                     }).ToList();
@@ -190,7 +190,8 @@ namespace QLNhaTro.Service.ContractService
                         ContractId = contractUpdate.Id,
                         ServiceId = s.ServiceId,
                         Price = s.Price,
-                        Number = s.Number.Value,
+                        Number = s.Number ?? 0,
+                        CurrentNumber = s.CurrentNumber ?? 0,
                         IsOldNewNumber = s.IsOldNewNumber,
                     });
                     var serviceRoomTask = _Context.ServiceRooms.AddRangeAsync(serviceRoom);
