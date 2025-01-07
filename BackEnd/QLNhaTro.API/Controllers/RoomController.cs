@@ -143,15 +143,29 @@ namespace QLNhaTro.API.Controllers
 
             }
         }
+        [HttpGet]
+        public IActionResult GetInfoCheckOut([FromQuery] long roomId)
+        {
+            try
+            {
+                var result = roomService.GetInfoCheckout(roomId);
+                //Thực hiện việc quyết toán tiền cho khách
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+
+            }
+        }
 
         [HttpPut]
         public async Task<IActionResult> CheckOutRoom([FromBody] CheckOutRoomReqModel data)
         {
             try
             {
-                await roomService.CheckOut(data);
-                //Thực hiện việc quyết toán tiền cho khách
-                return Ok();
+                var result =  await roomService.CheckOut(data);
+                return Ok(result);
             }
             catch (Exception ex)
             {

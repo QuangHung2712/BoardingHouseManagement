@@ -1,4 +1,5 @@
 ﻿using QLNhaTro.Commons;
+using QLNhaTro.Moddel.Moddel.ResponseModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,9 +10,8 @@ namespace QLNhaTro.Moddel.Moddel.RequestModels
 {
     public class CheckOutRoomReqModel : BaseEntity
     {
-        public long? NewNumberElectric { get; set; }
-        public long? NewNumberCountries { get; set; }
-        public decimal MoneyPunish { get; set; }
+        public List<GetInfoCheckOutRoomResModel> Service { get; set; }
+        public decimal? MoneyPunish { get; set; }
         public string? Note { get; set; }
     }
 }

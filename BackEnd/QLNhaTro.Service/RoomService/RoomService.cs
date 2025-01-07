@@ -12,6 +12,7 @@ using QLNhaTro.Moddel;
 using QLNhaTro.Moddel.Entity;
 using QLNhaTro.Moddel.Moddel.RequestModels;
 using QLNhaTro.Moddel.Moddel.ResponseModels;
+using QLNhaTro.Service.EmailService;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
@@ -27,10 +28,12 @@ namespace QLNhaTro.Service.RoomService
     public class RoomService : IRoomService
     {
         private readonly AppDbContext _Context;
+        private readonly IEmailService _emailService;
 
-        public RoomService(AppDbContext context)
+        public RoomService(AppDbContext context, IEmailService emailService)
         {
             _Context = context;
+            _emailService = emailService;
         }
         public async Task<List<GetAllRoomResModel>> GellAllRoomByTower(long toweId)
         {
@@ -228,16 +231,97 @@ namespace QLNhaTro.Service.RoomService
             _Context.Rooms.Update(room);
             await _Context.SaveChangesAsync();
         }
-        public async Task CheckOut(CheckOutRoomReqModel input)
+        public List<GetInfoCheckOutRoomResModel> GetInfoCheckout(long roomId)
+        {
+            return _Context.ServiceRooms.Include(r=> r.Contract)
+                .Where(item=> item.Contract.RoomId == roomId && !item.Contract.IsDeleted)
+                .Select(record => new GetInfoCheckOutRoomResModel
+                {
+                    ServiceId = record.ServiceId,
+                    OldNumber = record.CurrentNumber,
+                    ServiceName = record.Service.Name,
+                    UnitPrice  =record.Price,
+                    IsOldNewNumber = record.IsOldNewNumber,
+                    UsageNumber = record.Number 
+                }).ToList();
+        }
+        public async Task<string> CheckOut(CheckOutRoomReqModel input)
         {
             var contract =  _Context.Contracts.Where(record=> record.RoomId == input.Id && record.TerminationDate == null && !record.IsDeleted).FirstOrDefault();
             var room = _Context.Rooms.GetAvailableById(input.Id);
             if(contract == null) throw new NotFoundException(nameof(contract));
+            var customer = _Context.ContractCustomers.Include(r => r.Customer)
+                .Where(item => item.ContractId == contract.Id && item.Customer.IsRepresentative)
+                .Select(c => new
+                {
+                    CustomerId = c.CustomerId,
+                    Fullname = c.Customer.FullName,
+                    Email = c.Customer.Email,
+                }).FirstOrDefault();
             contract.TerminationDate = DateTime.Now;
             room.StatusNewCustomer = true;
             _Context.Contracts.Update(contract);
             _Context.Rooms.Update(room);
+
+            //Tạo hoá đơn
+            Bill newBill = new Bill
+            {
+                RoomId = room.Id,
+                CustomerId = customer.CustomerId,
+                CreationDate = DateOnly.FromDateTime(DateTime.Now),
+                PriceRoom = room.PriceRoom,
+                PaymentDate = DateTime.Now,
+                Status = CommonEnums.StatusBill.DaXacNhanThanhToan,
+                TotalAmount = 0,
+            };
+            _Context.Bills.Add(newBill);
             await _Context.SaveChangesAsync();
+
+            if(input.MoneyPunish != null || input.MoneyPunish != 0)
+            {
+                Incur newArise = new Incur
+                {
+                    BillId = newBill.Id,
+                    Amount = input.MoneyPunish.Value,
+                    RoomId = room.Id,
+                    Reason = input.Note,
+                    StatusPay = true,
+                    CreationDate = DateTime.Now,
+                    TowerId = room.TowerId,
+                };
+                newBill.TotalAmount = input.MoneyPunish.Value;
+                _Context.Incurs.Add(newArise);
+            }
+            var arise = _Context.Incurs.Where(item => (item.RoomId == room.Id && item.StatusPay == false) && !item.IsDeleted).ToList();
+            foreach (var item in arise)
+            {
+                item.BillId = newBill.Id;
+            }
+            _Context.Incurs.UpdateRange(arise);
+            var service = input.Service.Select(item => new ServiceInvoiceDetails
+            {
+                BillId = newBill.Id,
+                ServiceId = item.ServiceId,
+                NewNumber = item.NewNumber,
+                OldNumber = item.OldNumber,
+                UnitPrice = item.UnitPrice,
+                UsageNumber = item.IsOldNewNumber ? item.NewNumber.Value - item.OldNumber : item.UsageNumber,
+
+            });
+            _Context.ServiceInvoiceDetails.AddRange(service);
+            newBill.TotalAmount += newBill.PriceRoom + arise.Sum(item => item.Amount) + service.Sum(item=> item.UnitPrice * item.UsageNumber);
+            _Context.Bills.Update(newBill);
+
+            await _Context.SaveChangesAsync();
+
+            #region Gửi hóa đơn đến khách thuê
+            string link = $"http://localhost:8080/vue/enterbill/{CommonFunctions.Encryption(newBill.Id.ToString())}";
+            string EmailContent = $"Xin chào {customer.Fullname}.Sau khi quyết toàn tiền phòng bạn còn lại  {contract.Deposit - newBill.TotalAmount} VND. Bạn vui lòng truy cập vào link để xem hóa đơn \nĐây là link: {link}";
+            await _emailService.SendEmailAsync(customer.Email, "Nhập hóa đơn tiền phòng", EmailContent);
+            #endregion
+
+            //Tính tiền thừa
+            return $"Bạn phải thanh toán lại cho khách thuê {contract.Deposit} - {newBill.TotalAmount} = {contract.Deposit - newBill.TotalAmount} VND";
         }
         public async Task ChangeRoom(ChangeRoomReqModel input)
         {

@@ -50,6 +50,20 @@ export default {
             imgAvatar: null,
             form: false,
             landlordId: 0,
+            tinhData: [
+                    
+            ],
+            huyenData: [
+                
+            ],
+            phuongData: [
+                
+            ],
+            selectTinh: null,
+            selectHuyen: null,
+            selectPhuong: null,
+            handleIconClick: false,
+            address: '',
             rules: {
                 required: v => !!v || 'Vui lòng không để trống',
                 validEmail: v => /^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(v) || 'Email phải hợp lệ và kết thúc bằng @gmail.com',
@@ -105,6 +119,15 @@ export default {
             const dateTime = new Date(this.infoUser.doB); // Ví dụ có giờ
             dateTime.setDate(dateTime.getDate() + 1); // Cộng thêm 1 ngày
             this.infoUser.doB = dateTime.toISOString().split('T')[0]; // Kết quả sẽ là "2025-01-07"
+            await Axios.get(`https://esgoo.net/api-tinhthanh/1/0.htm`)
+                            .then(response=>{
+                                this.tinhData =  response.data.data;
+                            })
+                            .catch(error=>{
+                                this.message = "Lấy danh sách tỉnh thành bị lỗi " + error;
+                                this.snackbar = true;
+                                this.snackbarColor = 'red';
+                            })
         },
         async btnEditBank(){
             this.previewImage = null
@@ -236,6 +259,41 @@ export default {
                 this.snackbar = true;
                 return null; // Trả về null nếu lỗi
             }
+        },
+        onTinhChange(){
+            Axios.get(`https://esgoo.net/api-tinhthanh/2/${this.selectTinh}.htm`)
+                        .then(response=>{
+                            this.huyenData =  response.data.data;
+                        })
+                        .catch(error=>{
+                            this.message = "Lấy danh sách tỉnh thành bị lỗi " + error;
+                            this.snackbar = true;
+                            this.snackbarColor = 'red';
+                        })
+        },
+        onHuyenChange(){
+            Axios.get(`https://esgoo.net/api-tinhthanh/3/${this.selectHuyen}.htm`)
+                        .then(response=>{
+                            this.phuongData =  response.data.data;
+                        })
+                        .catch(error=>{
+                            this.message = "Lấy danh sách tỉnh thành bị lỗi " + error;
+                            this.snackbar = true;
+                            this.snackbarColor = 'red';
+                        })
+        },
+        onPhuongChange(){
+            const tinh = this.tinhData.find(item => item.id === this.selectTinh);
+            const huyen = this.huyenData.find(item => item.id === this.selectHuyen);
+            const phuong = this.phuongData.find(item => item.id === this.selectPhuong);
+            if (tinh && huyen && phuong) {
+                return ` ${phuong.full_name} ${huyen.full_name} ${tinh.full_name}`;
+            } else {
+                return ''; // Trả về chuỗi rỗng nếu có một trong các biến là null hoặc undefined
+            }
+        },
+        FormatAddress(){
+            this.infoUser.address = this.address + this.onPhuongChange();
         },
     }
             
@@ -591,10 +649,77 @@ export default {
                             <v-text-field v-model="infoUser.email" :rules="[required]" type="text" @input="formatPrice" variant="outlined" clearable placeholder="Nhập vào email" class="input-control"></v-text-field>
                         </div>
                     </BCol>
+                    <div v-show="handleIconClick" v-cloak>
+                        <transition name="slide-up">
+                            <BRow>
+                                <BCol class="col-lg-4">
+                                    <div class="form-group">
+                                        <label class="form-label">Tỉnh</label>
+                                        <v-autocomplete
+                                            v-model="selectTinh"
+                                            :items="tinhData"
+                                            item-title="full_name"
+                                            item-value="id"
+                                            outlined
+                                            dense
+                                            clearable
+                                            @update:modelValue="onTinhChange"
+                                        ></v-autocomplete>
+                                    </div>
+                                </BCol>
+                                <BCol class="col-lg-4">
+                                    <div class="form-group">
+                                        <label class="form-label">Quận, huyện</label>
+                                        <v-autocomplete
+                                            v-model="selectHuyen"
+                                            :items="huyenData"
+                                            item-title="full_name"
+                                            item-value="id"
+                                            outlined
+                                            dense
+                                            clearable
+                                            :disabled="!selectTinh"
+                                            @update:modelValue="onHuyenChange"
+                                        ></v-autocomplete>
+                                    </div>
+                                </BCol>
+                                <BCol class="col-lg-4">
+                                    <div class="form-group">
+                                        <label class="form-label">Phường, xã</label>
+                                        <v-autocomplete
+                                            v-model="selectPhuong"
+                                            :items="phuongData"
+                                            item-title="full_name"
+                                            item-value="id"
+                                            outlined
+                                            dense
+                                            clearable
+                                            :disabled="!selectHuyen"
+                                            @update:modelValue="onPhuongChange"
+                                        ></v-autocomplete>
+                                    </div>
+                                </BCol>
+                                <BCol class="col-lg-12">
+                                    <div class="form-group">
+                                    <label class="form-label">Số nhà:</label>
+                                    <v-text-field
+                                        v-model="address"
+                                        variant="outlined"
+                                        :disabled="!selectPhuong"
+                                        clearable
+                                        placeholder="Nhập vào tên dịch vụ"
+                                        class="input-control"
+                                        @input="FormatAddress"
+                                    ></v-text-field>
+                                    </div>
+                                </BCol>
+                            </BRow>
+                        </transition>
+                    </div>
                     <BCol class="col-lg-12">
                         <div class="form-group">
                             <label class="form-label">Địa chỉ:</label>
-                            <v-text-field v-model="infoUser.address" :rules="[required]" type="text" @input="formatPrice" variant="outlined" clearable class="input-control"></v-text-field>
+                            <v-text-field v-model="infoUser.address" :rules="[required]" type="text" readonly @click="handleIconClick = !handleIconClick" variant="outlined" class="input-control"></v-text-field>
                         </div>
                     </BCol>
                 </BRow>

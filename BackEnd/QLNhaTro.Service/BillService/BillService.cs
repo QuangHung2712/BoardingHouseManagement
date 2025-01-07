@@ -3,6 +3,7 @@ using DocumentFormat.OpenXml.Office2010.Excel;
 using DocumentFormat.OpenXml.Office2010.ExcelAc;
 using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.VariantTypes;
+using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QLNhaTro.Commons;
@@ -63,7 +64,7 @@ namespace QLNhaTro.Service.BillService
                 _Context.Bills.Add(newbill);
                 await _Context.SaveChangesAsync();
 
-                var arise = _Context.Incurs.Where(item =>item.RoomId == newbill.RoomId && item.StatusPay == false && !item.IsDeleted).ToList();
+                var arise = _Context.Incurs.Where(item =>(item.RoomId == newbill.RoomId && item.StatusPay == false) && !item.IsDeleted).ToList();
                 foreach (var item in arise)
                 {
                     item.BillId = newbill.Id;
@@ -173,7 +174,7 @@ namespace QLNhaTro.Service.BillService
                     IsOldNewNumber = record.Service.IsOldNewNumber,
                 }).ToList();
             }
-            result.Arises = _Context.Incurs.Where(item=> (item.RoomId == infoBill.RoomId && item.StatusPay == false) || item.BillId == infoBill.Id).Select(record => new AriseBillResModel
+            result.Arises = _Context.Incurs.Where(item=> item.BillId == infoBill.Id && !item.IsDeleted).Select(record => new AriseBillResModel
             {
                 Id = record.Id,
                 Amount = record.Amount, 
@@ -245,6 +246,15 @@ namespace QLNhaTro.Service.BillService
             };
             _Context.Notifications.Add(notification);
 
+            var arise = _Context.Incurs.Where(item=> item.BillId == infoBill.Id && !item.IsDeleted).ToList();
+            if(arise != null)
+            {
+                foreach (var item in arise)
+                {
+                    item.StatusPay = true;
+                }
+                _Context.Incurs.UpdateRange(arise);
+            } 
             //Cập nhận thông tin hoá đơn
             infoBill.PaymentDate = DateTime.Now;
             infoBill.Status = StatusBill.ChuaXacNhanThanhToan;
@@ -368,7 +378,7 @@ namespace QLNhaTro.Service.BillService
                 OldNumber = record.OldNumber,
                 NewNumber = record.NewNumber,
             }).ToList();
-            result.Arises = _Context.Incurs.Where(item => item.RoomId == infoBill.RoomId && item.StatusPay == false).Select(record => new AriseBillResModel
+            result.Arises = _Context.Incurs.Where(item => item.BillId == infoBill.Id && !item.IsDeleted).Select(record => new AriseBillResModel
             {
                 Id = record.Id,
                 Amount = record.Amount,
@@ -426,6 +436,11 @@ namespace QLNhaTro.Service.BillService
             if (contractStillValid.Count <= 0) throw new Exception("Tất cả các phòng đều có hóa đơn");
             foreach (var room in contractStillValid)
             {
+                var OldNumberService = _Context.ServiceInvoiceDetails.Include(item => item.Bills)
+                        .Where(item => item.Bills.RoomId == room.RoomId && !item.Bills.IsDeleted)
+                        .OrderByDescending(b => b.Bills.CreationDate)
+                        .Select(record => record.NewNumber)
+                        .FirstOrDefault();
                 var service = _Context.ServiceRooms.Where(item => item.ContractId == room.ContractId).Include(s => s.Service).Select(s => new ServiceCalculateRoomResModel
                 {
                     Id = s.ServiceId,
@@ -433,7 +448,7 @@ namespace QLNhaTro.Service.BillService
                     UnitPrice = s.Price,
                     UsageNumber = s.Number,
                     IsOldNewNumber = s.IsOldNewNumber,
-                    OldNumber = 0,
+                    OldNumber = s.CurrentNumber,
                 }).ToList();
                 room.Services = service;
             }    
@@ -448,12 +463,11 @@ namespace QLNhaTro.Service.BillService
                     .Where(item=> item.ContractId == room.ContractId && item.Customer.IsRepresentative == true)
                     .Select(record=> new
                     {
-                        Id = record.Id,
+                        Id = record.CustomerId,
                         FullName = record.Customer.FullName,
                         Email = record.Customer.Email,
                     }).FirstOrDefault();
                 if (customer == null) throw new NotFoundException($"Không có người đại diện của phòng {room.NumberOfRoom}");
-
                 Bill newBiil = new Bill 
                 {
                     CustomerId = customer.Id,
@@ -466,25 +480,45 @@ namespace QLNhaTro.Service.BillService
                 _Context.Bills.Add(newBiil);
                 await _Context.SaveChangesAsync();
 
-                var service = room.Services.Select(item=>new ServiceInvoiceDetails
-                {
-                    BillId = newBiil.Id,
-                    ServiceId = item.Id,
-                    OldNumber = item.OldNumber,
-                    NewNumber = item.NewNumber,
-                    UnitPrice = item.UnitPrice,
-                    UsageNumber = !item.IsOldNewNumber ? item.UsageNumber : item.NewNumber.Value - item.OldNumber.Value,
-                });
-                _Context.ServiceInvoiceDetails.AddRange(service);
+                /* var service = room.Services.Select(item=>new ServiceInvoiceDetails
+                 {
+                     BillId = newBiil.Id,
+                     ServiceId = item.Id,
+                     OldNumber = item.OldNumber,
+                     NewNumber = item.NewNumber,
+                     UnitPrice = item.UnitPrice,
+                     UsageNumber = !item.IsOldNewNumber ? item.UsageNumber : item.NewNumber.Value - item.OldNumber.Value,
+                 });*/
 
-                var arise = _Context.Incurs.Where(item => (item.RoomId == room.RoomId && item.StatusPay == false) || item.BillId == newBiil.Id).ToList();
+                //thêm các ServiceInvoiceDetails và cập nhận số dùng hiện tại vào bảng ServiceRooms
+                decimal totalService = 0;
+                foreach (var s in room.Services)
+                {
+                    ServiceInvoiceDetails service = new ServiceInvoiceDetails();
+                    if (s.IsOldNewNumber == true)
+                    {
+                        var serviceRoom = _Context.ServiceRooms.Where(item=> item.ServiceId == s.Id && item.ContractId == room.ContractId).FirstOrDefault();
+                        serviceRoom.CurrentNumber = (int)s.NewNumber;
+                        _Context.ServiceRooms.Update(serviceRoom);
+                    }
+                    service.BillId = newBiil.Id;
+                    service.ServiceId = s.Id;
+                    service.OldNumber = s.OldNumber;
+                    service.NewNumber = s.NewNumber;
+                    service.UnitPrice = s.UnitPrice;
+                    service.UsageNumber = !s.IsOldNewNumber ? s.UsageNumber : s.NewNumber.Value - s.OldNumber.Value;
+                    totalService += service.UnitPrice * service.UsageNumber;
+                    _Context.ServiceInvoiceDetails.Add(service);
+                }
+
+                var arise = _Context.Incurs.Where(item => (item.RoomId == room.RoomId && item.StatusPay == false) && !item.IsDeleted).ToList();
                 foreach (var item in arise)
                 {
                     item.BillId = newBiil.Id;
                 }
                 _Context.Incurs.UpdateRange(arise);
 
-                newBiil.TotalAmount = newBiil.PriceRoom + arise.Sum(item => item.Amount) + service.Sum(item => item.UnitPrice * item.UsageNumber);
+                newBiil.TotalAmount = newBiil.PriceRoom + arise.Sum(item => item.Amount) + totalService;
                 _Context.Bills.Update(newBiil);
                 
                 await _Context.SaveChangesAsync();

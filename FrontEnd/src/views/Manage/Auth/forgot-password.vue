@@ -1,6 +1,14 @@
+<style scoped>
+    .auth-wrapper{
+        background-image: url('../../../../public/images/background.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+</style>
 <script>
 import Rightbar from "@/components/right-bar.vue"
-//import apiClient from "@/plugins/axios";
+import apiClient from "@/plugins/axios";
 
 export default {
     name: "FORGOT-PASSWORD",
@@ -12,10 +20,12 @@ export default {
             email:'',
             IsEmail: false,
             IsCode: false,
-            password: '',
-            passwordConfirm: '',
             inputs: Array(6).fill(''),
-            code: '',
+            data: {
+                password: '',
+                passwordConfirm: '',
+                landlordId: 0,
+            },
             message: '',
             snackbar: false,
             snackbarColor: '',
@@ -25,36 +35,34 @@ export default {
                 matchPassword: (v) =>v === this.password || 'Mật khẩu xác nhận không khớp',
             },
             showpassword: false,
+            code: 0,
         }
     },
     methods:{
         btnSendEmail(){
-            this.IsEmail = true;
-            // apiClient.post(`/Landlord/ForGotPassword/${this.email}`)
-            //         .then(response=> {
-            //             this.code = response.data;
-                        
-            //         })
-            //         .catch(error=>{
-            //             this.message = 'Đã xảy ra lỗi: ' + error.response.data.message;
-            //             this.snackbarColor = 'red'
-            //             this.snackbar = true
-            //         })
+            apiClient.post(`/Landlord/ForGotPassword/${this.email}`)
+                    .then(response=> {
+                        this.data.landlordId = response.data;
+                        this.IsEmail = true;
+                    })
+                    .catch(error=>{
+                        this.message = 'Đã xảy ra lỗi: ' + error.response.data.message;
+                        this.snackbarColor = 'red'
+                        this.snackbar = true
+                    })
         },
         btnContinue(){
-            this.IsEmail = false;
-            this.IsCode = true;
-        },
-        moveToNext(index) {
-            // Nếu ký tự đã được nhập và chưa phải là ô cuối cùng
-            if (this.inputs[index].length === 1 && index < this.inputs.length - 1) {
-                // Lấy danh sách các trường input
-                const nextInput = this.$el.querySelectorAll('input')[index + 1];
-                if (nextInput) {
-                nextInput.focus(); // Di chuyển focus sang ô tiếp theo
-                }
-            }
-        },
+            apiClient.get(`/Landlord/CheckCode?input=${this.code}&landlordId=${this.data.landlordId}`)
+                    .then(()=>{
+                        this.IsEmail = false;
+                        this.IsCode = true;
+                    })
+                    .catch(error=>{
+                        this.message = 'Đã xảy ra lỗi: ' + error.response.data.message;
+                        this.snackbarColor = 'red'
+                        this.snackbar = true
+                    })
+        }
     }
 }
 </script>
@@ -101,18 +109,28 @@ export default {
                                 variant="outlined" 
                                 placeholder="Nhập vào Email" 
                                 v-model="email"
+                                :readonly="IsCode"
                             ></v-text-field>
                         </div>
                         <div   class="d-grid">
                             <button type="button" v-show="!IsEmail && !IsCode" class="btn btn-primary" @click="btnSendEmail">Gửi Email</button>
                         </div>
                         <div v-show="IsEmail">
-                            <p class="mb-0">Chúng tôi đã gửi mã đến Email: qua****qn@gmail.com</p>
+                            <p class="mb-0">Chúng tôi đã gửi mã đến email của bạn</p>
                             <p class="mb-3">Không nhận được Email?<a href="#" class="link-primary ms-1">Gửi lại mã</a></p>
                             <BRow class="row my-4 text-center">
-                                <BCol class="col" v-for="(input, index) in inputs" :key="index">
-                                    <input type="text" class="form-control text-center" placeholder="0" maxlength="1" @input="moveToNext(index)" >
-                                </BCol>
+                                <!-- <BCol class="col" v-for="(input, index) in inputs" :key="index">
+                                    <input type="text" class="form-control text-center" placeholder="0" maxlength="1">
+                                </BCol> -->
+                                <div class="form-group m-0">
+                                    <label class="form-label">Mã xác nhận:</label>
+                                    <v-text-field 
+                                        type="number"  
+                                        variant="outlined" 
+                                        placeholder="Nhập vào mã xác nhận"
+                                        v-model="code"
+                                    ></v-text-field>
+                                </div>
                             </BRow>
                             <div  class="d-grid">
                                 <button type="button" @click="btnContinue" class="btn btn-primary">Tiếp tục</button>
@@ -120,7 +138,7 @@ export default {
                         </div>
                         <div v-show="IsCode">
                             <div class="form-group m-0">
-                                <label class="form-label">Mật khẩu</label>
+                                <label class="form-label">Mật khẩu mới:</label>
                                 <v-text-field 
                                     type="text"  
                                     variant="outlined" 
@@ -129,8 +147,8 @@ export default {
                                     v-model="password"
                                 ></v-text-field>
                             </div>
-                            <div class="form-group m-0">
-                                <label class="form-label">Nhập lại mật khẩu</label>
+                            <div class="form-group ">
+                                <label class="form-label">Nhập lại mật khẩu:</label>
                                 <v-text-field 
                                     type="text"  
                                     variant="outlined" 

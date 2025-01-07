@@ -219,6 +219,7 @@ export default {
                         })
         },
         btnCalculateRoom(){
+            this.CalculateRoom = [];
             apiClient.get(`/Bill/CalculateRoom?towerId=${this.towerId}`)
                     .then(response=>{
                         this.CalculateRoom = response.data;
@@ -230,7 +231,6 @@ export default {
                     })
         },
         SendInvoice(){
-            console.log(this.CalculateRoom);
             apiClient.post(`/Bill/SendInvoice`,this.CalculateRoom)
                     .then(()=>{
                             this.message = "Tính tiền cho các phòng thành công. Hóa đơn đã được gửi đến khách thuê. Bạn hãy thi thoảng vào trang web để theo dõi trạng thái thanh toán của các khách thuê";

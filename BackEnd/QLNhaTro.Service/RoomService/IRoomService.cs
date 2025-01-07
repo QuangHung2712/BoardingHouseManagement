@@ -17,10 +17,11 @@ namespace QLNhaTro.Service.RoomService
         void DeleteRoom(long roomId);
         Task FineNewCustomers(long roomId);
         Task CancelFineNewCustomers(long roomId);
-        Task CheckOut(CheckOutRoomReqModel input);
+        Task<string> CheckOut(CheckOutRoomReqModel input);
         Task ChangeRoom(ChangeRoomReqModel input);
         Task<List<GetDropDownRoom>> GetDropDownRooms(long towerId);
         Task<List<GetDropDownRoom>> GetRoomNoContract(long towerId);
         GetInfomationHomeResModel GetInfoHome(long towerId);
+        List<GetInfoCheckOutRoomResModel> GetInfoCheckout(long roomId);
     }
 }

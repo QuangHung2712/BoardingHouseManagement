@@ -22,6 +22,8 @@
         margin: 1%;
         border-radius: 25px;
         max-width: 400px;
+        background-color: #42a5f5;
+        color: white;
     }
     .dialog{
         width: 80%;
@@ -31,6 +33,7 @@
         background-color: blue;
         color: whitesmoke;
     }
+
 </style>
 <script>
     import Navbar from "@/components/navbar.vue"
@@ -249,14 +252,14 @@
         <Navbar />
     </div>
 
-    <div class="pc-container m-0">
+    <div class="pc-container m-0 item">
         <v-container >
             <div class="page-header">
                 <div class="page-block">
                     <BRow class="align-items-center">
                         <BCol md="12">
                             <div class="page-header-title">
-                                <h2 class="mb-0">Toà nhà</h2>
+                                <h2 class="mb-0">Danh sách toà nhà</h2>
                             </div>
                         </BCol>
                     </BRow>
@@ -273,44 +276,43 @@
             </v-snackbar>
             <v-card class="pa-4">
                 <BRow>
-                <BCol class="col-md-4">
+                <BCol class="col-md-9">
                     <v-text-field label="Địa chỉ" variant="outlined" clearable hide-details v-model="searchAddress"></v-text-field>
                 </BCol>
-                <Bcol class="col-md-4">
-
-                </Bcol>
-                <Bcol class="col-md-4">
+                <Bcol class="col-md-3 text-center">
                     <v-btn color="blue-lighten-1" class="mt-2" @click="(viewdialogEdit = !viewdialogEdit) && (btnCreateEdit(0))"> Thêm toà nhà</v-btn>
                 </Bcol>
             </BRow>
             </v-card>
-            <v-card class="mt-5">
-                <div class="d-flex flex-wrap">
-                    <v-card class="pa-4 itemTower" color="peach" dark v-for="item in filteredTowers" :key="item.id">
-                        <v-card-title>
-                            {{ item.towerName }}
-                        </v-card-title>
-                        <v-card-text>
-                            <v-icon>mdi-map-marker</v-icon>
-                            <span>{{ item.address }}</span>
-                            <p class="mt-2">Số phòng: {{item.sumRoom}}</p>
-                            <p class="mt-2">Đã cho thuê: {{ item.roomRented }}</p>
-                            <p  class="mt-2">Còn trống: {{ item.roomStillEmpty }}</p>
-                            <v-row justify="space-around" class="mt-2">
-                                <v-btn icon size="small" @click="deleteTower(item.id,item.address)">
-                                    <v-icon>mdi-delete</v-icon>
-                                </v-btn>
-                                <v-btn icon size="small" @click="(viewdialogEdit = !viewdialogEdit) && (btnCreateEdit(item.id))">
-                                    <v-icon>mdi-pencil</v-icon>
-                                </v-btn>
-                                <v-btn @click="goToTowerDetails(item.id)" icon size="small">
-                                    <v-icon>mdi-eye</v-icon>
-                                </v-btn>
-                            </v-row>
-                        </v-card-text>
-                    </v-card>
+                <div class="d-flex flex-wrap mt-5">
+                    <v-row>
+                        <v-col cols="4" v-for="item in filteredTowers" :key="item.id" >
+                            <v-card class="pa-4 itemTower" color="peach" dark >
+                                <v-card-title>
+                                    {{ item.towerName }}
+                                </v-card-title>
+                                <v-card-text>
+                                    <v-icon>mdi-map-marker</v-icon>
+                                    <span>{{ item.address }}</span>
+                                    <p class="mt-2">Số phòng: {{item.sumRoom}}</p>
+                                    <p class="mt-2">Đã cho thuê: {{ item.roomRented }}</p>
+                                    <p  class="mt-2">Còn trống: {{ item.roomStillEmpty }}</p>
+                                    <v-row justify="space-around" class="mt-2">
+                                        <v-btn icon size="small" @click="deleteTower(item.id,item.address)">
+                                            <v-icon>mdi-delete</v-icon>
+                                        </v-btn>
+                                        <v-btn icon size="small" @click="(viewdialogEdit = !viewdialogEdit) && (btnCreateEdit(item.id))">
+                                            <v-icon>mdi-pencil</v-icon>
+                                        </v-btn>
+                                        <v-btn @click="goToTowerDetails(item.id)" icon size="small">
+                                            <v-icon>mdi-eye</v-icon>
+                                        </v-btn>
+                                    </v-row>
+                                </v-card-text>
+                            </v-card>
+                        </v-col>
+                    </v-row>
                 </div>
-            </v-card>
         <BModal v-model="viewdialogEdit" hide-footer :title="titleDialog" modal-class="fadeInRight"
                 class="v-modal-custom" centered size="lg" >
                 <div class="card-body">
@@ -319,7 +321,7 @@
                             <BCol class="col-lg-6">
                                 <div class="form-group">
                                     <label class="form-label">Tên tòa nhà:</label>
-                                    <v-text-field v-model="tower.userEnterInformation" :rules="[required]" variant="outlined" clearable placeholder="Nhập vào tên dịch vụ" class="input-control"></v-text-field>
+                                    <v-text-field v-model="tower.towerName" :rules="[required]" variant="outlined" clearable placeholder="Nhập vào tên dịch vụ" class="input-control"></v-text-field>
                                 </div>
                             </BCol>
                             <BCol class="col-lg-6 d-flex align-items-center">

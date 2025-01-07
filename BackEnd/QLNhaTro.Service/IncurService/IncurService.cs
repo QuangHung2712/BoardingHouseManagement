@@ -41,7 +41,7 @@ namespace QLNhaTro.Service.IncurService
             {
                 try
                 {
-                    
+                    var curentDate = DateTime.Now;
                     var newIncur = new Incur
                     {
                         RoomId = input.RoomId,
@@ -51,7 +51,7 @@ namespace QLNhaTro.Service.IncurService
                         TowerId = input.TowerId,
                     };
                     
-                    var bill = _Context.Bills.Where(item => item.RoomId == input.RoomId && !item.IsDeleted && item.Status == CommonEnums.StatusBill.ChuaThanhToan && item.Status == CommonEnums.StatusBill.ChuaDienThongTin).FirstOrDefault();
+                    var bill = _Context.Bills.Where(item => item.RoomId == input.RoomId && !item.IsDeleted &&item.CreationDate.Month == curentDate.Month && item.CreationDate.Year == curentDate.Year && (item.Status == CommonEnums.StatusBill.ChuaThanhToan || item.Status == CommonEnums.StatusBill.ChuaDienThongTin)).FirstOrDefault();
 
                     if (bill != null)
                     {
@@ -74,7 +74,7 @@ namespace QLNhaTro.Service.IncurService
                 {
                     var incur = _Context.Incurs.GetAvailableById(input.Id);
                     if (incur.StatusPay == true) throw new Exception("Phát sinh đã được thanh toán không thể sửa");
-                    if(incur.Amount != input.Amount && incur.Bill != null)
+                    if(incur.Amount != input.Amount && incur.BillId != null)
                     {
                         var bill = _Context.Bills.Where(item => item.RoomId == input.RoomId && !item.IsDeleted).FirstOrDefault();
                         if (bill == null) 

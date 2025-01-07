@@ -113,13 +113,21 @@ namespace QLNhaTro.API.Controllers
         {
             try
             {
-                bool isEmail = _Service.ForgotPassword(email);
-                if (!isEmail)
-                {
-                    return Unauthorized(new { Message = "Địa chỉ Email không tồn tại!" });
-                }
-                var result = await _emailService.SendEmailCode(email, "quên mật khẩu");
+                var result = await _Service.ForgotPassword(email);
                 return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
+        }
+        [HttpGet]
+        public IActionResult CheckCode([FromQuery]int input, [FromQuery]long landlordId)
+        {
+            try
+            {
+                _Service.CheckCode(input, landlordId);
+                return Ok();
             }
             catch (Exception ex)
             {

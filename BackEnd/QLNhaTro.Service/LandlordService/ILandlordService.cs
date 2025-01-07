@@ -17,12 +17,14 @@ namespace QLNhaTro.Service.LandlordService
         Task CreateLandlord(CreateEditLandlordReqModels input);
         Task UpdateLandlord(CreateEditLandlordReqModels input, IFormFile ImgQR);
         Task DeleteLandlord(long id);
-        bool ForgotPassword(string inputEmail);
+        Task<long> ForgotPassword(string inputEmail);
         Landlord GetById(long id);
         Task ChangePassword(ChangePasswordReqModel input);
         GetInfoPaymentResModel GetInfoPayment(long id);
         Task UpdateInfoPayment(UpdateInfoPaymentReqModel input, IFormFile ImgQR);
         ContactInfoResModel GetContactInfo(long id);
         Task MonthlyReport();
+        void CheckCode(int input, long landlordId);
+
     }
 }

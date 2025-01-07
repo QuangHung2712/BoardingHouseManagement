@@ -250,7 +250,7 @@ export default {
                                     ></v-select>
                             </BCol>
                             <BCol class="col-sm-2 col-6"><v-btn @click="(viewdialog = !viewdialog) && (ViewEdit(0,'Thêm phát sinh'))" color="blue-lighten-1" class="mt-2"> Thêm phát sinh </v-btn></BCol>
-                            <BCol class="col-sm-2 col-6"><v-btn color="blue-lighten-1" class="mt-2" > Xuất ra Excel </v-btn></BCol>
+                            <!-- <BCol class="col-sm-2 col-6"><v-btn color="blue-lighten-1" class="mt-2" > Xuất ra Excel </v-btn></BCol> -->
                         </BRow>
                         <v-data-table 
                             :headers = "headersTable"

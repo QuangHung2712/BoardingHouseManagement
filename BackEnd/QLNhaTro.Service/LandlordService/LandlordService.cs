@@ -1,8 +1,10 @@
 ﻿using DocumentFormat.OpenXml.Office.CustomUI;
 using DocumentFormat.OpenXml.Office2010.Excel;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using QLNhaTro.Commons;
@@ -28,10 +30,12 @@ namespace QLNhaTro.Service.LandlordService
     {
         private readonly AppDbContext _Context;
         private readonly IEmailService _EmailService;
-        public LandlordService(AppDbContext context, IEmailService emailService)
+        private readonly IMemoryCache _memoryCache;
+        public LandlordService(AppDbContext context, IEmailService emailService, IMemoryCache memoryCache)
         {
             _Context = context;
             _EmailService = emailService;
+            _memoryCache = memoryCache;
         }
         public long Login(LoginReqModels request)
         {
@@ -142,11 +146,28 @@ namespace QLNhaTro.Service.LandlordService
                 throw;
             }
         }
-        public bool ForgotPassword(string inputEmail)
+        public async Task<long> ForgotPassword(string inputEmail)
         {
-            return _Context.Landlords.Any(item => item.Email != null && item.Email.ToLower() == inputEmail.ToLower());
-        }
+            var landlord =  _Context.Landlords.Where(item => item.Email != null && item.Email.ToLower() == inputEmail.ToLower()).FirstOrDefault();
+            if(landlord == null)
+            {
+                throw new Exception("Email không tồn tại");
+            }
+            var cacheKey = $"PasswordReset_{landlord.Id}";
+            int code = await _EmailService.SendEmailCode(landlord.Email, "Quên mật khẩu");
+            _memoryCache.Set(cacheKey, code, DateTimeOffset.UtcNow.AddMinutes(10));
+            return landlord.Id;
 
+        }
+        public void CheckCode(int input,long landlordId)
+        {
+            var cacheKey = $"PasswordReset_{landlordId}";
+            _memoryCache.TryGetValue(cacheKey, out string? resetCode);
+            if(resetCode != input.ToString())
+            {
+                throw new Exception("Mã xác nhận không đúng hoặc đã hết hạn sử dụng");
+            }
+        }
         public Landlord GetById(long id)
         {
             try

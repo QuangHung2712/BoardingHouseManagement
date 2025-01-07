@@ -3,6 +3,8 @@ import pageheader from "@/components/page-header.vue"
 import apiClient from "@/plugins/axios";
 import CryptoJS from 'crypto-js';
 import store from "../../../../state/store";
+import Axios from "axios";
+
 
 export default {
     name: "wizard",
@@ -47,7 +49,24 @@ export default {
                         currentNumber: 0, 
                     },
                 ],
-            }
+            },
+            formAddress: false,
+            viewDiaLogAddress: false,
+            tinhData: [
+                    
+            ],
+            huyenData: [
+                
+            ],
+            phuongData: [
+                
+            ],
+            selectTinh: null,
+            selectHuyen: null,
+            selectPhuong: null,
+            address: '',
+            addressConfirm: '',
+            indexAddress: 0,
 
         }
     },
@@ -195,6 +214,57 @@ export default {
             // Kiểm tra xem có checkbox nào được chọn là người đại diện hay không
             this.isRepresentativeSelected = this.contractData.customers.some(customer => customer.isRepresentative);
         },
+        btnAddress(index){
+            Axios.get(`https://esgoo.net/api-tinhthanh/1/0.htm`)
+                .then(response=>{
+                    this.tinhData =  response.data.data;
+                })
+                .catch(error=>{
+                    this.message = "Lấy danh sách tỉnh thành bị lỗi " + error;
+                    this.snackbar = true;
+                    this.snackbarColor = 'red';
+                })
+                this.indexAddress = index;
+        },
+        onTinhChange(){
+            Axios.get(`https://esgoo.net/api-tinhthanh/2/${this.selectTinh}.htm`)
+                        .then(response=>{
+                            this.huyenData =  response.data.data;
+                        })
+                        .catch(error=>{
+                            this.message = "Lấy danh sách tỉnh thành bị lỗi " + error;
+                            this.snackbar = true;
+                            this.snackbarColor = 'red';
+                        })
+        },
+        onHuyenChange(){
+            Axios.get(`https://esgoo.net/api-tinhthanh/3/${this.selectHuyen}.htm`)
+                        .then(response=>{
+                            this.phuongData =  response.data.data;
+                        })
+                        .catch(error=>{
+                            this.message = "Lấy danh sách tỉnh thành bị lỗi " + error;
+                            this.snackbar = true;
+                            this.snackbarColor = 'red';
+                        })
+        },
+        onPhuongChange(){
+            const tinh = this.tinhData.find(item => item.id === this.selectTinh);
+            const huyen = this.huyenData.find(item => item.id === this.selectHuyen);
+            const phuong = this.phuongData.find(item => item.id === this.selectPhuong);
+            if (tinh && huyen && phuong) {
+                return ` ${phuong.full_name} ${huyen.full_name} ${tinh.full_name}`;
+            } else {
+                return ''; // Trả về chuỗi rỗng nếu có một trong các biến là null hoặc undefined
+            }
+        },
+        FormatAddress(){
+            this.addressConfirm = this.address + this.onPhuongChange();
+        },
+        btnSaveAddress(){
+            this.contractData.customers[this.indexAddress].address = this.addressConfirm;
+            this.viewDiaLogAddress = false
+        }
     }
 }
 </script>
@@ -371,7 +441,7 @@ export default {
                                             <div class="col-sm-4">
                                                 <div class="form-group">
                                                     <label class="form-label">Địa chỉ: </label>
-                                                    <v-text-field variant="outlined" :rules="[required]" clearable v-model="customer.address"></v-text-field>
+                                                    <v-text-field readonly variant="outlined" :rules="[required]" @click="(viewDiaLogAddress = !viewDiaLogAddress) && btnAddress(index)" v-model="customer.address"></v-text-field>
                                                 </div>
                                             </div>
                                         </div>
@@ -422,7 +492,7 @@ export default {
                                         </div>
                                         <div class="col-sm-3" v-else v-show="service.serviceId">
                                             <div class="form-group">
-                                            <label class="form-label">Số ban đầu: </label>
+                                            <label class="form-label">Số hiện tại: </label>
                                             <v-text-field type="number" variant="outlined" :rules="[requiredNumber]" v-model="service.currentNumber" clearable></v-text-field>
                                             </div>
                                         </div>
@@ -463,5 +533,94 @@ export default {
                 </div>
           </div>
         </div>
-        </BRow>
+        <BModal v-model="viewDiaLogAddress" hide-footer title="Chọn địa chỉ" modal-class="fadeInRight"
+            class="v-modal-custom" centered size="lg" >
+            <div class="card-body">
+                <v-form v-model="formAddress" ref="formChange">
+                    <transition name="slide-up">
+                        <BRow>
+                            <BCol class="col-lg-4">
+                                <div class="form-group">
+                                    <label class="form-label">Tỉnh</label>
+                                    <v-autocomplete
+                                        v-model="selectTinh"
+                                        :items="tinhData"
+                                        item-title="full_name"
+                                        item-value="id"
+                                        outlined
+                                        dense
+                                        clearable
+                                        @update:modelValue="onTinhChange"
+                                    ></v-autocomplete>
+                                </div>
+                            </BCol>
+                            <BCol class="col-lg-4">
+                                <div class="form-group">
+                                    <label class="form-label">Quận, huyện</label>
+                                    <v-autocomplete
+                                        v-model="selectHuyen"
+                                        :items="huyenData"
+                                        item-title="full_name"
+                                        item-value="id"
+                                        outlined
+                                        dense
+                                        clearable
+                                        :disabled="!selectTinh"
+                                        @update:modelValue="onHuyenChange"
+                                    ></v-autocomplete>
+                                </div>
+                            </BCol>
+                            <BCol class="col-lg-4">
+                                <div class="form-group">
+                                    <label class="form-label">Phường, xã</label>
+                                    <v-autocomplete
+                                        v-model="selectPhuong"
+                                        :items="phuongData"
+                                        item-title="full_name"
+                                        item-value="id"
+                                        outlined
+                                        dense
+                                        clearable
+                                        :disabled="!selectHuyen"
+                                        @update:modelValue="onPhuongChange"
+                                    ></v-autocomplete>
+                                </div>
+                            </BCol>
+                            <BCol class="col-lg-12">
+                                <div class="form-group">
+                                <label class="form-label">Số nhà:</label>
+                                <v-text-field
+                                    v-model="address"
+                                    variant="outlined"
+                                    :disabled="!selectPhuong"
+                                    clearable
+                                    placeholder="Nhập vào tên dịch vụ"
+                                    class="input-control"
+                                    @input="FormatAddress"
+                                ></v-text-field>
+                                </div>
+                            </BCol>
+                            <BCol class="col-lg-12">
+                                <div class="form-group">
+                                <label class="form-label">Địa chỉ:</label>
+                                <v-text-field
+                                    v-model="addressConfirm"
+                                    variant="outlined"
+                                    readonly
+                                    class="input-control"
+                                    :rules="[required]"
+                                ></v-text-field>
+                                </div>
+                            </BCol>
+                        </BRow>
+                    </transition>
+                </v-form>
+            </div>
+            <div class="modal-footer v-modal-footer">
+                <BButton type="button" variant="light" @click="viewDiaLogAddress = false">Close
+                </BButton>
+                <BButton type="button" variant="primary" @click="btnSaveAddress()" :disabled="!formAddress">Save Changes</BButton>
+            </div>
+        </BModal>
+    </BRow>
 </template>

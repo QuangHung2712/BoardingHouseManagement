@@ -27,7 +27,7 @@ namespace QLNhaTro.API.Extensions
             services.AddScoped<ILandlordService, LandlordService>();
             services.AddScoped<IRoomService, RoomService>();
             services.AddScoped<ITowerService,TowerService>();
-
+            services.AddMemoryCache();
             // Cấu hình dịch vụ Hosted Quartz (Quartz sẽ chạy job ngay cả khi không có người truy cập)
             services.AddQuartz(q =>
             {

@@ -204,8 +204,8 @@ export default {
                             <BCol class="col-sm-2 d-sm-block d-none"></BCol>
                             <BCol class="col-sm-4 col-6"><v-text-field label="Tên dịch vụ" variant="outlined" v-model="searchName" clearable hide-details></v-text-field></BCol>
                             <BCol class="col-sm-2 col-6"><v-btn @click="(viewdialog = !viewdialog) && (DetailService(0,'Thêm dịch vụ'))" color="blue-lighten-1" class="mt-2"> Thêm dịch vụ </v-btn></BCol>
-                            <BCol class="col-sm-2 col-6"><v-btn color="blue-lighten-1" class="mt-2" > Xuất ra Excel </v-btn></BCol>
-                            <BCol class="col-sm-2 col-6"><v-btn color="blue-lighten-1" class="mt-2"> Nhập từ Excel </v-btn></BCol>
+                            <!-- <BCol class="col-sm-2 col-6"><v-btn color="blue-lighten-1" class="mt-2" > Xuất ra Excel </v-btn></BCol>
+                            <BCol class="col-sm-2 col-6"><v-btn color="blue-lighten-1" class="mt-2"> Nhập từ Excel </v-btn></BCol> -->
                         </BRow>
                         
                         <v-data-table 

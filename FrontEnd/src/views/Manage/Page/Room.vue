@@ -50,7 +50,15 @@
                 message: '',
                 snackbar: false,
                 snackbarColor: '',
-                checkout: {},
+                checkout: {
+                    id: null,
+                    moneyPunish: null,
+                    note: null,
+                    newNumber: null,
+                    service:[
+
+                    ]
+                },
                 viewdialogCheckOut: false,
                 viewdialogChangeRoom: false,
                 contractData: [],
@@ -243,9 +251,33 @@
             FormatPrice(){
                 this.selectRoom.priceRoom = common.formatPrice(this.selectRoom.priceRoom);
             },
-            CheckOutRoom(){
-                this.viewdialogDetail = false;
-                this.form = true;
+            CheckOutRoom(roomid){
+                this.form = false;
+                apiClient(`/Room/GetInfoCheckout?roomId=${roomid}`)
+                    .then(response=>{
+                        this.checkout.service = response.data;
+                        this.checkout.id = roomid;
+                    })
+                    .catch(error =>{
+                        this.message = 'Đã xảy ra lỗi ' + error.response?.data?.message || error
+                        this.snackbarColor = 'red'
+                        this.snackbar = true
+                        this.viewdialogCheckOut = false
+                    })
+            },
+            btnSaveCheckOut(){
+                apiClient.put(`/Room/CheckOutRoom`,this.checkout)
+                        .then(response=>{
+                            this.message = 'Trả phòng thánh công:  ' + response.data
+                            this.snackbarColor = 'Green'
+                            this.snackbar = true
+                            this.viewdialogCheckOut = false
+                        })
+                        .catch(error =>{
+                            this.message = 'Đã xảy ra lỗi ' + error.response?.data?.message || error
+                            this.snackbarColor = 'red'
+                            this.snackbar = true
+                        })
             },
             ChangeRoom(id){
                 this.viewdialogDetail = false;
@@ -270,7 +302,6 @@
                             this.snackbar = true
                         })
             },
-
             onServiceSelected(service){
                 const selectedService = this.servicedata.find(item => item.id === service.serviceId);
                 if (selectedService) {
@@ -457,7 +488,7 @@
                 <BCard>
                     <BCardBody class="p-0">
                         <BRow>
-                            <BCol class="col-sm-3 col-6">            
+                            <!-- <BCol class="col-sm-3 col-6">            
                                 <v-select
                                     clearable
                                     label="Trạng thái phí"
@@ -467,7 +498,7 @@
                                     variant="outlined"
                                     hide-details>
                                 </v-select>
-                            </BCol>
+                            </BCol> -->
                             <BCol class="col-sm-3 col-6">
                                 <v-select
                                     clearable
@@ -490,7 +521,7 @@
                 <BCard no-body class="table-card p-sm-2">
                     <BCardBody>
                         <BRow class="text-end pb-3">
-                            <BCol class="col-sm-9 col-6"><v-btn color="blue-lighten-1" class="mt-2" @click="(viewdialogEdit = !viewdialogEdit) && (EditRoom(0,'Thêm dịch vụ'))"> Thêm phòng</v-btn></BCol>
+                            <BCol class="col-sm-9 col-6"><v-btn color="blue-lighten-1" class="mt-2" @click="(viewdialogEdit = !viewdialogEdit) && (EditRoom(0,'Thêm phòng'))"> Thêm phòng</v-btn></BCol>
                             <BCol class="col-sm-3 col-6"><v-btn color="blue-lighten-1" class="mt-2"> Tính tiền Phòng</v-btn></BCol>
                         </BRow>
                         <v-data-table 
@@ -518,7 +549,7 @@
                             </template>
                             <template v-slot:[`item.actions`]="{ item }">
                                 <v-icon small @click="(viewdialogDetail = !viewdialogDetail)&& (DetailRoom(item.id))" title="Xem chi tiết">mdi-eye</v-icon>
-                                <v-icon class="ml-lg-3" small @click="(viewdialogEdit = !viewdialogEdit) && (EditRoom(item.id,'Sửa dịch vụ'))" title="Sửa phòng" >mdi-pencil-circle </v-icon>
+                                <v-icon class="ml-lg-3" small @click="(viewdialogEdit = !viewdialogEdit) && (EditRoom(item.id,'Sửa phòng'))" title="Sửa phòng" >mdi-pencil-circle </v-icon>
                                 <v-icon class="ml-lg-3" v-show="!item.customerName" small @click="deleteRoom(item.id,item.numberOfRoom)" title="Xoá phòng" >mdi-delete-empty </v-icon>
                                 <v-icon class="ml-lg-3" v-show="item.customerName" small @click="(viewdialogCheckOut = !viewdialogCheckOut) && (CheckOutRoom(item.id))" title="Trả phòng">mdi-refresh</v-icon>
                                 <v-icon class="ml-lg-3" v-show="item.customerName" small @click="(viewdialogChangeRoom = !viewdialogChangeRoom) && (ChangeRoom(item.id))" title="Đổi phòng">mdi-swap-horizontal</v-icon>
@@ -555,18 +586,6 @@
                                     <div class="form-group">
                                         <label class="form-label">Giá:</label>
                                         <v-text-field v-model="selectRoom.priceRoom" :rules="[requiredNumber]" type="text" @input="FormatPrice" variant="outlined" clearable placeholder="Nhập vào giá phòng" class="input-control"></v-text-field>
-                                    </div>
-                                </BCol>
-                                <BCol class="col-lg-6">
-                                    <div class="form-group">
-                                        <label class="form-label">Số điện(nếu có):</label>
-                                        <v-text-field v-model="selectRoom.numberElectric"  type="number" variant="outlined" clearable placeholder="Nhập vào số người tối đa được ở" class="input-control"></v-text-field>
-                                    </div>
-                                </BCol>
-                                <BCol class="col-lg-6">
-                                    <div class="form-group">
-                                        <label class="form-label">Số nước(nếu có):</label>
-                                        <v-text-field v-model="selectRoom.numberCountries" type="number" variant="outlined" clearable placeholder="Nhập vào số người tối đa được ở" class="input-control"></v-text-field>
                                     </div>
                                 </BCol>
                                 <BCol class="col-lg-12">
@@ -644,19 +663,7 @@
                                                     <v-text-field v-model="selectRoom.priceRoom" :rules="[requiredNumber]" type="text" @input="FormatPrice" variant="outlined" readonly  class="input-control"></v-text-field>
                                                 </div>
                                             </BCol>
-                                            <BCol class="col-lg-4">
-                                                <div class="form-group">
-                                                    <label class="form-label">Số điện(nếu có):</label>
-                                                    <v-text-field v-model="selectRoom.numberElectric"  type="number" variant="outlined" readonly  class="input-control"></v-text-field>
-                                                </div>
-                                            </BCol>
-                                            <BCol class="col-lg-4">
-                                                <div class="form-group">
-                                                    <label class="form-label">Số nước(nếu có):</label>
-                                                    <v-text-field v-model="selectRoom.numberCountries" type="number" variant="outlined" readonly  class="input-control"></v-text-field>
-                                                </div>
-                                            </BCol>
-                                            <BCol class="col-lg-12">
+                                            <BCol class="col-lg-8">
                                                 <div class="form-group">
                                                     <label class="form-label">Ghi chú:</label>
                                                     <v-text-field v-model="selectRoom.note" type="number" variant="outlined" readonly class="input-control"></v-text-field>
@@ -765,29 +772,26 @@
                     </div>
                 </BModal>
                 <BModal v-model="viewdialogCheckOut" hide-footer title="Trả phòng" modal-class="fadeInRight"
-                    class="v-modal-custom" centered size="lg" >
+                    class="v-modal-custom" centered size="md" >
                     <div class="card-body">
                         <v-form v-model="form" ref="form">
                             <BRow>
-                                <BCol class="col-lg-6">
-                                    <div class="form-group">
-                                        <label class="form-label">Số điện(nếu có):</label>
-                                        <v-text-field v-model="checkout.newNumberElectric"  type="number" variant="outlined" clearable placeholder="Nhập vào số phòng" class="input-control"></v-text-field>
-                                    </div>
-                                </BCol>
-                                <BCol class="col-lg-6">
-                                    <div class="form-group">
-                                        <label class="form-label">Số nước(nếu có):</label>
-                                        <v-text-field v-model="checkout.newNumberCountries"  type="number" variant="outlined" clearable placeholder="Nhập vào các thiết bị có trong phòng" class="input-control"></v-text-field>
-                                    </div>
-                                </BCol>
-                                <BCol class="col-lg-6">
+                                <div v-for="(service, index) in checkout.service" :key="index">
+                                    <BCol class="col-lg-12" v-if="service.isOldNewNumber" >
+                                        <div class="form-group">
+                                            <label class="form-label">Số {{ service.serviceName }} (Số cũ: {{ service.oldNumber }}) :</label>
+                                            <v-text-field v-model="service.newNumber"  type="number" variant="outlined" clearable placeholder="Nhập vào số phòng" class="input-control"></v-text-field>
+                                        </div>
+                                    </BCol>
+                                </div>
+                                
+                                <BCol class="col-lg-12">
                                     <div class="form-group">
                                         <label class="form-label">Tiền phạt(nếu có):</label>
                                         <v-text-field v-model="checkout.moneyPunish" type="number" variant="outlined" clearable placeholder="Nhập vào số người tối đa được ở" class="input-control"></v-text-field>
                                     </div>
                                 </BCol>
-                                <BCol class="col-lg-6">
+                                <BCol class="col-lg-12">
                                     <div class="form-group">
                                         <label class="form-label">Ghi chú(nếu có):</label>
                                         <v-text-field v-model="checkout.note" type="number" @input="FormatPrice" variant="outlined" clearable placeholder="Nhập vào giá phòng" class="input-control"></v-text-field>
@@ -799,7 +803,7 @@
                     <div class="modal-footer v-modal-footer">
                         <BButton type="button" variant="light" @click="viewdialogCheckOut = false">Close
                         </BButton>
-                        <BButton type="button" variant="primary" @click="CreateEditService()" :disabled="!form">Save Changes</BButton>
+                        <BButton type="button" variant="primary" @click="btnSaveCheckOut()" :disabled="!form">Save Changes</BButton>
                     </div>
                 </BModal>
                 <BModal v-model="viewdialogChangeRoom" hide-footer title="Đổi phòng" modal-class="fadeInRight"
