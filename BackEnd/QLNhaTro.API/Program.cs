@@ -5,8 +5,12 @@ using QLNhaTro.API.Extensions;
 using QLNhaTro.API.MiddleWare;
 using QLNhaTro.Commons;
 using QLNhaTro.Moddel;
+using Quartz;
+using Quartz.Impl;
+using Quartz.Spi;
 
 var builder = WebApplication.CreateBuilder(args);
+
 
 // Add services to the container.
 builder.Services.AddCors(); //
@@ -27,6 +31,10 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
 builder.Services.ServiceRegister(); //gọi file map Interface với inploment
 builder.Services.AddTransient<JwtMiddleWare>(); //
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(); //
+
+
+
+
 
 builder.Services.AddSwaggerGen(option =>
 {
@@ -81,5 +89,6 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
 
 app.Run();

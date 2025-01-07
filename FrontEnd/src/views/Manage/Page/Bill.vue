@@ -195,6 +195,18 @@ export default {
             if(price)
             return common.formatTablePrice(price);
         },
+        btnUpdate(idBill){
+            apiClient.get(`/Bill/GetDetail?billId=${idBill}`)
+                .then(response=>{
+                    this.selectBill = response.data;
+                    console.log(this.selectBill);
+                })
+                .catch(error=>{
+                    this.message = "Lấy thông tin hoá đơn bị lỗi: " + error.response?.data?.message || error.message;
+                    this.snackbar = true;
+                    this.snackbarColor = 'red';
+                })
+        }
     }
 }
 </script>
@@ -245,8 +257,8 @@ export default {
                             </template>
                             <template v-slot:[`item.actions`]="{ item }">
                                 <v-icon small @click="(viewdialog = !viewdialog) &&(DetailBill(item.id))">mdi-eye</v-icon>
-                                <v-icon class="ml-lg-3" small @click="(viewdialogEdit = !viewdialogEdit) " >mdi-pencil-circle </v-icon>
-                                <v-icon class="ml-lg-3" small @click="deleteBill(item.id,item.numberOfRoom)" >mdi-delete-empty </v-icon>
+                                <v-icon class="ml-lg-3" v-show="item.status === 'Chưa thanh toán'" small @click="(viewdialogEdit = !viewdialogEdit) && (btnUpdate(item.id)) " >mdi-pencil-circle </v-icon>
+                                <v-icon class="ml-lg-3"  v-show="item.status === 'Chưa thanh toán'" small @click="deleteBill(item.id,item.numberOfRoom)" >mdi-delete-empty </v-icon>
                             </template>
                         </v-data-table>
                     </BCardBody>
@@ -300,16 +312,16 @@ export default {
                     class="v-modal-custom" centered size="lg">
                     <div class="card-body">
                         <v-form v-model="form">
-                            <!-- <div class="card" v-for="(Service,index) in selectBill " :key="index">
-                                <div class="card-header">
-                                    <h4>Dịch vụ {{ Service.serviceName }}</h4>
+                            <div class="card" v-for="(Service,index) in selectBill.service " :key="index" >
+                                <div class="card-header" v-if="Service.newNumber != null">
+                                    <h4>Dịch vụ {{ Service.name }}</h4>
                                 </div>
-                                <div class="card-body" >
+                                <div class="card-body "  v-if="Service.newNumber != null">
                                     <BRow>
                                         <BCol class="col-lg-6">
                                             <div class="form-group">
                                                 <label class="form-label">Số cũ:</label>
-                                                <v-text-field v-model="Service.oldNumber" :rules="[required]" variant="outlined" clearable placeholder="Nhập vào số cũ" class="input-control"></v-text-field>
+                                                <v-text-field v-model="Service.oldNumber" :rules="[v => (v !== null && v !== undefined && v !== '') || 'Trường này là bắt buộc']" variant="outlined" clearable placeholder="Nhập vào số cũ" class="input-control"></v-text-field>
                                             </div>
                                         </BCol>
                                         <BCol class="col-lg-6">
@@ -320,7 +332,7 @@ export default {
                                         </BCol>
                                     </BRow>
                                 </div>
-                            </div> -->
+                            </div>
                         </v-form>
                     </div>
                     <div class="modal-footer v-modal-footer">

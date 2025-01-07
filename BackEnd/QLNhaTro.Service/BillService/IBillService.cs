@@ -20,5 +20,6 @@ namespace QLNhaTro.Service.BillService
         List<GetAllBillByTowerResModel> GetAll(long towerId);
         Task DeleteBill(long billId);
         GetDetailBillResModel GetDetail(long billId);
+        Task UpdateBill(UpdateBillReqModel input);
     }
 }

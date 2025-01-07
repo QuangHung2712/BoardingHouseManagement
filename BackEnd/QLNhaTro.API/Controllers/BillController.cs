@@ -166,5 +166,20 @@ namespace QLNhaTro.API.Controllers
 
             }
         }
+
+        [HttpPut]
+        public async Task<ActionResult> Update([FromBody] UpdateBillReqModel input)
+        {
+            try
+            {
+                 await _billService.UpdateBill(input);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+
+            }
+        }
     }
 }

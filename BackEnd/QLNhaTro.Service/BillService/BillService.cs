@@ -1,4 +1,5 @@
-﻿using DocumentFormat.OpenXml.Office2010.Excel;
+﻿using DocumentFormat.OpenXml.InkML;
+using DocumentFormat.OpenXml.Office2010.Excel;
 using DocumentFormat.OpenXml.Office2010.ExcelAc;
 using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.VariantTypes;
@@ -365,6 +366,36 @@ namespace QLNhaTro.Service.BillService
                 Reason = record.Reason,
             }).ToList();
             return result;
+        }
+        public async Task UpdateBill(UpdateBillReqModel input)
+        {
+            // Lấy danh sách ServiceInvoiceDetails theo BillId và ServiceId
+            var serviceInvoices = _Context.ServiceInvoiceDetails
+                .Where(item => item.BillId == input.Id &&
+                               input.Service.Select(s => s.ServiceId).Contains(item.ServiceId))
+                .ToList();
+
+            // Kiểm tra nếu không có bản ghi nào được tìm thấy
+            if (serviceInvoices == null || !serviceInvoices.Any())
+            {
+                throw new Exception("Không tìm thấy dữ liệu để cập nhật.");
+            }
+
+            // Thực hiện cập nhật thông tin
+            foreach (var invoice in serviceInvoices)
+            {
+                var inputService = input.Service.FirstOrDefault(s => s.ServiceId == invoice.ServiceId && s.NewNumber != null);
+                if (input != null)
+                {
+                    invoice.OldNumber = inputService.OldNumber;
+                    invoice.NewNumber = inputService.NewNumber;
+                    invoice.UsageNumber = inputService.UsageNumber;
+                    invoice.UnitPrice = inputService.UnitPrice;
+                }
+            }
+
+            // Lưu thay đổi vào database
+            await _Context.SaveChangesAsync();
         }
     }
 }

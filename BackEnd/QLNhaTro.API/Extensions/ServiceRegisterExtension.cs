@@ -8,6 +8,7 @@ using QLNhaTro.Service.LandlordService;
 using QLNhaTro.Service.RoomService;
 using QLNhaTro.Service.Service;
 using QLNhaTro.Service.TowerService;
+using Quartz;
 
 namespace QLNhaTro.API.Extensions
 {
@@ -25,6 +26,18 @@ namespace QLNhaTro.API.Extensions
             services.AddScoped<ILandlordService, LandlordService>();
             services.AddScoped<IRoomService, RoomService>();
             services.AddScoped<ITowerService,TowerService>();
+
+            // Cấu hình dịch vụ Hosted Quartz (Quartz sẽ chạy job ngay cả khi không có người truy cập)
+            services.AddQuartz(q =>
+            {
+                q.UseMicrosoftDependencyInjectionJobFactory();
+                var jobKey = JobKey.Create(nameof(Job));
+                q.AddJob<Job>(jobKey)
+                .AddTrigger(trigger => trigger
+                                        .ForJob(jobKey)
+                                        .WithCronSchedule("0 25 0 * * ?"));
+            });
+            services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
         }
     }
 }

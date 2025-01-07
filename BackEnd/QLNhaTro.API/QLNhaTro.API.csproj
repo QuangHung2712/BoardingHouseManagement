@@ -19,6 +19,9 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Quartz" Version="3.13.1" />
+    <PackageReference Include="Quartz.AspNetCore" Version="3.13.1" />
+    <PackageReference Include="Quartz.Extensions.Hosting" Version="3.13.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
   </ItemGroup>
 
@@ -26,6 +29,10 @@
     <ProjectReference Include="..\QLNhaTro.Commons\QLNhaTro.Commons.csproj" />
     <ProjectReference Include="..\QLNhaTro.Moddel\QLNhaTro.Moddel.csproj" />
     <ProjectReference Include="..\QLNhaTro.Service\QLNhaTro.Service.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Extensions\Job\" />
   </ItemGroup>
 
 </Project>

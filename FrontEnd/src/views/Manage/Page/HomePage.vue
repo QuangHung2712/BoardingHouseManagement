@@ -96,6 +96,8 @@
                         this.message = "Từ chối hoá đơn thành công!";
                         this.snackbar = true;
                         this.snackbarColor = 'green';
+                        this.GetRequestPaymentConfirmation();
+                        this.getInfo();
                     })
                     .catch(error=>{
                         this.message = "Từ chối hoá đơn bị lỗi: " + error.response?.data?.message || error;
