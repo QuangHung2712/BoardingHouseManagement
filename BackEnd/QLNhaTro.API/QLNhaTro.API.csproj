@@ -31,8 +31,4 @@
     <ProjectReference Include="..\QLNhaTro.Service\QLNhaTro.Service.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Extensions\Job\" />
-  </ItemGroup>
-
 </Project>

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using QLNhaTro.Commons;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,9 +7,8 @@ using System.Threading.Tasks;
 
 namespace QLNhaTro.Moddel.Moddel.RequestModels
 {
-    public class ServiceUpdateBillReqModel
+    public class ServiceUpdateBillReqModel : BaseEntity
     {
-        public long ServiceId { get; set; }
         public long? OldNumber { get; set; }
         public long? NewNumber { get; set; }
         public long UsageNumber { get; set; }

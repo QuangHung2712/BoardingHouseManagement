@@ -13,5 +13,6 @@ namespace QLNhaTro.Moddel.Entity
         public string Address { get; set; }
         public long LandlordId { get; set; }
         public virtual Landlord Landlord { get; set; }
+        public bool UserEnterInformation { get; set; }// Người nhận nhận thông tin
     }
 }

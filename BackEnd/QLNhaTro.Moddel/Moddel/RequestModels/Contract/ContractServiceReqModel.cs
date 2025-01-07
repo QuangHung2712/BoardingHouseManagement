@@ -10,7 +10,8 @@ namespace QLNhaTro.Moddel.Moddel.RequestModels
     {
         public long ServiceId { get; set; }
         public decimal Price { get; set; }
-        public int Number { get; set; }
+        public int? Number { get; set; }
         public bool IsOldNewNumber { get; set; }
+        public int? CurrentNumber { get; set; }// Số ban đầu
     }
 }

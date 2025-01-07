@@ -17,5 +17,7 @@ namespace QLNhaTro.Moddel.Entity
         public decimal Amount { get; set; }
         public string Reason { get; set; }
         public bool StatusPay { get; set; }
+        public long? BillId { get; set; }
+        public virtual Bill? Bill { get; set; }
     }
 }

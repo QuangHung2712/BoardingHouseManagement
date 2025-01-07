@@ -180,5 +180,18 @@ namespace QLNhaTro.API.Controllers
                 return StatusCode(500, new { Message = ex.Message });
             }
         }
+        [HttpGet]
+        public async Task<ActionResult> Test()
+        {
+            try
+            {
+                await _Service.MonthlyReport();
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
+        }
     }
 }

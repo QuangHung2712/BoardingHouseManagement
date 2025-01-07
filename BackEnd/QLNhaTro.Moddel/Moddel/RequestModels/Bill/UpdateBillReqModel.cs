@@ -10,5 +10,7 @@ namespace QLNhaTro.Moddel.Moddel.RequestModels
     public class UpdateBillReqModel : BaseEntity
     {
         public List<ServiceUpdateBillReqModel> Service { get; set; }
+        public decimal PriceRoom { get; set; }
+        public decimal SumArises { get; set; }
     }
 }

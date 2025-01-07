@@ -11,6 +11,7 @@ using QLNhaTro.Moddel;
 using QLNhaTro.Moddel.Entity;
 using QLNhaTro.Moddel.Moddel.RequestModels;
 using QLNhaTro.Moddel.Moddel.ResponseModels;
+using QLNhaTro.Service.EmailService;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -26,9 +27,11 @@ namespace QLNhaTro.Service.LandlordService
     public class LandlordService : ILandlordService
     {
         private readonly AppDbContext _Context;
-        public LandlordService(AppDbContext context)
+        private readonly IEmailService _EmailService;
+        public LandlordService(AppDbContext context, IEmailService emailService)
         {
             _Context = context;
+            _EmailService = emailService;
         }
         public long Login(LoginReqModels request)
         {
@@ -52,6 +55,7 @@ namespace QLNhaTro.Service.LandlordService
         {
             var landlord =  _Context.Landlords.Where(item => item.Id == id && !item.IsDeleted).Select(record => new GetInfoPaymentResModel
             {
+                Bank = record.Bank,
                 PaymentQRImageLink = CommonFunctions.ConverPathIMG(record.PaymentQRImageLink),
                 STK = record.STK
             }).FirstOrDefault();
@@ -64,6 +68,7 @@ namespace QLNhaTro.Service.LandlordService
         public async Task UpdateInfoPayment(UpdateInfoPaymentReqModel input,IFormFile ImgQR)
         {
             var landlord = _Context.Landlords.GetAvailableById(input.Id);
+            landlord.Bank = input.bank;
             landlord.STK = input.STK;
             landlord.PaymentQRImageLink = SaveImgLocal(ImgQR, landlord.Id,landlord.PaymentQRImageLink, "Ảnh QR ngân hàng thanh toán");
             _Context.Landlords.Update(landlord);
@@ -88,9 +93,7 @@ namespace QLNhaTro.Service.LandlordService
                     Address = input.Address,
                     SDTZalo = input.SDTZalo,
                     Password = "defaultpassword",
-                    STK = "Chưa có",
-                    PaymentQRImageLink="Chưa có",
-                    SampleContractLink= "Chưa có"
+                    Bank = "Chưa có",
                 };
                 _Context.Landlords.Add(landlord);
                 await _Context.SaveChangesAsync();
@@ -210,6 +213,65 @@ namespace QLNhaTro.Service.LandlordService
             // Trả về đường dẫn ảnh đã lưu
             return filePath;
         }
-        
+        public async Task MonthlyReport()
+        {
+            var date = DateTime.Now.ToString("MM/yyyy");
+            var landlords = _Context.Landlords.Where(item => item.IsActive && !item.IsDeleted).ToList();
+            foreach(var landlord in landlords)
+            {
+                string content = $"Đây là báo tháng {date}. Các thông tin được lấy đến ngày 20";
+                decimal Total = 0;
+                var Towers = _Context.Towers.Where(item => item.LandlordId == landlord.Id && !item.IsDeleted).ToList();
+                foreach(var tower in Towers)
+                {
+                    var occupiedRoomIds = _Context.Contracts
+                       .Where(contract =>
+                           contract.TerminationDate == null && !contract.IsDeleted) // Hợp đồng vẫn còn hiệu lực
+                       .Select(contract => contract.RoomId)
+                       .Distinct();
+                    var availableRooms = _Context.Rooms
+                    .Where(room => !occupiedRoomIds.Contains(room.Id) && room.TowerId == tower.Id).Select(item => new
+                    {
+                        name = item.Name,
+                    }).ToList();
+                   
+
+                    var bills = _Context.Bills.Include(item => item.Room).Where(item => item.CreationDate.Month == DateTime.Now.Month && item.Room.TowerId == tower.Id).ToList();
+                    var RoomUnpaid = bills.Where(item => item.Status == CommonEnums.StatusBill.DaXacNhanThanhToan).Select(item => new { item.Room.Name }).ToList();
+                    var RoomPaid = bills.Where(item => item.Status == CommonEnums.StatusBill.ChuaThanhToan || item.Status == CommonEnums.StatusBill.ChuaXacNhanThanhToan).Select(item => new { item.Room.Name }).ToList();
+
+                    //Phòng chưa thanh toán
+                    long TotalRoomUnpaid = RoomUnpaid.Count;
+                    string InfoRoomUnpaid = string.Join(", ", RoomUnpaid.Select(item => item.Name));
+
+                    //Phòng đã thanh toán
+                    long TotalRoomPaid = RoomPaid.Count;
+                    string InfoRoomPaid = string.Join(", ", RoomPaid.Select(item => item.Name));
+
+                    //Phòng chưa có hóa đơn
+                    long RoomNoInvoice = bills.Count - RoomUnpaid.Count - RoomPaid.Count;
+                    string InfoRoomNoInvoice = string.Join(", ", (bills.Where(item => item.Status == CommonEnums.StatusBill.ChuaDienThongTin).Select(item => new { item.Room.Name }).ToList()).Select(item => item.Name));
+
+                    //Phòng còn trống
+                    int RoomAvailable = availableRooms.Count();
+                    string InfoRoomAvailable = string.Join(", ", availableRooms.Select(item => item.name));
+
+                    long RoomExpireContract = 5;
+                    string InfoRoomExpireContract = "";
+                    decimal TotalAmount = bills.Where(item => item.Status == CommonEnums.StatusBill.DaXacNhanThanhToan).Sum(item => item.TotalAmount);
+                    Total += TotalAmount;
+                    content += $"Đây là báo cáo của tòa nhà {tower.Name} ở địa {tower.Address} " +
+                                $"      Số phòng chưa thanh toán: {TotalRoomUnpaid} đó là các phòng {InfoRoomUnpaid}" +
+                                $"      Sô phòng đã thánh toán: {TotalRoomUnpaid} đó là các phòng {InfoRoomUnpaid}" +
+                                $"      Số phòng chưa có hóa đơn: {RoomAvailable} đó là các phòng {InfoRoomAvailable}" +
+                                $"      Số phòng còn trống: {RoomAvailable} đó là các phòng {InfoRoomAvailable}" +
+                                $"      Số phòng sắp hết hợp đồng {RoomExpireContract} đó là các phòng {InfoRoomExpireContract}" +
+                                $"      Tổng số tiền thu được ở tòa nhà này là {TotalAmount}";
+                }
+                content += $"Tổng số tiền bạn đã thu được trong tháng {date} là: {Total}VND";
+                await _EmailService.SendEmailAsync(landlord.Email, $"Báo cáo tháng {date}", content);
+            }
+        }
+
     }
 }

@@ -23,5 +23,6 @@ namespace QLNhaTro.Service.LandlordService
         GetInfoPaymentResModel GetInfoPayment(long id);
         Task UpdateInfoPayment(UpdateInfoPaymentReqModel input, IFormFile ImgQR);
         ContactInfoResModel GetContactInfo(long id);
+        Task MonthlyReport();
     }
 }

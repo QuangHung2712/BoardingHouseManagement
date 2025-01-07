@@ -315,10 +315,15 @@
                 <div class="card-body">
                     <v-form v-model="form" ref="form">
                         <BRow>
-                            <BCol class="col-lg-12">
+                            <BCol class="col-lg-6">
                                 <div class="form-group">
                                     <label class="form-label">Tên tòa nhà:</label>
                                     <v-text-field v-model="tower.towerName" :rules="[required]" variant="outlined" clearable placeholder="Nhập vào tên dịch vụ" class="input-control"></v-text-field>
+                                </div>
+                            </BCol>
+                            <BCol class="col-lg-6 d-flex align-items-center">
+                                <div class="form-group">
+                                    <v-checkbox label="Tự động gửi yêu cầu nhập vào các số mới của các dịch vụ cần" v-model="tower.userEnterInformation"></v-checkbox>
                                 </div>
                             </BCol>
                             <div v-show="handleIconClick" v-cloak>

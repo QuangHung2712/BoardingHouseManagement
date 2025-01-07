@@ -129,7 +129,7 @@
                     <h3 class="px-lg-16 text-center">Nhập thông tin hoá đơn tháng {{ BillData.date }} của phòng {{ BillData.numberOfRoom }}</h3>
                     <p class="text-center"> <v-icon>mdi-map-marker</v-icon>Địa chỉ: {{ BillData.addressTower }}</p>
                 </BCardHeader>
-                <BCardBody>
+                <BCardBody class="p-0">
                     <BRow>
                         <table class="table Info" >
                             <thead>
@@ -147,8 +147,11 @@
                                     <td>1</td>
                                     <td>{{ FormatPrice(BillData.priceRoom)}}</td>
                                 </tr>
-                                <tr v-for="(serviceItem, index) in filteredServicesFalse" :key="index">
-                                    <td>Tiền {{ serviceItem.name }}</td>
+                                <tr v-for="(serviceItem, index) in BillData.service" :key="index">
+                                    <td>
+                                        <div>Tiền {{ serviceItem.name }}</div> 
+                                        <div v-show="serviceItem.newNumber != null">(Số cũ: {{ serviceItem.oldNumber }} - Số mới: {{ serviceItem.newNumber }})</div>
+                                    </td>
                                     <td>{{ FormatPrice(serviceItem.unitPrice) }}</td>
                                     <td>{{ serviceItem.usageNumber }}</td>
                                     <td>{{ FormatPrice(serviceItem.unitPrice * serviceItem.usageNumber) }}</td>
@@ -159,17 +162,9 @@
                                     <td>1</td>
                                     <td>{{ FormatPrice(arise.amount) }}</td>
                                 </tr>
-                                <tr v-for="(serviceItem, index) in filteredServicesTrue" :key="index" v-show="BillData.status != 1">
-                                    <td>
-                                        <div>Tiền {{ serviceItem.name }}</div> 
-                                        <div>(Số cũ: {{ serviceItem.oldNumber }} - Số mới: {{ serviceItem.newNumber }})</div>
-                                    </td>
-                                    <td>{{ FormatPrice(serviceItem.unitPrice) }}</td>
-                                    <td>{{ serviceItem.usageNumber }}</td>
-                                    <td>{{ FormatPrice(serviceItem.unitPrice * serviceItem.usageNumber) }}</td>
-                                </tr>
+
                                 <tr>
-                                    <td colspan="3"><h4>Tổng tiền</h4></td>
+                                    <td colspan="3" v-show="BillData.status != 1 "><h4>Tổng tiền</h4></td>
                                     <td><h4>{{FormatPrice(BillData.amount) }}</h4></td>
                                 </tr>
                             </tbody>
@@ -189,15 +184,12 @@
                                 </div>
                             </BCol>
                         </BRow>
-
-                        <div v-for="(serviceItem, index) in filteredServicesTrue" :key="index" v-show="BillData.status == 1">
-                            <BCol class="col-lg-6">
-                            <div class="form-group">
+                        <BCol class="col-lg-6" v-for="(serviceItem, index) in filteredServicesTrue" :key="index" v-show="BillData.status == 1">
+                            <div class="form-group m-0">
                                 <label class="form-label">Nhập vào số {{ serviceItem.name }} (số cũ {{ serviceItem.oldNumber }}):</label>
                                 <v-text-field type="number" v-model="serviceItem.newNumber" variant="outlined" :rules="[v => !!v || 'Trường này là bắt buộc']" clearable placeholder='Nhập số mới' class="input-control"></v-text-field>
                             </div>
                         </BCol>
-                        </div>
                     </BRow>
                 </BCardBody>
                 <BCardFooter class="d-flex justify-center">

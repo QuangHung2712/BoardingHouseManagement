@@ -275,7 +275,8 @@ namespace QLNhaTro.Service.RoomService
                 ContractId = contractNew.Id,
                 ServiceId = s.ServiceId,
                 Price = s.Price,
-                Number = s.Number,
+                Number = s.Number.Value,
+                CurrentNumber = s.CurrentNumber.Value
             }).ToList();
             await _Context.ServiceRooms.AddRangeAsync(contractService);
 

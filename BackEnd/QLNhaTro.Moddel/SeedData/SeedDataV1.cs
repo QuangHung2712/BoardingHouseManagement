@@ -230,17 +230,17 @@ namespace QLNhaTro.Moddel.SeedData
                     {
                         var NewServiceRoom = new List<ServiceRoom>
                         {
-                            new ServiceRoom {Id = 1,ContractId = 1,ServiceId = 6,Price = 3500,Number = 1,IsOldNewNumber = false},
-                            new ServiceRoom {Id = 2,ContractId = 1,ServiceId = 7,Price = 35000,Number = 3,IsOldNewNumber = false},
+                            new ServiceRoom {Id = 1,ContractId = 1,ServiceId = 6,Price = 3500,Number = 1,IsOldNewNumber = true},
+                            new ServiceRoom {Id = 2,ContractId = 1,ServiceId = 7,Price = 35000,Number = 3,IsOldNewNumber = true},
                             new ServiceRoom {Id = 3,ContractId = 1,ServiceId = 8,Price = 100000,Number = 3,IsOldNewNumber = false},
-                            new ServiceRoom {Id = 4,ContractId = 2,ServiceId = 6,Price = 3500,Number = 1,IsOldNewNumber = false},
+                            new ServiceRoom {Id = 4,ContractId = 2,ServiceId = 6,Price = 3500,Number = 1,IsOldNewNumber = true},
                             new ServiceRoom {Id = 5,ContractId = 2,ServiceId = 7,Price = 35000,Number = 3,IsOldNewNumber = false},
                             new ServiceRoom {Id = 6,ContractId = 2,ServiceId = 8,Price = 100000,Number = 3,IsOldNewNumber = false},
                             new ServiceRoom {Id = 7,ContractId = 2,ServiceId = 9,Price = 100000,Number = 3,IsOldNewNumber = false},
-                            new ServiceRoom {Id = 8,ContractId = 3,ServiceId = 6,Price = 3500,Number = 1,IsOldNewNumber = false},
+                            new ServiceRoom {Id = 8,ContractId = 3,ServiceId = 6,Price = 3500,Number = 1,IsOldNewNumber = true},
                             new ServiceRoom {Id = 9,ContractId = 3,ServiceId = 10,Price = 100000,Number = 3,IsOldNewNumber = false},
                             new ServiceRoom {Id = 10,ContractId = 3,ServiceId = 9,Price = 100000,Number = 3,IsOldNewNumber = false},
-                            new ServiceRoom {Id = 11,ContractId = 4,ServiceId = 6,Price = 3500,Number = 1,IsOldNewNumber = false},
+                            new ServiceRoom {Id = 11,ContractId = 4,ServiceId = 6,Price = 3500,Number = 1,IsOldNewNumber = true},
                             new ServiceRoom {Id = 12,ContractId = 4,ServiceId = 7,Price = 35000,Number = 3,IsOldNewNumber = false},
                             new ServiceRoom {Id = 13,ContractId = 4,ServiceId = 9,Price = 100000,Number = 3,IsOldNewNumber = false},
                             new ServiceRoom {Id = 14,ContractId = 5,ServiceId = 10,Price = 100000,Number = 3,IsOldNewNumber = false},
@@ -304,7 +304,6 @@ namespace QLNhaTro.Moddel.SeedData
                             new ContractCustomer {Id = 8,ContractId = 4,CustomerId = 8},
                             new ContractCustomer {Id = 9,ContractId = 5,CustomerId = 9},
                             new ContractCustomer {Id = 10,ContractId = 5,CustomerId = 10},
-                            new ContractCustomer {Id = 11,ContractId = 6,CustomerId = 11},
                         };
                         context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT [dbo].[ContractCustomers] ON");
                         context.ContractCustomers.AddRange(NewContractCustomers);

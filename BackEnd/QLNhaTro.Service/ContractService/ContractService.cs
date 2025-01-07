@@ -106,6 +106,7 @@ namespace QLNhaTro.Service.ContractService
                             Price = x.Price,
                             Number = x.Number,
                             IsOldNewNumber = x.IsOldNewNumber,
+                            
                         }).ToList(),
                     }).FirstOrDefaultAsync();
                 if (contractData == null) throw new NotFoundException(nameof(id));
@@ -156,9 +157,12 @@ namespace QLNhaTro.Service.ContractService
                         ContractId = contract.Id,
                         ServiceId = s.ServiceId,
                         Price = s.Price,
-                        Number = s.Number,
+                        Number = s.CurrentNumber ?? 0,
+                        CurrentNumber = s.CurrentNumber ?? 0,
                         IsOldNewNumber = s.IsOldNewNumber,
                     }).ToList();
+
+                    
                     await _Context.ServiceRooms.AddRangeAsync(contractService);
                     await _Context.SaveChangesAsync(); // Lưu ServiceRoom
 
@@ -186,7 +190,7 @@ namespace QLNhaTro.Service.ContractService
                         ContractId = contractUpdate.Id,
                         ServiceId = s.ServiceId,
                         Price = s.Price,
-                        Number = s.Number,
+                        Number = s.Number.Value,
                         IsOldNewNumber = s.IsOldNewNumber,
                     });
                     var serviceRoomTask = _Context.ServiceRooms.AddRangeAsync(serviceRoom);

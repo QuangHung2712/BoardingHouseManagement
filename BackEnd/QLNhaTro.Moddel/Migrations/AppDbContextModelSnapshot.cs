@@ -211,6 +211,9 @@ namespace QLNhaTro.Moddel.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<long?>("BillId")
+                        .HasColumnType("bigint");
+
                     b.Property<DateTime>("CreationDate")
                         .HasColumnType("datetime2");
 
@@ -232,6 +235,8 @@ namespace QLNhaTro.Moddel.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("BillId");
+
                     b.HasIndex("RoomId");
 
                     b.HasIndex("TowerId");
@@ -248,6 +253,10 @@ namespace QLNhaTro.Moddel.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
 
                     b.Property<string>("Address")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Bank")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -469,6 +478,9 @@ namespace QLNhaTro.Moddel.Migrations
                     b.Property<long?>("OldNumber")
                         .HasColumnType("bigint");
 
+                    b.Property<string>("PathImg")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<long>("ServiceId")
                         .HasColumnType("bigint");
 
@@ -497,6 +509,9 @@ namespace QLNhaTro.Moddel.Migrations
 
                     b.Property<long>("ContractId")
                         .HasColumnType("bigint");
+
+                    b.Property<int>("CurrentNumber")
+                        .HasColumnType("int");
 
                     b.Property<bool>("IsOldNewNumber")
                         .HasColumnType("bit");
@@ -621,6 +636,9 @@ namespace QLNhaTro.Moddel.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("UserEnterInformation")
+                        .HasColumnType("bit");
+
                     b.HasKey("Id");
 
                     b.HasIndex("LandlordId");
@@ -690,6 +708,10 @@ namespace QLNhaTro.Moddel.Migrations
 
             modelBuilder.Entity("QLNhaTro.Moddel.Entity.Incur", b =>
                 {
+                    b.HasOne("QLNhaTro.Moddel.Entity.Bill", "Bill")
+                        .WithMany()
+                        .HasForeignKey("BillId");
+
                     b.HasOne("QLNhaTro.Moddel.Entity.Room", "Room")
                         .WithMany()
                         .HasForeignKey("RoomId")
@@ -701,6 +723,8 @@ namespace QLNhaTro.Moddel.Migrations
                         .HasForeignKey("TowerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Bill");
 
                     b.Navigation("Room");
 

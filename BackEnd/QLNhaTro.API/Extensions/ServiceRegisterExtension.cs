@@ -1,4 +1,5 @@
-﻿using QLNhaTro.Service;
+﻿using QLNhaTro.API.Extensions.Job;
+using QLNhaTro.Service;
 using QLNhaTro.Service.BillService;
 using QLNhaTro.Service.ContractService;
 using QLNhaTro.Service.CustomerService;
@@ -31,11 +32,16 @@ namespace QLNhaTro.API.Extensions
             services.AddQuartz(q =>
             {
                 q.UseMicrosoftDependencyInjectionJobFactory();
-                var jobKey = JobKey.Create(nameof(Job));
-                q.AddJob<Job>(jobKey)
+                var jobKey = JobKey.Create(nameof(JobInvoiceRequest));
+                q.AddJob<JobInvoiceRequest>(jobKey)
                 .AddTrigger(trigger => trigger
                                         .ForJob(jobKey)
-                                        .WithCronSchedule("0 25 0 * * ?"));
+                                        .WithCronSchedule("0 53 16 * * ?"));
+                var SendMonthlyReports = JobKey.Create(nameof(JobSendMonthlyReports));
+                q.AddJob<JobSendMonthlyReports>(SendMonthlyReports)
+                .AddTrigger(trigger => trigger
+                                       .ForJob(SendMonthlyReports)
+                                       .WithCronSchedule("0 5 17 * * ?"));
             });
             services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
         }

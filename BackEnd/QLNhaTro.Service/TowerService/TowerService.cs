@@ -29,6 +29,7 @@ namespace QLNhaTro.Service.TowerService
                 TowerName  = t.Name,
                 Id = t.Id,
                 Address = t.Address,
+                UserEnterInformation = t.UserEnterInformation,
                 SumRoom = _Context.Rooms.Count(r=> r.TowerId == t.Id && !r.IsDeleted),
                 RoomRented = _Context.Rooms.Count(r =>r.TowerId == t.Id &&
                     !r.IsDeleted &&

@@ -15,6 +15,7 @@ namespace QLNhaTro.Moddel.Entity
         public virtual Services Service { get; set; }
         public decimal Price { get; set; }
         public int Number { get; set; }
+        public int CurrentNumber { get; set; } // Số ban đầu
         public bool IsOldNewNumber { get; set; }
     }
 }

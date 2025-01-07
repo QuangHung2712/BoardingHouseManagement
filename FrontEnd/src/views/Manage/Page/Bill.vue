@@ -64,8 +64,6 @@ export default {
                 ]
             },
             CalculateRoom:[
-                {roomName:'101',newElectricity: null,newCountries: null },
-                {roomName:'102',newElectricity: null,newCountries: null },
             ],
             searchCustomer: '',
             searchRoom: '',
@@ -97,7 +95,7 @@ export default {
                     : true;
 
                 const matchesDate = this.searchDate
-                    ? this.formatDate(bill.month) === this.searchDate
+                    ? bill.time === this.searchDate.split('-').reverse().join('/')
                     : true;
                 const matchesStatus = this.searchStatus
                     ? bill.status?.toLowerCase() === this.searchStatus.toLowerCase()
@@ -155,7 +153,6 @@ export default {
             apiClient.get(`/Bill/GetDetail?billId=${idBill}`)
                     .then(response=>{
                         this.selectBill = response.data;
-                        console.log(this.selectBill);
                     })
                     .catch(error=>{
                         this.message = "Lấy thông tin hoá đơn bị lỗi: " + error.response?.data?.message || error.message;
@@ -177,7 +174,6 @@ export default {
             if (!dateString) return '';
             const [month, year] = dateString.split('/'); // Tách MM/YYYY
             //if (!month || !year) return ''; // Xử lý nếu không đúng định dạng
-            console.log(`${year}-${month.padStart(2, '0')}`)
             return `${year}-${month.padStart(2, '0')}`; // Trả về định dạng YYYY-MM
         },
         getAllBill(){
@@ -199,13 +195,56 @@ export default {
             apiClient.get(`/Bill/GetDetail?billId=${idBill}`)
                 .then(response=>{
                     this.selectBill = response.data;
-                    console.log(this.selectBill);
                 })
                 .catch(error=>{
                     this.message = "Lấy thông tin hoá đơn bị lỗi: " + error.response?.data?.message || error.message;
                     this.snackbar = true;
                     this.snackbarColor = 'red';
                 })
+        },
+        saveUpdate(){
+            this.selectBill.sumArises = this.selectBill.arises.reduce((sum,item) => sum + (item.amount || 0),0);
+            apiClient.put(`/Bill/Update`,this.selectBill)
+                    .then(()=>{
+                            this.message = "Sửa hóa đơn thành công";
+                            this.snackbar = true;
+                            this.snackbarColor = 'green';
+                            this.viewdialogEdit = false;
+                            this.getAllBill();
+                        })
+                        .catch(error=>{
+                            this.message = "Sửa hoá đơn bị lỗi: " + error.response?.data?.message || error;
+                            this.snackbar = true;
+                            this.snackbarColor = 'red';
+                        })
+        },
+        btnCalculateRoom(){
+            apiClient.get(`/Bill/CalculateRoom?towerId=${this.towerId}`)
+                    .then(response=>{
+                        this.CalculateRoom = response.data;
+                    })
+                    .catch(error=>{
+                        this.message = "Đã xảy ra lỗi: " + error.response?.data?.message || error;
+                        this.snackbar = true;
+                        this.snackbarColor = 'red';
+                    })
+        },
+        SendInvoice(){
+            console.log(this.CalculateRoom);
+            apiClient.post(`/Bill/SendInvoice`,this.CalculateRoom)
+                    .then(()=>{
+                            this.message = "Tính tiền cho các phòng thành công. Hóa đơn đã được gửi đến khách thuê. Bạn hãy thi thoảng vào trang web để theo dõi trạng thái thanh toán của các khách thuê";
+                            this.snackbar = true;
+                            this.snackbarColor = 'green';
+                            this.viewdialogCalculateRoomCharges = false;
+                            
+                            this.getAllBill();
+                        })
+                        .catch(error=>{
+                            this.message = "Tính tiền bị lỗi: " + error.response?.data?.message || error;
+                            this.snackbar = true;
+                            this.snackbarColor = 'red';
+                        })
         }
     }
 }
@@ -227,7 +266,7 @@ export default {
                     <BCardBody class="p-0">
                         <BRow>
                             <BCol class="col-sm-3 col-6"><input type="month" class="form-control" id="example-datemin" v-model="searchDate" min="2000-01-02" placeholder="Chọn thời gian"></BCol>
-                            <BCol class="col-sm-3 col-6"><v-select label="Trạng thái phí" :items="['Đã thanh toán','Chưa thanh toán']" v-model="searchStatus" clearable hide-details></v-select></BCol>
+                            <BCol class="col-sm-3 col-6"><v-select label="Trạng thái phí" :items="['Đã thanh toán','Chưa thanh toán','Chờ xác nhận thanh toán']" v-model="searchStatus" clearable hide-details></v-select></BCol>
                             <BCol class="col-sm-3 col-4"><v-text-field label="Số phòng" variant="outlined" v-model="searchRoom" clearable hide-details></v-text-field></BCol>
                             <BCol class="col-sm-3 col-4"><v-text-field label="Tên khách hàng" variant="outlined" v-model="searchCustomer" clearable hide-details></v-text-field></BCol>
                         </BRow>
@@ -237,7 +276,7 @@ export default {
                     <BCardBody>
                         <BRow class="text-end pb-3">
                             <Bcol class="col-sm-6"></Bcol>
-                            <BCol class="col-sm-6 col-12"><v-btn @click="(viewdialogCalculateRoomCharges = !viewdialogCalculateRoomCharges)" color="blue-lighten-1" class="mt-2">Tính tiền phòng</v-btn></BCol>
+                            <BCol class="col-sm-6 col-12"><v-btn @click="(viewdialogCalculateRoomCharges = !viewdialogCalculateRoomCharges) && (btnCalculateRoom())" color="blue-lighten-1" class="mt-2">Tính tiền phòng</v-btn></BCol>
                         </BRow>
                         <v-data-table 
                             :headers = "headersTable"
@@ -310,6 +349,8 @@ export default {
                 </BModal>
                 <BModal v-model="viewdialogEdit" hide-footer title="Sửa hoá đơn phòng 101" modal-class="fadeInRight"
                     class="v-modal-custom" centered size="lg">
+                    <h6>Tên khách hàng: {{ selectBill.customerName }}</h6>
+                    <h6>Tiền phòng: {{ FormatTablePrice(selectBill.priceRoom) }}</h6>
                     <div class="card-body">
                         <v-form v-model="form">
                             <div class="card" v-for="(Service,index) in selectBill.service " :key="index" >
@@ -321,13 +362,49 @@ export default {
                                         <BCol class="col-lg-6">
                                             <div class="form-group">
                                                 <label class="form-label">Số cũ:</label>
-                                                <v-text-field v-model="Service.oldNumber" :rules="[v => (v !== null && v !== undefined && v !== '') || 'Trường này là bắt buộc']" variant="outlined" clearable placeholder="Nhập vào số cũ" class="input-control"></v-text-field>
+                                                <v-text-field type="number" v-model="Service.oldNumber" :rules="[v => (v !== null && v !== undefined && v !== '') || 'Trường này là bắt buộc']" variant="outlined" clearable placeholder="Nhập vào số cũ" class="input-control"></v-text-field>
                                             </div>
                                         </BCol>
                                         <BCol class="col-lg-6">
                                             <div class="form-group">
                                                 <label class="form-label">Số mới:</label>
-                                                <v-text-field v-model="Service.newNumber" :rules="[required]" variant="outlined" clearable placeholder="Nhập vào số mới" class="input-control"></v-text-field>
+                                                <v-text-field type="number" v-model="Service.newNumber" :rules="[required]" variant="outlined" clearable placeholder="Nhập vào số mới" class="input-control"></v-text-field>
+                                            </div>
+                                        </BCol>
+                                    </BRow>
+                                </div>
+                                <BRow class="align-items-center" v-show="Service.newNumber == null">
+                                    <BCol class="col-lg-4 text-center">
+                                        <h5>Dịch vụ: {{ Service.name }}</h5>
+                                    </BCol>
+                                    <BCol class="col-lg-8">
+                                        <v-text-field v-model="Service.usageNumber" :rules="[required]" variant="outlined" clearable placeholder="Nhập vào số sử dụng" class="input-control"></v-text-field>
+                                    </BCol>
+                                </BRow>
+                            </div>
+                           
+                        </v-form>
+                    </div>
+                    <div class="modal-footer v-modal-footer">
+                        <BButton type="button" variant="light" @click="viewdialog = false">Close
+                        </BButton>
+                        <BButton type="button" variant="primary" @click="saveUpdate()" :disabled="!form">Save Changes</BButton>
+                    </div>
+                </BModal>
+                <BModal v-model="viewdialogCalculateRoomCharges" hide-footer title="Tính tiền phòng" modal-class="fadeInRight"
+                    class="v-modal-custom" centered size="lg">
+                    <div class="card-body">
+                        <v-form v-model="form">
+                            <div class="card" v-for="(room,index) in CalculateRoom " :key="index" >
+                                <div class="card-header">
+                                    <h4>Nhập thông tin cho phòng {{ room.numberOfRoom }}</h4>
+                                </div>
+                                <div class="card-body">
+                                    <BRow>
+                                        <BCol class="col-lg-6" v-for="(service,index) in room.services" :key="index">
+                                            <div class="form-group" v-if="service.isOldNewNumber == true">
+                                                <label class="form-label">Số {{ service.name}} (số cũ: {{ service.oldNumber}})</label>
+                                                <v-text-field type="number" v-model="service.newNumber" :rules="[required]" variant="outlined" clearable placeholder="Nhập vào số mới" class="input-control"></v-text-field>
                                             </div>
                                         </BCol>
                                     </BRow>
@@ -336,42 +413,9 @@ export default {
                         </v-form>
                     </div>
                     <div class="modal-footer v-modal-footer">
-                        <BButton type="button" variant="light" @click="viewdialog = false">Close
+                        <BButton type="button" variant="light" @click="viewdialogCalculateRoomCharges = false">Close
                         </BButton>
-                        <BButton type="button" variant="primary" @click="CreateEditArise()" :disabled="!form">Save Changes</BButton>
-                    </div>
-                </BModal>
-                <BModal v-model="viewdialogCalculateRoomCharges" hide-footer title="Tính tiền phòng" modal-class="fadeInRight"
-                    class="v-modal-custom" centered size="lg">
-                    <div class="card-body">
-                        <v-form v-model="form">
-                            <!-- <div class="card" v-for="(Calculate,index) in CalculateRoom " :key="index">
-                                <div class="card-header">
-                                    <h4>Phòng {{ Calculate.roomName }}</h4>
-                                </div>
-                                <div class="card-body" >
-                                    <BRow>
-                                        <BCol class="col-lg-6">
-                                            <div class="form-group">
-                                                <label class="form-label">Số điện mới:</label>
-                                                <v-text-field v-model="Calculate.oldNumber" :rules="[required]" variant="outlined" clearable placeholder="Nhập vào số điện mới" class="input-control"></v-text-field>
-                                            </div>
-                                        </BCol>
-                                        <BCol class="col-lg-6">
-                                            <div class="form-group">
-                                                <label class="form-label">Số nước mới:</label>
-                                                <v-text-field v-model="Calculate.newNumber" :rules="[required]" variant="outlined" clearable placeholder="Nhập vào số nước mới" class="input-control"></v-text-field>
-                                            </div>
-                                        </BCol>
-                                    </BRow>
-                                </div>
-                            </div> -->
-                        </v-form>
-                    </div>
-                    <div class="modal-footer v-modal-footer">
-                        <BButton type="button" variant="light" @click="viewdialog = false">Close
-                        </BButton>
-                        <BButton type="button" variant="primary" @click="CreateEditArise()" :disabled="!form">Save Changes</BButton>
+                        <BButton type="button" variant="primary" @click="SendInvoice()" :disabled="!form">Save Changes</BButton>
                     </div>
                 </BModal>
             </BCol>

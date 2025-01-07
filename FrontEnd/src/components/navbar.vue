@@ -49,6 +49,7 @@ export default {
             },
             imgAvatar: null,
             form: false,
+            landlordId: 0,
             rules: {
                 required: v => !!v || 'Vui lòng không để trống',
                 validEmail: v => /^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(v) || 'Email phải hợp lệ và kết thúc bằng @gmail.com',
@@ -58,7 +59,9 @@ export default {
         };
     },
     created(){
+        this.landlordId =  localStorage.getItem('landlordId');
         this.GetInfo();
+
     },
     methods: {
         changeMode(mode) {
@@ -88,9 +91,10 @@ export default {
         },
         async btnInfo(){
             this.previewImage = null
-            apiClient.get(`/Landlord/GetDetail/${1}`)
+            apiClient.get(`/Landlord/GetDetail/${this.landlordId}`)
                     .then(response=>{
                         this.infoUser = response.data;
+
                     })
                     .catch(error=>{
                         this.message = "Lấy thông tin người dùng bị lỗi: " + error.response.data.message;
@@ -98,6 +102,9 @@ export default {
                         this.snackbarColor = 'red';
                     })
             this.imgAvatar = await this.loadImages(this.infoUser.pathAvatar);
+            const dateTime = new Date(this.infoUser.doB); // Ví dụ có giờ
+            dateTime.setDate(dateTime.getDate() + 1); // Cộng thêm 1 ngày
+            this.infoUser.doB = dateTime.toISOString().split('T')[0]; // Kết quả sẽ là "2025-01-07"
         },
         async btnEditBank(){
             this.previewImage = null
@@ -113,7 +120,7 @@ export default {
                         this.snackbar = true;
                         this.snackbarColor = 'red';
                     })
-            await apiClient.get(`/Landlord/GetInfoPayment?id=${4}`)
+            await apiClient.get(`/Landlord/GetInfoPayment?id=${this.landlordId}`)
                             .then(response=>{
                                 this.dataUpdatePayment = response.data;
                             })
@@ -160,7 +167,7 @@ export default {
         UpdateInfoPayment(){
             // Tạo FormData để gửi dữ liệu theo dạng multipart/form-data
             const formData = new FormData();
-            formData.append("id",4);
+            formData.append("id",this.landlordId);
             formData.append("bank", this.dataUpdatePayment.bank);
             formData.append("sTK", this.dataUpdatePayment.stk);
             if (this.dataUpdatePayment.img) {
@@ -182,7 +189,7 @@ export default {
         },
         UpdateInfo(){
             const formData = new FormData();
-            formData.append("landlordId",1);
+            formData.append("landlordId",this.landlordId);
             formData.append("fullName", this.infoUser.fullName);
             formData.append("doB", this.infoUser.doB);
             formData.append("PhoneNumber",this.infoUser.phoneNumber);
@@ -206,7 +213,7 @@ export default {
                     })
         },
         GetInfo(){
-            apiClient.get(`/Landlord/GetInfoContact?id=${1}`)
+            apiClient.get(`/Landlord/GetInfoContact?id=${this.landlordId}`)
                     .then(response=>{
                         this.infoUser.pathAvatar = response.data.pathAvatar;
                     })
@@ -217,6 +224,7 @@ export default {
                     })
         },
         async loadImages(path){
+            if(path)
             try {
                 const response = await fetch(path);
                 const blob = await response.blob(); // Chuyển phản hồi thành Blob
@@ -277,7 +285,7 @@ export default {
                         <span>Mặc định</span>
                     </a>
                 </BDropdown>
-                <BDropdown v-model="show" variant="link-secondary" auto-close="outside" class="card-header-dropdown pb-0 pt-3" toggle-class="text-reset dropdown-btn arrow-none me-0" menu-class="dropdown-menu-end dropdown-notification pc-h-dropdown" aria-haspopup="true" :offset="{ alignmentAxis: -145, crossAxis: 0, mainAxis: 20 }">
+                <!-- <BDropdown v-model="show" variant="link-secondary" auto-close="outside" class="card-header-dropdown pb-0 pt-3" toggle-class="text-reset dropdown-btn arrow-none me-0" menu-class="dropdown-menu-end dropdown-notification pc-h-dropdown" aria-haspopup="true" :offset="{ alignmentAxis: -145, crossAxis: 0, mainAxis: 20 }">
                     <template #button-content><span class="text-muted"><i class="ph-duotone ph-bell"></i>
                             <span class="position-absolute topbar-badge translate-middle badge rounded-pill bg-success"><span class="notification-badge">4</span><span class="visually-hidden">unread
                                     messages
@@ -405,7 +413,7 @@ export default {
                             </BCol>
                         </BRow>
                     </div>
-                </BDropdown>
+                </BDropdown> -->
                 <BDropdown variant="link-secondary" auto-close="outside" class="card-header-dropdown py-0" toggle-class="text-reset dropdown-btn arrow-none me-0" menu-class="dropdown-menu-end dropdown-user-profile dropdown-menu-end pc-h-dropdown" aria-haspopup="true" :offset="{ alignmentAxis: -145, crossAxis: 0, mainAxis: 20 }">
                     <template #button-content><span class="text-muted"> <img :src="infoUser.pathAvatar" alt="user-image" class="user-avtar">
                         </span>
@@ -556,7 +564,7 @@ export default {
                     <BCol class="col-lg-4">
                         <div class="form-group">
                             <label class="form-label">Ngày sinh:</label>
-                            <v-date-input clearable variant="outlined" v-model="infoUser.doB" placeholder="Chọn ngày tháng năm sinh"></v-date-input>
+                            <input type="date" class="form-control" id="example-datemin" :rules="[required]" v-model="infoUser.doB" min="2000-01-02">
                         </div>
                     </BCol>
                     <BCol class="col-lg-4">

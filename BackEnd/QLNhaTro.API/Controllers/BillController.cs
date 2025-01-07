@@ -181,5 +181,34 @@ namespace QLNhaTro.API.Controllers
 
             }
         }
+
+        [HttpGet]
+        public IActionResult CalculateRoom([FromQuery] long towerId)
+        {
+            try
+            {
+                var result = _billService.CalculateRoom(towerId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+
+            }
+        }
+        [HttpPost]
+        public async Task<ActionResult> SendInvoice([FromBody] List<CalculateRoomResModel> input)
+        {
+            try
+            {
+                await _billService.SendInvoice(input);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+
+            }
+        }
     }
 }

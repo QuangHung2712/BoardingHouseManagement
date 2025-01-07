@@ -21,5 +21,7 @@ namespace QLNhaTro.Service.BillService
         Task DeleteBill(long billId);
         GetDetailBillResModel GetDetail(long billId);
         Task UpdateBill(UpdateBillReqModel input);
+        List<CalculateRoomResModel> CalculateRoom(long towerId);
+        Task SendInvoice(List<CalculateRoomResModel> input);
     }
 }

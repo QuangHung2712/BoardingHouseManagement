@@ -11,7 +11,7 @@ namespace QLNhaTro.Commons
         public class DefaultValue
         {
             public const string DEFAULT_CONTROLLER_ROUTER = "api/[controller]/[action]";
-            public const string DEFAULT_BASE_Directory_IMG = @"D:\Code\BoardingHouseManagement\BoardingHouseManagement\FrontEnd\public";
+            public const string DEFAULT_BASE_Directory_IMG = @"D:\Du_An\BoardingHouseManagement\FrontEnd\public";
 
         }
         public class AppSettingKeys

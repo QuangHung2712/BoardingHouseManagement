@@ -29,7 +29,7 @@ namespace QLNhaTro.Moddel.Moddel.ResponseModels
                 CCCD = landlord.CCCD,
                 Address = landlord.Address,
                 SDTZalo = landlord.SDTZalo,
-                PathAvatar = CommonFunctions.ConverPathIMG(landlord.PathAvatar),
+                PathAvatar = landlord.PathAvatar == null ? null : CommonFunctions.ConverPathIMG(landlord.PathAvatar),
             };
         }
     }

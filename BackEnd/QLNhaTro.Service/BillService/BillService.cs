@@ -11,6 +11,7 @@ using QLNhaTro.Moddel;
 using QLNhaTro.Moddel.Entity;
 using QLNhaTro.Moddel.Moddel.RequestModels;
 using QLNhaTro.Moddel.Moddel.ResponseModels;
+using QLNhaTro.Service.ContractService;
 using QLNhaTro.Service.EmailService;
 using System;
 using System.Collections.Generic;
@@ -341,6 +342,7 @@ namespace QLNhaTro.Service.BillService
             if (roomDetails == null) throw new NotFoundException("Phòng");
             var result = new GetDetailBillResModel
             {
+                Id = infoBill.Id,
                 NumberOfRoom = roomDetails.Room.Name,
                 PriceRoom = roomDetails.Room.PriceRoom,
                 Date = infoBill.CreationDate.AddMonths(-1).ToString("MM/yyyy"),
@@ -372,9 +374,9 @@ namespace QLNhaTro.Service.BillService
             // Lấy danh sách ServiceInvoiceDetails theo BillId và ServiceId
             var serviceInvoices = _Context.ServiceInvoiceDetails
                 .Where(item => item.BillId == input.Id &&
-                               input.Service.Select(s => s.ServiceId).Contains(item.ServiceId))
+                               input.Service.Select(s => s.Id).Contains(item.ServiceId))
                 .ToList();
-
+            var infoBill = _Context.Bills.GetAvailableById(input.Id);
             // Kiểm tra nếu không có bản ghi nào được tìm thấy
             if (serviceInvoices == null || !serviceInvoices.Any())
             {
@@ -384,18 +386,108 @@ namespace QLNhaTro.Service.BillService
             // Thực hiện cập nhật thông tin
             foreach (var invoice in serviceInvoices)
             {
-                var inputService = input.Service.FirstOrDefault(s => s.ServiceId == invoice.ServiceId && s.NewNumber != null);
-                if (input != null)
+                var inputService = input.Service.Where(s => s.Id == invoice.ServiceId).FirstOrDefault();
+                if (inputService != null)
                 {
-                    invoice.OldNumber = inputService.OldNumber;
+                    invoice.OldNumber = inputService.OldNumber ?? invoice.OldNumber;
+                    invoice.NewNumber = inputService.NewNumber ?? invoice.NewNumber;
                     invoice.NewNumber = inputService.NewNumber;
-                    invoice.UsageNumber = inputService.UsageNumber;
+                    invoice.UsageNumber = inputService.NewNumber != null ? inputService.NewNumber.Value - inputService.OldNumber.Value : inputService.UsageNumber;
                     invoice.UnitPrice = inputService.UnitPrice;
                 }
             }
+            _Context.ServiceInvoiceDetails.UpdateRange(serviceInvoices);
 
-            // Lưu thay đổi vào database
+            //Cập nhật hóa đơn
+            infoBill.TotalAmount = infoBill.PriceRoom + input.SumArises + serviceInvoices.Sum(item => item.UnitPrice * item.UsageNumber);
+            _Context.Bills.Update(infoBill);
             await _Context.SaveChangesAsync();
+        }
+        public List<CalculateRoomResModel> CalculateRoom(long towerId)
+        {
+            DateTime currentDate = DateTime.Now;
+            var contractStillValid = _Context.Contracts.Include(r => r.Room).Where(c => c.TerminationDate == null && c.Room.TowerId == towerId && !c.Room.IsDeleted && !c.IsDeleted)
+               .Where(r=> !_Context.Bills.Any(b=> b.RoomId == r.RoomId && b.CreationDate.Month ==currentDate.Month && b.CreationDate.Year == currentDate.Year && !b.IsDeleted))
+               .Select(record => new CalculateRoomResModel
+               {
+                   ContractId = record.Id,
+                   RoomId = record.RoomId,
+                   NumberOfRoom = record.Room.Name,
+                   PriceRoom = record.Room.PriceRoom,
+                   
+               }).ToList();
+            if (contractStillValid.Count <= 0) throw new Exception("Tất cả các phòng đều có hóa đơn");
+            foreach (var room in contractStillValid)
+            {
+                var service = _Context.ServiceRooms.Where(item => item.ContractId == room.ContractId).Include(s => s.Service).Select(s => new ServiceCalculateRoomResModel
+                {
+                    Id = s.ServiceId,
+                    Name = s.Service.Name,
+                    UnitPrice = s.Price,
+                    UsageNumber = s.Number,
+                    IsOldNewNumber = s.IsOldNewNumber,
+                    OldNumber = 0,
+                }).ToList();
+                room.Services = service;
+            }    
+
+            return contractStillValid;
+        }
+        public async Task SendInvoice(List<CalculateRoomResModel> input)
+        {
+            foreach(var room in input)
+            {
+                var customer = _Context.ContractCustomers.Include(c => c.Customer)
+                    .Where(item=> item.ContractId == room.ContractId && item.Customer.IsRepresentative == true)
+                    .Select(record=> new
+                    {
+                        Id = record.Id,
+                        FullName = record.Customer.FullName,
+                        Email = record.Customer.Email,
+                    }).FirstOrDefault();
+                if (customer == null) throw new NotFoundException($"Không có người đại diện của phòng {room.NumberOfRoom}");
+
+                Bill newBiil = new Bill 
+                {
+                    CustomerId = customer.Id,
+                    RoomId = room.RoomId,
+                    CreationDate = DateOnly.FromDateTime(DateTime.Now),
+                    PriceRoom = room.PriceRoom,
+                    Status = StatusBill.ChuaThanhToan,
+                    TotalAmount = 0
+                };
+                _Context.Bills.Add(newBiil);
+                await _Context.SaveChangesAsync();
+
+                var service = room.Services.Select(item=>new ServiceInvoiceDetails
+                {
+                    BillId = newBiil.Id,
+                    ServiceId = item.Id,
+                    OldNumber = item.OldNumber,
+                    NewNumber = item.NewNumber,
+                    UnitPrice = item.UnitPrice,
+                    UsageNumber = !item.IsOldNewNumber ? item.UsageNumber : item.NewNumber.Value - item.OldNumber.Value,
+                });
+                _Context.ServiceInvoiceDetails.AddRange(service);
+
+                var arise = _Context.Incurs.Where(item => item.RoomId == room.RoomId && item.StatusPay == false).Select(record => new AriseBillResModel
+                {
+                    Id = record.Id,
+                    Amount = record.Amount,
+                    Reason = record.Reason,
+                }).ToList();
+
+                newBiil.TotalAmount = newBiil.PriceRoom + arise.Sum(item => item.Amount) + service.Sum(item => item.UnitPrice * item.UsageNumber);
+                _Context.Bills.Update(newBiil);
+                
+                await _Context.SaveChangesAsync();
+
+                #region Gửi hóa đơn đến khách thuê
+                string link = $"http://localhost:8080/vue/enterbill/{CommonFunctions.Encryption(newBiil.Id.ToString())}";
+                string EmailContent = $"Xin chào {customer.FullName}. Đã có hóa đơn tháng {newBiil.CreationDate.AddMonths(-1).ToString("MM/yyyy")} của phòng {room.NumberOfRoom}.Bạn vui lòng truy cập vào link để xem và thanh toán hóa đơn \nĐây là link: {link}";
+                await _Email.SendEmailAsync(customer.Email, "Nhập hóa đơn tháng mới", EmailContent);
+                #endregion
+            }
         }
     }
 }

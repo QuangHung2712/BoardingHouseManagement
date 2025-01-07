@@ -14,5 +14,6 @@ namespace QLNhaTro.Moddel.Moddel.ResponseModels
         public int SumRoom { get; set; }
         public int RoomRented { get; set; }
         public int RoomStillEmpty { get; set; }
+        public bool UserEnterInformation { get; set; }
     }
 }

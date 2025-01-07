@@ -1,4 +1,5 @@
-﻿using System;
+﻿using QLNhaTro.Commons;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,7 +8,7 @@ using static QLNhaTro.Commons.CommonEnums;
 
 namespace QLNhaTro.Moddel.Moddel.ResponseModels
 {
-    public class GetDetailBillResModel
+    public class GetDetailBillResModel : BaseEntity
     {
         public List<NameServiceBillResModel> Service { get; set; }
         public List<AriseBillResModel> Arises { get; set; }

@@ -3,6 +3,7 @@ import pageheader from "@/components/page-header.vue"
 import apiClient from "@/plugins/axios";
 import CryptoJS from 'crypto-js';
 import store from "../../../../state/store";
+import router from "@/router";
 
 export default {
     name: "wizard",
@@ -35,14 +36,16 @@ export default {
                         email: null,
                         cCCD: "",
                         address: "",
-                        isRepresentative : true,
+                        isRepresentative : false,
                     },
                 ],
                 services:[
                     {
-                        serviceId: '',
+                        serviceId: null,
                         price: '',
                         number: 1,
+                        isOldNewNumber: false,
+                        currentNumber: 0, 
                     },
                 ],
             }
@@ -94,9 +97,10 @@ export default {
         },
         addService(){
             this.contractData.services.push({
-                serviceId: '',
+                serviceId: null,
                 price: '',
                 number: 1,
+
             })
         },
         closeService(index){
@@ -147,18 +151,28 @@ export default {
                     .then(reponse=>{
                         this.contractData = reponse.data;
                         this.handleRepresentativeChange();
+                        for(let item of this.contractData.customers)
+                        {
+                            const dateTime = new Date(item.doB);
+                            dateTime.setDate(dateTime.getDate() + 1);
+                            item.doB = dateTime.toISOString().split('T')[0];
+                        }
                     })
                     .catch(error =>{
                         this.message = "Lấy thông tin hợp đồng bị lỗi "+ error.response?.data?.message || error.message;
                         this.snackbar = true;
                         this.snackbarColor = 'red';
-                    })
+                    });
+            
+            
+                   
         },
         onServiceSelected(service){
             const selectedService = this.servicedata.find(item => item.id === service.serviceId);
             if (selectedService) {
                 service.price = selectedService.price;
-                service.isOldNewNumber = selectedService.isOldNewNumber;
+                service.isOldNewNumber = selectedService.isOldNewNumber
+                service.currentNumber = selectedService.currentNumber;
             } else {
                 service.price = ''; // Xóa giá nếu không có dịch vụ
             }
@@ -170,6 +184,8 @@ export default {
                         this.message = "Thao tác thành công"
                         this.snackbar = true;
                         this.snackbarColor = 'green';
+                        this.$router.push({ name: 'createEdit', params: { idcontract: encryptedId } });
+
                     })
                     .catch(error =>{
                         this.message = "Đã xảy ra lỗi: "+ error.response?.data?.message || error.message;
@@ -181,7 +197,6 @@ export default {
             // Kiểm tra xem có checkbox nào được chọn là người đại diện hay không
             this.isRepresentativeSelected = this.contractData.customers.some(customer => customer.isRepresentative);
         },
-
     }
 }
 </script>
@@ -343,7 +358,7 @@ export default {
                                                     <v-text-field variant="outlined" :rules="[required]" clearable v-model="customer.phoneNumber"></v-text-field>
                                                 </div>
                                             </div>
-                                            <div class="col-sm-4" v-show="index ===0">
+                                            <div class="col-sm-4" v-if="customer.isRepresentative">
                                                 <div class="form-group">
                                                     <label class="form-label">Email: </label>
                                                     <v-text-field variant="outlined" :rules="[index === 0 ? required : null]" clearable v-model="customer.email"></v-text-field>
@@ -401,10 +416,16 @@ export default {
                                             <v-text-field variant="outlined" clearable :rules="[requiredNumber]" v-model="service.price" ></v-text-field>
                                             </div>
                                         </div>
-                                        <div class="col-sm-3">
+                                        <div class="col-sm-3" v-if="!service.isOldNewNumber">
                                             <div class="form-group">
                                             <label class="form-label">Số lượng người dùng: </label>
                                             <v-text-field type="number" variant="outlined" :rules="[requiredNumber]" v-model="service.number" clearable></v-text-field>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3" v-else>
+                                            <div class="form-group">
+                                            <label class="form-label">Số ban đầu: </label>
+                                            <v-text-field type="number" variant="outlined" :rules="[requiredNumber]" v-model="service.currentNumber" clearable></v-text-field>
                                             </div>
                                         </div>
                                     </div>

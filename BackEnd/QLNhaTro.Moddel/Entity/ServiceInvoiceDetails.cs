@@ -17,5 +17,6 @@ namespace QLNhaTro.Moddel.Entity
         public long? NewNumber { get; set; } //Số mới
         public long UsageNumber { get; set; } //Số sử dụng
         public decimal UnitPrice { get; set; } //Đơn giá
+        public string? PathImg { get; set; }
     }
 }

@@ -407,6 +407,7 @@
                     };
                     reader.readAsDataURL(file);
                     }
+                    console.log(this.previewUrls)
                 }
             },
             FineNewCustomers(roomid,roomName){
@@ -595,7 +596,7 @@
                                         md="3"
                                     >
                                         <v-img
-                                            :src="previewUrls[index] || selectRoom.pathImgRoom[index]"
+                                            :src="previewUrls?.[index] || selectRoom?.pathImgRoom?.[index]"
                                             aspect-ratio="1"
                                             class="mb-4"
                                         ></v-img>
