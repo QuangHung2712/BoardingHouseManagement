@@ -13,5 +13,6 @@ namespace QLNhaTro.Moddel.Moddel.RequestModels
         public string TowerName { get; set; }
         public string Address { get; set; }
         public long LandlordId { get; set; }
+        public bool UserEnterInformation { get; set; }
     }
 }

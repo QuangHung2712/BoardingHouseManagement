@@ -260,8 +260,6 @@ namespace QLNhaTro.Service.RoomService
                 }).FirstOrDefault();
             contract.TerminationDate = DateTime.Now;
             room.StatusNewCustomer = true;
-            _Context.Contracts.Update(contract);
-            _Context.Rooms.Update(room);
 
             //Tạo hoá đơn
             Bill newBill = new Bill
@@ -277,7 +275,7 @@ namespace QLNhaTro.Service.RoomService
             _Context.Bills.Add(newBill);
             await _Context.SaveChangesAsync();
 
-            if(input.MoneyPunish != null || input.MoneyPunish != 0)
+            if(input.MoneyPunish != null)
             {
                 Incur newArise = new Incur
                 {
@@ -311,6 +309,9 @@ namespace QLNhaTro.Service.RoomService
             _Context.ServiceInvoiceDetails.AddRange(service);
             newBill.TotalAmount += newBill.PriceRoom + arise.Sum(item => item.Amount) + service.Sum(item=> item.UnitPrice * item.UsageNumber);
             _Context.Bills.Update(newBill);
+
+            _Context.Contracts.Update(contract);
+            _Context.Rooms.Update(room);
 
             await _Context.SaveChangesAsync();
 
@@ -424,6 +425,18 @@ namespace QLNhaTro.Service.RoomService
             var RoomUnpaid = bills.Where(item => item.Status == CommonEnums.StatusBill.DaXacNhanThanhToan).Select(item =>new { item.Room.Name }).ToList();
             var RoomPaid = bills.Where(item => item.Status == CommonEnums.StatusBill.ChuaThanhToan || item.Status == CommonEnums.StatusBill.ChuaXacNhanThanhToan).Select(item => new { item.Room.Name }).ToList();
             string InfoRoomNoInvoice = string.Join(", ", (bills.Where(item => item.Status == CommonEnums.StatusBill.ChuaDienThongTin).Select(item => new { item.Room.Name }).ToList()).Select(item => item.Name));
+            //hợp đồng sắp hết hạn
+
+            //var contractExpire = _Context.Contracts
+            //   .Where(contract =>
+            //       contract.TerminationDate == null && !contract.IsDeleted && (contract.EndDate - DateTime.Now.Date ).TotalDays == 30 && !contract.IsDeleted) // Hợp đồng vẫn còn hiệu lực
+            //   .Select(contract => contract.RoomId)
+            //   .Distinct();
+            //var roomExpire = _Context.Rooms
+            //.Where(room => contractExpire.Contains(room.Id) && room.TowerId == towerId).Select(item => new
+            //{
+            //    name = item.Name,
+            //}).ToList();
             return new GetInfomationHomeResModel
             {
                 RoomUnpaid = RoomUnpaid.Count,
@@ -434,8 +447,8 @@ namespace QLNhaTro.Service.RoomService
                 InfoRoomNoInvoice = InfoRoomNoInvoice,
                 RoomAvailable = RoomAvailable,
                 InfoRoomAvailable = InfoRoomAvailable,
-                RoomExpireContract = 5,
-                InfoRoomExpireContract = "",
+                RoomExpireContract = 5, //roomExpire.Count(),
+                InfoRoomExpireContract = "1",// string.Join(", ", roomExpire.Select(item => item.name)),
                 TotalAmount = bills.Where(item => item.Status == CommonEnums.StatusBill.DaXacNhanThanhToan).Sum(item => item.TotalAmount),
 
             };

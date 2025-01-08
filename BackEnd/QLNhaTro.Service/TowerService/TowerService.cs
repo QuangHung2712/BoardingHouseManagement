@@ -33,9 +33,9 @@ namespace QLNhaTro.Service.TowerService
                 SumRoom = _Context.Rooms.Count(r=> r.TowerId == t.Id && !r.IsDeleted),
                 RoomRented = _Context.Rooms.Count(r =>r.TowerId == t.Id &&
                     !r.IsDeleted &&
-                     _Context.Contracts.Any(c =>c.RoomId == r.Id &&(c.TerminationDate == null || c.TerminationDate >= DateTime.Now) && !c.IsDeleted)),
+                     _Context.Contracts.Any(c =>c.RoomId == r.Id &&(c.TerminationDate == null || c.TerminationDate > DateTime.Now) && !c.IsDeleted)),
                 RoomStillEmpty = _Context.Rooms.Count(r =>r.TowerId == t.Id && !r.IsDeleted 
-                    &&(!_Context.Contracts.Any(c => c.RoomId == r.Id && !c.IsDeleted) ||_Context.Contracts.All(c =>c.RoomId == r.Id && c.TerminationDate < DateTime.Now ) ))
+                    &&(!_Context.Contracts.Any(c => c.RoomId == r.Id && !c.IsDeleted) ||_Context.Contracts.All(c =>c.RoomId == r.Id && c.TerminationDate == null) ))
             }).ToListAsync();
             if(towerData.Count == 0) throw new NotFoundException("Chủ nhà không tồn tại");
             return towerData;
@@ -51,6 +51,7 @@ namespace QLNhaTro.Service.TowerService
                         Name = input.TowerName,
                         Address = input.Address,
                         LandlordId = input.LandlordId,
+                        UserEnterInformation = input.UserEnterInformation
                     };
                     _Context.Towers.Add(newTower);
                     await _Context.SaveChangesAsync();
@@ -67,6 +68,7 @@ namespace QLNhaTro.Service.TowerService
                     var tower = _Context.Towers.GetAvailableById(input.Id);
                     tower.Name = input.TowerName;
                     tower.Address = input.Address;
+                    tower.UserEnterInformation = input.UserEnterInformation;
                     _Context.Towers.Update(tower);
                     await _Context.SaveChangesAsync();
                 }

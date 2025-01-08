@@ -74,7 +74,7 @@
                         })
             },
             GetRequestPaymentConfirmation(){
-                apiClient.get(`/Bill/GetRequestPayment?landlordId=${1}`)
+                apiClient.get(`/Bill/GetRequestPayment?landlordId=${this.towerId}`)
                         .then(response=>{
                             this.RequestPaymentConfirmation = response.data;
                             console.log(this.RequestPaymentConfirmation);
@@ -224,7 +224,7 @@
                             <p class="text-muted mb-0">Số phòng sắp hết hạn hợp đồng</p>
                             <div class="d-flex align-items-end">
                                 <h2 class="mb-0 f-w-500">{{ dataInfo.roomExpireContract }}</h2>
-                                <span class="badge bg-light-warning ms-2">{{dataInfo.infoRoomExpireContract ? 'Phòng: ' + dataInfo.infoRoomExpireContract : 'Không có phòng nào sắp hết hạn hợp đồng'}}</span>
+                                <span class="badge bg-light-warning ms-2">{{dataInfo.infoRoomExpireContract ? 'Phòng: ' + dataInfo.infoRoomExpireContract : 'Không có phòng nào'}}</span>
                             </div>
                         </div>
                     </div>

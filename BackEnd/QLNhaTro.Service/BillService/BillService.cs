@@ -266,7 +266,7 @@ namespace QLNhaTro.Service.BillService
         }
         public List<GetRequestPaymentConfirmationResModel> GetRequestPayment(long landlordId)
         {
-            var result = _Context.Notifications.Where(item=> item.LandlordId == landlordId && !item.ReadStatus).Include(n=> n.Bill).Select(record => new GetRequestPaymentConfirmationResModel
+            var result = _Context.Notifications.Include(n => n.Bill).Where(item=> item.Bill.Room.TowerId == landlordId && !item.ReadStatus).Select(record => new GetRequestPaymentConfirmationResModel
             {
                 Id = record.Id,
                 BillId= record.BillId,

@@ -240,8 +240,8 @@ namespace QLNhaTro.Service.ContractService
         }
         public string ExportWord(long contractId)
         {
-            string SampleContract = "D:\\Code\\BoardingHouseManagement\\BoardingHouseManagement\\Tài liệu\\HopDongMau.docx";
-            string outputPath = "D:\\Code\\BoardingHouseManagement\\BoardingHouseManagement\\Tài liệu\\output_contract.docx";
+            string SampleContract = "D:\\Du_An\\BoardingHouseManagement\\Tài liệu\\HopDongMau.docx";
+            string outputPath = "D:\\Du_An\\BoardingHouseManagement\\Tài liệu\\output_contract.docx";
 
             var contractData = _Context.Contracts.GetAvailableById(contractId);
             var roomDetails = _Context.Rooms

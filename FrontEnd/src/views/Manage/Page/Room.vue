@@ -522,7 +522,7 @@
                     <BCardBody>
                         <BRow class="text-end pb-3">
                             <BCol class="col-sm-9 col-6"><v-btn color="blue-lighten-1" class="mt-2" @click="(viewdialogEdit = !viewdialogEdit) && (EditRoom(0,'Thêm phòng'))"> Thêm phòng</v-btn></BCol>
-                            <BCol class="col-sm-3 col-6"><v-btn color="blue-lighten-1" class="mt-2"> Tính tiền Phòng</v-btn></BCol>
+                            <!-- <BCol class="col-sm-3 col-6"><v-btn color="blue-lighten-1" class="mt-2"> Tính tiền Phòng</v-btn></BCol> -->
                         </BRow>
                         <v-data-table 
                         :headers = "headersTable"
