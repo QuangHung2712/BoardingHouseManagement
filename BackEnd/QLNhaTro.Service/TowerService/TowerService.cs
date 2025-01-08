@@ -34,8 +34,12 @@ namespace QLNhaTro.Service.TowerService
                 RoomRented = _Context.Rooms.Count(r =>r.TowerId == t.Id &&
                     !r.IsDeleted &&
                      _Context.Contracts.Any(c =>c.RoomId == r.Id &&(c.TerminationDate == null || c.TerminationDate > DateTime.Now) && !c.IsDeleted)),
-                RoomStillEmpty = _Context.Rooms.Count(r =>r.TowerId == t.Id && !r.IsDeleted 
-                    &&(!_Context.Contracts.Any(c => c.RoomId == r.Id && !c.IsDeleted) ||_Context.Contracts.All(c =>c.RoomId == r.Id && c.TerminationDate == null) ))
+                RoomStillEmpty = _Context.Rooms.Count(r => r.TowerId == t.Id && !r.IsDeleted) -
+                         _Context.Rooms.Count(r => r.TowerId == t.Id &&
+                             !r.IsDeleted &&
+                             _Context.Contracts.Any(c => c.RoomId == r.Id &&
+                                 (c.TerminationDate == null || c.TerminationDate > DateTime.Now) &&
+                                 !c.IsDeleted))
             }).ToListAsync();
             if(towerData.Count == 0) throw new NotFoundException("Chủ nhà không tồn tại");
             return towerData;
