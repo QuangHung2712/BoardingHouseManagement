@@ -58,3 +58,4 @@ createApp(App)
     .component('Wizard', Wizard)
     .mount('#app')
 store.dispatch('autoLogin');
+store.dispatch('autoLoginCustomer');

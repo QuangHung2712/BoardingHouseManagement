@@ -17,5 +17,6 @@ namespace QLNhaTro.Service.CustomerService
         void DeteleCustomer(long contractId);
         List<ViewBillByEmailResModel> ViewBillByEmail(string email);
         CustomerResModel GetByDetail(long id);
+        long Login(string email, string password);
     }
 }

@@ -465,7 +465,7 @@ namespace QLNhaTro.Service.RoomService
         public List<SearchRoomResModel> SearchRoom(string address,decimal priceForm, decimal priceArrive)
         {
             var room = _Context.Rooms.Include(r => r.Tower)
-                .Where(item => item.Tower.Address.Contains(address) && item.PriceRoom >= priceForm && item.PriceRoom <= priceArrive && !item.IsDeleted)
+                .Where(item => item.Tower.Address.Contains(address) && item.PriceRoom >= priceForm && item.PriceRoom <= priceArrive && !item.IsDeleted && item.StatusNewCustomer)
                 .Select(r => new SearchRoomResModel
                 {
                     TowerName = r.Tower.Name,

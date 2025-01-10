@@ -113,5 +113,9 @@ namespace QLNhaTro.Service.CustomerService
             }
             return CustomerResModel.Mapping(customer,false);
         }
+        public long Login(string email, string password)
+        {
+            return _Context.Customers.Where(item=> item.Email != null && item.Email.ToLower() == email.ToLower() && item.Password == password && !item.IsDeleted).Select(record=> record.Id).FirstOrDefault();
+        }
     }
 }

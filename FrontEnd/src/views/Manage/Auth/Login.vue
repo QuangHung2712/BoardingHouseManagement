@@ -127,31 +127,6 @@ export default {
                             <button type="button" @click="LogIn()" class="btn btn-primary" :disabled="!form" :loading="loading">Đăng nhập</button>
                             <p v-if="errorMessage" class="text-danger mt-2">{{ errorMessage }}</p>
                         </div>
-                        <div class="saprator my-3">
-                            <span>Đăng nhập bằng</span>
-                        </div>
-                        <div class="text-center">
-                            <ul class="list-inline mx-auto mt-3 mb-0">
-                                <li class="list-inline-item">
-                                    <a href="https://www.facebook.com/" class="avtar avtar-s rounded-circle bg-facebook"
-                                        target="_blank">
-                                        <i class="fab fa-facebook-f text-white"></i>
-                                    </a>
-                                </li>
-                                <li class="list-inline-item">
-                                    <a href="https://twitter.com/" class="avtar avtar-s rounded-circle bg-twitter"
-                                        target="_blank">
-                                        <i class="fab fa-twitter text-white"></i>
-                                    </a>
-                                </li>
-                                <li class="list-inline-item">
-                                    <a href="https://myaccount.google.com/"
-                                        class="avtar avtar-s rounded-circle bg-googleplus" target="_blank">
-                                        <i class="fab fa-google text-white"></i>
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
                     </div>
                 </div>
             </div>

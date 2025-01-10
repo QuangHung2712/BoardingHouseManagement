@@ -16,6 +16,8 @@ const store = createStore({
         token: null,
         userId: null,
         roomId: null,
+        tokenCustomer: null,
+        customerId: null
     },
     mutations: {
         toggleSidebar(state) {
@@ -43,9 +45,19 @@ const store = createStore({
             state.token = null;
             state.userId = null;
         },
+        clearCustomerAuth(state) {
+            state.tokenCustomer = null;
+            state.customerId = null;
+        },
         setRoom(state,roomId){
             state.roomId = roomId;
-        }
+        },
+        setCustomerToken(state, token) {
+            state.tokenCustomer = token;
+        },
+        setCustomer(state, userId) {
+            state.customerId = userId;
+        },
     },
     actions: {
         login({ commit }, Userformation) {
@@ -55,6 +67,26 @@ const store = createStore({
             commit('setUser', userId);
             // Cập nhật token vào header mặc định của axios
             //axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        },
+        loginCustomer({ commit }, Userformation) {
+            const { token, userId } = Userformation
+            // Lưu token và userId vào Vuex
+            commit('setCustomerToken', token);
+            commit('setCustomer', userId);
+            // Cập nhật token vào header mặc định của axios
+            //axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        },
+        logoutCustomer({ commit }) {
+            // Xóa dữ liệu trong Vuex
+            commit('clearCustomerAuth');
+
+            // Xóa token trong localStorage
+            localStorage.removeItem('tokencustomer');
+            localStorage.removeItem('customerId');
+
+            // Xóa header Authorization
+            //delete axios.defaults.headers.common['Authorization'];
+
         },
         logout({ commit }) {
             // Xóa dữ liệu trong Vuex
@@ -81,14 +113,33 @@ const store = createStore({
                 commit('setUser', userId);
             }
         },
+        autoLoginCustomer({ commit }) {
+
+            // Kiểm tra token trong localStorage khi tải ứng dụng
+            const token = localStorage.getItem('tokencustomer');
+            const userId = localStorage.getItem('customerId');
+            if (token) {
+                commit('setCustomerToken', token);
+                // Gọi thêm API để lấy userId nếu cần
+            }
+            if(userId){
+                commit('setCustomer', userId);
+            }
+        },
     },
     getters: {
         isFixedWidth: state => state.isFixedWidth,
         isAuthenticated(state) {
             return !!state.token; // Trả về true nếu token không null
         },
+        isAuthenCustomer(state) {
+            return !!state.tokenCustomer; // Trả về true nếu token không null
+        },
         getUserId(state) {
             return state.userId;
+        },
+        getCustomerId(state) {
+            return state.customerId;
         },
         GetRoomId(state){
             return state.roomId;

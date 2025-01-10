@@ -171,7 +171,7 @@ export default {
                                 label="Họ và tên"  
                                 variant="outlined" 
                                 placeholder="Họ và tên" 
-                                :rules="[required]" 
+                                :rules="[rules.required]" 
                                 v-model="register.fullName"
                             ></v-text-field>
                             <div class="form-group">
@@ -199,7 +199,7 @@ export default {
                                 label="Căn cược công dân"  
                                 variant="outlined" 
                                 placeholder="Căn cược công dân" 
-                                :rules="[required]" 
+                                :rules="[rules.required]" 
                                 v-model="register.cCCD"
                             ></v-text-field>
                             <v-text-field 
@@ -207,7 +207,7 @@ export default {
                                 label="Địa chỉ thường trú"  
                                 variant="outlined" 
                                 placeholder="Địa chỉ thường trú" 
-                                :rules="[required]" 
+                                :rules="[rules.required]" 
                                 readonly
                                 @click="(viewDiaLogAddress = !viewDiaLogAddress) && btnAddress()"
                                 v-model="register.address"
@@ -217,6 +217,7 @@ export default {
                                 label="Số điện thoại đăng ký Zalo"  
                                 variant="outlined" 
                                 placeholder="Số điện thoại đăng ký Zalo" 
+                                :rules="[rules.required,]"
                                 v-model="register.sDTZalo"
                             ></v-text-field>
                             <div class="d-flex mt-1 justify-content-between">
