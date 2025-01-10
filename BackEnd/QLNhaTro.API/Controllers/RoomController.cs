@@ -234,5 +234,20 @@ namespace QLNhaTro.API.Controllers
                 return StatusCode(500, new { Message = ex.Message });
             }
         }
+
+        [HttpGet]
+        public IActionResult GetDetailFindRoom([FromQuery] long roomId)
+        {
+            try
+            {
+                var result = roomService.GetRoomDetailFindRoom(roomId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+
+            }
+        }
     }
 }

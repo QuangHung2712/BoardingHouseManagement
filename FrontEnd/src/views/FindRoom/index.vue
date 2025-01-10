@@ -3,6 +3,12 @@
         width: 40px;
         border-radius: 50%;
     }
+    .color-text{
+        color: azure;
+    }
+    .nav-item *{
+        color: azure;
+    }
 </style>
 <script>
 
@@ -22,17 +28,8 @@ import 'swiper/css/navigation';
 export default {
     data() {
         return{
-            tinhData: [],
-            huyenData: [],
-            phuongData: [],
-            selectTinh: null,
-            selectHuyen: null,
-            selectPhuong: null,
-            searchPrice: [0,10000000],
             status: false,
-            length: 3,
-            window: 0,
-            LoginStatus: true,
+            LoginStatus: false,
         }
     },
     name: "LANDING",
@@ -76,7 +73,8 @@ export default {
                 navbar.classList.remove("show");
                 document.removeEventListener("click", this.handleOutsideClick);
             }
-        }
+        },
+        
     },
     setup() {
         return {
@@ -96,16 +94,16 @@ export default {
 
 <template>
     <header id="home">
-        <BNav class="navbar navbar-expand-md navbar-light default">
+        <BNav style="background-color: #023573;" class="navbar navbar-expand-md navbar-light default">
             <div class="container">
                 <a class="pc-navbar-brand" href="/">
-                    <h3>TÌM KIẾM NHÀ TRỌ</h3>
+                    <h3 class="color-text">TÌM KIẾM NHÀ TRỌ</h3>
                 </a>
                 <button @click="toggleMenu" class="navbar-toggler rounded" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
-                    <ul class="navbar-nav ms-auto mt-lg-0 mt-2 mb-2 mb-lg-0 align-items-start">
+                    <ul class="navbar-nav ms-auto mt-lg-0 mt-2 mb-2 mb-lg-0 align-items-start ">
                         <li class="nav-item px-1">
                             <h5><router-link class="nav-link" to="/">Tìm Phòng trọ</router-link></h5>
                         </li>
@@ -191,6 +189,30 @@ export default {
                             </simplebar>
                         </div>
                     </BDropdown>
+                    <BModal v-model="modalShow" hide-footer class="v-modal-custom" id="login-modal" centered>
+                        <template #title>
+                            <h4 class="f-w-500 mb-1">Login with your email</h4>
+                            <p class="mb-3 pb-0">Don't have an Account?<a href="#" class="link-primary ms-2" data-bs-toggle="modal"
+                                    data-bs-target="#registration-modal" @click="toggleModal">Create Account</a></p>
+                        </template>
+                        <div class="form-group mb-3">
+                            <label class="form-label">Email address</label>
+                            <input type="email" class="form-control" placeholder="Email Address">
+                        </div>
+                        <div class="form-group mb-3">
+                            <label class="form-label">Password</label>
+                            <input type="password" class="form-control" placeholder="Password">
+                        </div>
+                        <div class="d-flex mt-1 justify-content-between align-items-center">
+                            <div class="form-check">
+                                <input class="form-check-input input-primary" type="checkbox" id="customCheckc1" checked="">
+                                <label class="form-check-label text-muted" for="customCheckc1">Remember me?</label>
+                            </div>
+                        </div>
+                        <div class="d-grid mt-4">
+                            <button type="button" class="btn btn-primary">Login</button>
+                        </div>
+                    </BModal>
                 </div>
             </div>
         </BNav>

@@ -453,7 +453,7 @@ namespace QLNhaTro.Service.RoomService
 
             };
         }
-        private List<string> ConverPathListIMG(List<string> input)
+        private static List<string> ConverPathListIMG(List<string> input)
         {
             List<string> result = new List<string>();
             foreach (var item in input) 
@@ -473,13 +473,47 @@ namespace QLNhaTro.Service.RoomService
                     Id = r.Id,
                     Device = r.Equipment,
                     Price = r.PriceRoom,
-                    IMG = _Context.ImgRooms.Where(item=> item.RoomId == r.Id).Select(record=> record.Path).ToList()
                 }).ToList();
             if(room.Count == 0)
             {
                 throw new Exception("Không có phòng nào phù hợp với điều kiện của bạn");
             }
+            foreach(var item in room)
+            {
+                item.IMG = ConverPathListIMG(_Context.ImgRooms.Where(r => r.RoomId == item.Id).Select(record => record.Path).ToList());
+            }
             return room;
+        }
+        public GetRoomDetailFindRoomResModel GetRoomDetailFindRoom(long Id)
+        {
+            var roomData = _Context.Rooms.Include(r => r.Tower)
+                .ThenInclude(t => t.Landlord)
+                .Where(r => r.Id == Id && !r.IsDeleted && r.StatusNewCustomer)
+                .Select(record => new GetRoomDetailFindRoomResModel
+                {
+                    TowerName = record.Tower.Name,
+                    TowerAddress = record.Tower.Address,
+                    PriceRoom = record.PriceRoom,
+                    Device = record.Equipment,
+                    MoTa = record.Note,
+                    SDTLandlord = record.Tower.Landlord.PhoneNumber,
+                    SDTZalo = record.Tower.Landlord.SDTZalo,
+                    LandlordName = record.Tower.Landlord.FullName,
+                    LandlordAvata = CommonFunctions.ConverPathIMG(record.Tower.Landlord.PathAvatar),
+                    PathImgRoom = ConverPathListIMG(_Context.ImgRooms.Where(item => item.RoomId == record.Id).Select(i => i.Path).ToList()),
+                    Service = _Context.Services.Where(item=> item.TowerId == record.TowerId).Select(s=> new GetAllServiceResModel
+                    {
+                        Id = s.Id,
+                        Name = s.Name,
+                        Price = s.UnitPrice,
+                        UnitOfCalculation = s.UnitOfCalculation
+                    }).ToList()
+                }).FirstOrDefault();
+            if(roomData == null)
+            {
+                throw new Exception("Phòng không tồn tại");
+            }
+            return roomData;
         }
     }
 }

@@ -117,7 +117,7 @@ export default [
                 component: () => import("../views/FindRoom/FindPeople.vue"),
             },
             {
-                path: "/detail",
+                path: "/detail/:idroom",
                 name: "detail",
                 meta: { title: "Chi tiết phòng trọ" },
                 component: () => import("../views/FindRoom/DetailRoom.vue"),

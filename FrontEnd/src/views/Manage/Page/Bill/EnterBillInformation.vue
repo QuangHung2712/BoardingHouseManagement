@@ -13,7 +13,6 @@
         },
         created(){
             const idBill = this.$route.params.idbill;
-            console.log(idBill);
             this.getinfoBill(idBill);
         },
         data(){

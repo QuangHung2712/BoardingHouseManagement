@@ -344,9 +344,12 @@
                 formData.append("numberElectric",this.selectRoom.numberElectric ?? "");
                 formData.append("numberCountries", this.selectRoom.numberCountries ?? "");
                 formData.append("note", this.selectRoom.note ?? "");
-                this.selectRoom.imgRoom.forEach((File)=>{
-                    formData.append("ImgRoom", File);
-                })
+                if(this.selectRoom.imgRoom)
+                {
+                    this.selectRoom.imgRoom.forEach((File)=>{
+                        formData.append("ImgRoom", File);
+                    })
+                }
                 console.log(this.selectRoom);
                 apiClient.post(`/Room/CreateEditRoom`,formData)
                 .then(response => {

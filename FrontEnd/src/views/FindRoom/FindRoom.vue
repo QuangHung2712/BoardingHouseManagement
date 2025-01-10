@@ -15,10 +15,8 @@ export default {
             selectHuyen: null,
             searchPrice: [0,10000000],
             status: true,
-            length: 3,
             window: 0,
             roomData :[
-
             ],
             message: '',
             snackbar: false,
@@ -95,6 +93,7 @@ export default {
             })
                     .then(response=>{
                         this.roomData = response.data
+                        console.log(this.roomData);
                         this.status = false;
                     })
                     .catch(error=>{
@@ -102,6 +101,10 @@ export default {
                         this.snackbar = true;
                         this.snackbarColor = 'red';
                     })
+        },
+        GotoDetail(roomId){
+            const route = this.$router.resolve({ name: 'detail', params: { idroom: roomId } });
+            window.open(route.href, '_blank');
         }
     },
 }
@@ -231,17 +234,17 @@ export default {
                                     <BRow>
                                         <BCol class="col-md-4 col-12">
                                             <v-window style="height: 100%;"
-                                                v-model="window"
+                                                v-model="room.selectimg"
                                                 show-arrows
                                                 theme="dark"
                                             >
                                                 <v-window-item
-                                                v-for="n in length"
-                                                :key="n"
+                                                v-for="(item,index) in room.img"
+                                                :key="index"
                                                 >
                                                 <v-card class="d-flex justify-center align-center" height="200px">
                                                     <v-img
-                                                        src="/images/Room/20241119180012-04a6_wm.jpg"
+                                                        :src="item"
                                                         alt="Room Image"
                                                         aspect-ratio="16/9"
                                                         class="rounded elevation-2"
@@ -252,7 +255,7 @@ export default {
                                             </v-window>
                                         </BCol>
                                         <BCol class="col-md-8 col-12 mt-4">
-                                            <router-link to="/detail" target="_blank">
+                                            <router-link @click="GotoDetail(room.id)" target="_blank">
                                                 <h4> {{ room.towerName }}</h4>
                                                 <h5>Giá: <span style="color: red;">{{ FormatPrice(room.price) }}</span></h5>
                                                 <p><v-icon>mdi-map-marker-radius</v-icon> {{ room.towerAddress }} </p>
