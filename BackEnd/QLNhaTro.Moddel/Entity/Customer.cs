@@ -10,7 +10,6 @@ namespace QLNhaTro.Moddel.Entity
     public class Customers : BaseInfoPeoPle
     {
 
-        public bool IsRepresentative { get; set; }//Có phải là người đại diện không
         public string? Password{ get; set; }
     }
 }

@@ -2,20 +2,27 @@
 import { Swiper, SwiperSlide } from 'swiper/vue';
 
 import Axios from "axios";
+import apiClient from '@/plugins/axios';
+import common from "@/components/common/JavaScripCommon"
+
 
 export default {
     data() {
         return{
             tinhData: [],
             huyenData: [],
-            phuongData: [],
             selectTinh: null,
             selectHuyen: null,
-            selectPhuong: null,
             searchPrice: [0,10000000],
-            status: false,
+            status: true,
             length: 3,
             window: 0,
+            roomData :[
+
+            ],
+            message: '',
+            snackbar: false,
+            snackbarColor: '',
         }
     },
     name: "LANDING",
@@ -61,11 +68,54 @@ export default {
                     this.snackbarColor = 'red';
                 })
         },
+        FormatPrice(price){
+            return common.formatTablePrice(price);
+        },
+        FindRoom(){
+            const tinh = this.tinhData.find(item => item.id === this.selectTinh);
+            const huyen = this.huyenData.find(item => item.id === this.selectHuyen);
+            var searchaddress ='';
+
+            if (tinh && huyen) {
+                searchaddress = ` ${huyen.full_name} ${tinh.full_name}`;
+            }
+            else{
+                this.message = "Vui lòng chọn đầy đủ  địa chỉ trước ";
+                this.snackbar = true;
+                this.snackbarColor = 'red';
+                return;
+            }
+            const priceArrive = this.searchPrice[1]
+            apiClient.get(`/Room/SearchRoom`,{
+                params: {
+                    address: searchaddress,
+                    priceFrom: this.searchPrice[0],
+                    priceArrive: priceArrive,
+                },
+            })
+                    .then(response=>{
+                        this.roomData = response.data
+                        this.status = false;
+                    })
+                    .catch(error=>{
+                        this.message = "Lấy danh sách tỉnh thành bị lỗi: " + error.response?.data?.message || error;
+                        this.snackbar = true;
+                        this.snackbarColor = 'red';
+                    })
+        }
     },
 }
 </script>
 <template>
     <v-container class="py-0">
+        <v-snackbar
+            v-model="snackbar"
+            :timeout="10000"
+            class="custom-snackbar"
+            :color="snackbarColor"
+        >
+            <h5 class="text-center">{{ message }}</h5>
+        </v-snackbar>
             <BCard>
                 <BRow>
                     <BCol class="col-xl-3 col-md-4 col-12">
@@ -134,7 +184,7 @@ export default {
                         </div>
                     </BCol>
                     <BCol class="col-xl-12 col-md-4 col-12 d-flex justify-center align-center">
-                        <v-btn class="mt-3 mt-md-0" prepend-icon="mdi-magnify">Tìm phòng trọ</v-btn>
+                        <v-btn class="mt-3 mt-md-0" prepend-icon="mdi-magnify" @click="FindRoom">Tìm phòng trọ</v-btn>
                     </BCol>
                 </BRow>
             </BCard>
@@ -142,7 +192,7 @@ export default {
 
         <BContainerFluid class="container-fluid">
             <!-- <div class="container-fluid"> -->
-            <div class="bg-dark mx-sm-3 home-section " v-show="status">
+            <div class="bg-dark mx-sm-3 home-section justify-content-center" v-if="status">
                
                 <div class="swiper language-slides-hero m-0">
                     <div class="swiper-wrapper " >
@@ -155,7 +205,7 @@ export default {
                                     <BCol sm="12" class="header-content">
                                         <BRow class="justify-content-center text-center">
                                             <BCol lg="8" sm="10" Cols="11" class="col-xl-7 col-md-9">
-                                                <h1 class="my-3 wow animate__fadeInUp text-white" data-wow-delay="0.4s">Chào mừng bạn đến với trang web tìm kiếm nhà trọ số 1 Việt Nam.</h1>
+                                                <h1 class="my-3 wow animate__fadeInUp text-white" data-wow-delay="0.4s">Chào mừng bạn đến với trang web tìm kiếm nhà trọ.</h1>
                                             </BCol>
                                         </BRow>
                                         <BRow class="justify-content-center text-center">
@@ -170,129 +220,51 @@ export default {
                     </div>
                 </div>               
             </div>
-            <div class="mx-sm-3 ListRoom">
+            <div class="mx-sm-3 ListRoom" v-else>
                 <v-container class="pt-0">
                     <v-row>
                         <v-col md="1"></v-col>
                         <v-col cols="12" md="10">
                             <h3>Danh sách các phòng trọ</h3>
-                    <BCard no-body>
-                            <BCardBody class="p-0">
-                                <BRow>
-                                    <BCol class="col-md-4 col-12">
-                                        <v-window style="height: 100%;"
-                                            v-model="window"
-                                            show-arrows
-                                            theme="dark"
-                                        >
-                                            <v-window-item
-                                            v-for="n in length"
-                                            :key="n"
+                            <BCard no-body v-for="(room, index) in roomData" :key="index">
+                                <BCardBody class="p-0">
+                                    <BRow>
+                                        <BCol class="col-md-4 col-12">
+                                            <v-window style="height: 100%;"
+                                                v-model="window"
+                                                show-arrows
+                                                theme="dark"
                                             >
-                                            <v-card class="d-flex justify-center align-center" height="200px">
-                                                <v-img
-                                                    src="/images/Room/20241119180012-04a6_wm.jpg"
-                                                    alt="Room Image"
-                                                    aspect-ratio="16/9"
-                                                    class="rounded elevation-2"
-                                                    contain
-                                                ></v-img>
-                                            </v-card>
-                                            </v-window-item>
-                                        </v-window>
-                                    </BCol>
-                                    <BCol class="col-md-8 col-12 mt-4">
-                                        <router-link to="/detail">
-                                            <h4> Số 11 Ngõ 91 đường Cầu Diễn </h4>
-                                            <h5>Giá: <span style="color: red;">3.000.000 VNĐ</span></h5>
-                                            <p><v-icon>mdi-map-marker-radius</v-icon> Số 11 Ngõ 91 đường Cầu Diễn Phường Cầu Diễn </p>
-                                            <p>Thiết bị: Máy giặt, Thang máy, Điều hoà, Nóng lạnh</p>
-                                        </router-link>
-                                        <div class="text-right">
-                                            <BButton variant="white"><v-icon >mdi-heart-outline</v-icon></BButton>
-                                        </div>
-                                    </BCol>
-                                </BRow>
-                            </BCardBody>
-                        </BCard>
-                        <BCard no-body>
-                            <BCardBody class="p-0">
-                                <BRow>
-                                    <BCol class="col-md-4 col-12">
-                                        <v-window style="height: 100%;"
-                                            v-model="window"
-                                            show-arrows
-                                            theme="dark"
-                                        >
-                                            <v-window-item
-                                            v-for="n in length"
-                                            :key="n"
-                                            >
-                                            <v-card class="d-flex justify-center align-center" height="200px">
-                                                <v-img
-                                                    src="/images/Room/20241119180012-04a6_wm.jpg"
-                                                    alt="Room Image"
-                                                    aspect-ratio="16/9"
-                                                    class="rounded elevation-2"
-                                                    contain
-                                                ></v-img>
-                                            </v-card>
-                                            </v-window-item>
-                                        </v-window>
-                                    </BCol>
-                                    <BCol class="col-md-8 col-12 mt-4">
-                                        <router-link to="/detail">
-                                            <h4> Số 11 Ngõ 91 đường Cầu Diễn </h4>
-                                            <h5>Giá: <span style="color: red;">3.000.000 VNĐ</span></h5>
-                                            <p><v-icon>mdi-map-marker-radius</v-icon> Số 11 Ngõ 91 đường Cầu Diễn Phường Cầu Diễn </p>
-                                            <p>Thiết bị: Máy giặt, Thang máy, Điều hoà, Nóng lạnh</p>
-                                        </router-link>
-                                        <div class="text-right">
-                                            <BButton variant="white"><v-icon>mdi-heart-outline</v-icon></BButton>
-                                        </div>
-                                    </BCol>
-                                </BRow>
-                            </BCardBody>
-                        </BCard>
-                        <BCard no-body>
-                            <BCardBody class="p-0">
-                                <BRow>
-                                    <BCol class="col-md-4 col-12">
-                                        <v-window style="height: 100%;"
-                                            v-model="window"
-                                            show-arrows
-                                            theme="dark"
-                                        >
-                                            <v-window-item
-                                            v-for="n in length"
-                                            :key="n"
-                                            >
-                                            <v-card class="d-flex justify-center align-center" height="200px">
-                                                <v-img
-                                                    src="/images/Room/20241119180012-04a6_wm.jpg"
-                                                    alt="Room Image"
-                                                    aspect-ratio="16/9"
-                                                    class="rounded elevation-2"
-                                                    contain
-                                                ></v-img>
-                                            </v-card>
-                                            </v-window-item>
-                                        </v-window>
-                                    </BCol>
-                                    <BCol class="col-md-8 col-12 mt-4">
-                                        <router-link to="/detail">
-                                            <h4> Số 11 Ngõ 91 đường Cầu Diễn </h4>
-                                            <h5>Giá: <span style="color: red;">3.000.000 VNĐ</span></h5>
-                                            <p><v-icon>mdi-map-marker-radius</v-icon> Số 11 Ngõ 91 đường Cầu Diễn Phường Cầu Diễn </p>
-                                            <p>Thiết bị: Máy giặt, Thang máy, Điều hoà, Nóng lạnh</p>
-                                        </router-link>
-                                        <div class="text-right">
-                                            <BButton variant="white"><v-icon>mdi-heart-outline</v-icon></BButton>
-                                        </div>
-                                    </BCol>
-                                </BRow>
-                            </BCardBody>
-                        </BCard>
+                                                <v-window-item
+                                                v-for="n in length"
+                                                :key="n"
+                                                >
+                                                <v-card class="d-flex justify-center align-center" height="200px">
+                                                    <v-img
+                                                        src="/images/Room/20241119180012-04a6_wm.jpg"
+                                                        alt="Room Image"
+                                                        aspect-ratio="16/9"
+                                                        class="rounded elevation-2"
+                                                        contain
+                                                    ></v-img>
+                                                </v-card>
+                                                </v-window-item>
+                                            </v-window>
+                                        </BCol>
+                                        <BCol class="col-md-8 col-12 mt-4">
+                                            <router-link to="/detail" target="_blank">
+                                                <h4> {{ room.towerName }}</h4>
+                                                <h5>Giá: <span style="color: red;">{{ FormatPrice(room.price) }}</span></h5>
+                                                <p><v-icon>mdi-map-marker-radius</v-icon> {{ room.towerAddress }} </p>
+                                                <p>Thiết bị: {{ room.device }}</p>
+                                            </router-link>
+                                            <div class="text-right">
+                                                <BButton variant="white"><v-icon >mdi-heart-outline</v-icon></BButton>
+                                            </div>
+                                        </BCol>
+                                    </BRow>
+                                </BCardBody>
+                            </BCard>
                         </v-col>
                         <v-col xl="1"></v-col>
                     </v-row>

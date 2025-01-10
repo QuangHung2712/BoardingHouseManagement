@@ -13,5 +13,6 @@ namespace QLNhaTro.Service.TowerService
         Task<List<GetAllTowerResModel>> GetAllTowerByLandlordId(long LandlordId);
         Task CreateEditTower(CreateEditTowerReqModel input);
         void DeleteTower(long Id);
+        string GetAddressTower(long towerId);
     }
 }

@@ -8,6 +8,7 @@ using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Presentation;
 using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.Wordprocessing;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query.Internal;
 using QLNhaTro.Commons;
@@ -563,7 +564,6 @@ namespace QLNhaTro.Service.ContractService
                         CCCD = item.CCCD,
                         Address = item.Address,
                         Email = item.Email,
-                        IsRepresentative = item.IsRepresentative,
                     };
                     _Context.Customers.Add(customer);
                     await _Context.SaveChangesAsync();
@@ -578,7 +578,6 @@ namespace QLNhaTro.Service.ContractService
                     customer.CCCD = item.CCCD;
                     customer.Address = item.Address;
                     customer.Email = item.Email;
-                    customer.IsRepresentative = item.IsRepresentative;
                     _Context.Customers.Update(customer);
                 }
                 //Thêm các bảng liên kết nhiều nhiều của hợp đồng với khách hàng
@@ -586,6 +585,7 @@ namespace QLNhaTro.Service.ContractService
                 {
                     ContractId = contractId,
                     CustomerId = customer.Id,
+                    IsRepresentative = item.IsRepresentative,
                 };
                 _Context.ContractCustomers.Add(contractCustomer);
             }

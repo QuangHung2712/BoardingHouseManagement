@@ -119,6 +119,9 @@ namespace QLNhaTro.Moddel.Migrations
                     b.Property<long>("CustomerId")
                         .HasColumnType("bigint");
 
+                    b.Property<bool>("IsRepresentative")
+                        .HasColumnType("bit");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ContractId");
@@ -155,9 +158,6 @@ namespace QLNhaTro.Moddel.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsRepresentative")
                         .HasColumnType("bit");
 
                     b.Property<string>("Password")

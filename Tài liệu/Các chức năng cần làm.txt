@@ -1,0 +1,5 @@
+Giao diện quản lý hệ thông
+Chức năng xem hoá đơn theo email của khách hàng chưa đăng ký trên hệ thống bị lỗi xuất hiện ký tự /
+Chức năng báo cáo
+Chức năng đổi phòng
+Chức năng đổi hợp đồng mẫu

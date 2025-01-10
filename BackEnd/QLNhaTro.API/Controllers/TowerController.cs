@@ -59,5 +59,19 @@ namespace QLNhaTro.API.Controllers
             }
 
         }
+        [HttpGet]
+        public IActionResult GetAddressTower([FromQuery]long towerId)
+        {
+            try
+            {
+                var result = _towerService.GetAddressTower(towerId);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
+
+        }
     }
 }

@@ -89,5 +89,11 @@ namespace QLNhaTro.Service.TowerService
             _Context.Towers.Update(tower);
             _Context.SaveChangesAsync();
         }
+        public string GetAddressTower(long towerId) 
+        {
+            var result = _Context.Towers.Where(item => item.Id == towerId).Select(item => item.Address).FirstOrDefault();
+            if (result == null) throw new Exception("Toà nhà không tồn tại");
+            return result;
+        }
     }
 }

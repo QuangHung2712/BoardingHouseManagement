@@ -10,6 +10,8 @@
 <script>
 import { ref } from 'vue';
 import simplebar from "simplebar-vue"
+import CryptoJS from 'crypto-js';
+import apiClient from '@/plugins/axios';
 export default {
     setup() {
         const logo = ref(null);
@@ -39,6 +41,7 @@ export default {
     data() {
         return {
             towerId : 0,
+            towerAddress: '',
         };
     },
     methods: {
@@ -60,6 +63,19 @@ export default {
                 this.$store.commit('changeLayoutType', { layoutType });
             },
         },
+    },
+    created(){
+        const idtower = this.$route.params.idtower;
+        const DecodingIdTower = CryptoJS.enc.Utf8.stringify(CryptoJS.enc.Base64.parse(idtower));
+        apiClient.get(`/Tower/GetAddressTower?towerId=${DecodingIdTower}`)
+                .then(response=>{
+                    this.towerAddress = response.data;
+                })
+                .catch(error=>{
+                    this.snackbar = true;
+                    this.message = 'Lấy địa chỉ toà nhà bị lỗi ' + error.response?.data?.message || error.message;
+                    this.snackbarColor = 'red';
+                })
     },
     watch: {
         layoutType: {
@@ -106,7 +122,7 @@ export default {
 <template>
     <div class="navbar-wrapper" id="navbar-wrapper">
         <div class="m-header">
-            <router-link to="/" class="b-brand text-primary mt-lg-4">
+            <router-link to="/" class="b-brand text-primary mt-lg-3">
                 <!-- ========   Change your logo from here   ============ -->
                 <!-- <img ref="logo" alt="logo image" class="logo-lg custom_logo"> -->
                 <!-- <img :src="isDarkTheme ? '@/assets/images/logo-dark.svg' : '@/assets/images/logo-white.svg'" alt="logo image" class="logo-lg custom_logo"> -->
@@ -116,7 +132,8 @@ export default {
                 <h3 style="color: azure ;">QUẢN LÝ NHÀ TRỌ</h3>
             </router-link>
         </div>
-        <simplebar data-simplebar style="height: 760px" class="mt-4">
+        <div class="px-3 text-center" style="color: azure;">Địa chỉ: {{ towerAddress }}</div>
+        <simplebar data-simplebar class="mt-4">
             <div class="navbar-content">
                 <ul class="pc-navbar">
                     <!-- <li class="pc-item" :class="{ 'active': this.$route.path === '/dashboard' }">
@@ -208,7 +225,7 @@ export default {
             </div>
         </simplebar>
     </div>
-    <BCard no-body class="pc-user-card">
+    <!-- <BCard no-body class="pc-user-card">
         <BCardBody>
             <div class="d-flex align-items-center">
                 <div class="flex-shrink-0">
@@ -250,7 +267,7 @@ export default {
                 </BDropdown>
             </div>
         </BCardBody>
-    </BCard>
+    </BCard> -->
     <!-- <div class="dropdown">
                 <BLink class="btn btn-icon btn-link-secondary avtar arrow-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" data-bs-offset="0,20">
                     <i class="ph-duotone ph-windows-logo"></i>

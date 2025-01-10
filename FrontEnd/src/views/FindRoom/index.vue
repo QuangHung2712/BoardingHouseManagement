@@ -99,7 +99,7 @@ export default {
         <BNav class="navbar navbar-expand-md navbar-light default">
             <div class="container">
                 <a class="pc-navbar-brand" href="/">
-                    TÌM KIẾM NHÀ TRỌ
+                    <h3>TÌM KIẾM NHÀ TRỌ</h3>
                 </a>
                 <button @click="toggleMenu" class="navbar-toggler rounded" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>

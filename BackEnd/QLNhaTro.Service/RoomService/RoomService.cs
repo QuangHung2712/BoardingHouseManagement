@@ -251,7 +251,7 @@ namespace QLNhaTro.Service.RoomService
             var room = _Context.Rooms.GetAvailableById(input.Id);
             if(contract == null) throw new NotFoundException(nameof(contract));
             var customer = _Context.ContractCustomers.Include(r => r.Customer)
-                .Where(item => item.ContractId == contract.Id && item.Customer.IsRepresentative)
+                .Where(item => item.ContractId == contract.Id && item.IsRepresentative)
                 .Select(c => new
                 {
                     CustomerId = c.CustomerId,
@@ -411,10 +411,14 @@ namespace QLNhaTro.Service.RoomService
             var occupiedRoomIds = _Context.Contracts
                .Where(contract =>
                    contract.TerminationDate == null && !contract.IsDeleted) // Hợp đồng vẫn còn hiệu lực
-               .Select(contract => contract.RoomId)
-               .Distinct();
+               .Select(contract =>new 
+               { 
+                   RoomId = contract.RoomId ,
+                   EndDate = contract.EndDate
+               })
+               .ToList();
             var availableRooms = _Context.Rooms
-            .Where(room => !occupiedRoomIds.Contains(room.Id) && room.TowerId == towerId).Select(item=> new
+            .Where(room => !occupiedRoomIds.Select(item=> item.RoomId).Contains(room.Id) && room.TowerId == towerId).Select(item=> new
             {
                 name = item.Name,
             }).ToList();
@@ -425,18 +429,14 @@ namespace QLNhaTro.Service.RoomService
             var RoomUnpaid = bills.Where(item => item.Status == CommonEnums.StatusBill.DaXacNhanThanhToan).Select(item =>new { item.Room.Name }).ToList();
             var RoomPaid = bills.Where(item => item.Status == CommonEnums.StatusBill.ChuaThanhToan || item.Status == CommonEnums.StatusBill.ChuaXacNhanThanhToan).Select(item => new { item.Room.Name }).ToList();
             string InfoRoomNoInvoice = string.Join(", ", (bills.Where(item => item.Status == CommonEnums.StatusBill.ChuaDienThongTin).Select(item => new { item.Room.Name }).ToList()).Select(item => item.Name));
-            //hợp đồng sắp hết hạn
 
-            //var contractExpire = _Context.Contracts
-            //   .Where(contract =>
-            //       contract.TerminationDate == null && !contract.IsDeleted && (contract.EndDate - DateTime.Now.Date ).TotalDays == 30 && !contract.IsDeleted) // Hợp đồng vẫn còn hiệu lực
-            //   .Select(contract => contract.RoomId)
-            //   .Distinct();
-            //var roomExpire = _Context.Rooms
-            //.Where(room => contractExpire.Contains(room.Id) && room.TowerId == towerId).Select(item => new
-            //{
-            //    name = item.Name,
-            //}).ToList();
+            //hợp đồng sắp hết hạn
+            var contractExpire = occupiedRoomIds.Where(item => (item.EndDate.Month - DateTime.Now.Month) <= 1).Select(item => item.RoomId).ToList();
+            var roomExpire = _Context.Rooms
+                .Where(room => contractExpire.Contains(room.Id) && room.TowerId == towerId).Select(item => new
+                {
+                    name = item.Name,
+                }).ToList();
             return new GetInfomationHomeResModel
             {
                 RoomUnpaid = RoomUnpaid.Count,
@@ -447,8 +447,8 @@ namespace QLNhaTro.Service.RoomService
                 InfoRoomNoInvoice = InfoRoomNoInvoice,
                 RoomAvailable = RoomAvailable,
                 InfoRoomAvailable = InfoRoomAvailable,
-                RoomExpireContract = 5, //roomExpire.Count(),
-                InfoRoomExpireContract = "1",// string.Join(", ", roomExpire.Select(item => item.name)),
+                RoomExpireContract = roomExpire.Count(),
+                InfoRoomExpireContract = string.Join(", ", roomExpire.Select(item => item.name)),
                 TotalAmount = bills.Where(item => item.Status == CommonEnums.StatusBill.DaXacNhanThanhToan).Sum(item => item.TotalAmount),
 
             };
@@ -461,6 +461,25 @@ namespace QLNhaTro.Service.RoomService
                 result.Add(CommonFunctions.ConverPathIMG(item));
             }
             return result;
+        }
+        public List<SearchRoomResModel> SearchRoom(string address,decimal priceForm, decimal priceArrive)
+        {
+            var room = _Context.Rooms.Include(r => r.Tower)
+                .Where(item => item.Tower.Address.Contains(address) && item.PriceRoom >= priceForm && item.PriceRoom <= priceArrive && !item.IsDeleted)
+                .Select(r => new SearchRoomResModel
+                {
+                    TowerName = r.Tower.Name,
+                    TowerAddress = r.Tower.Address,
+                    Id = r.Id,
+                    Device = r.Equipment,
+                    Price = r.PriceRoom,
+                    IMG = _Context.ImgRooms.Where(item=> item.RoomId == r.Id).Select(record=> record.Path).ToList()
+                }).ToList();
+            if(room.Count == 0)
+            {
+                throw new Exception("Không có phòng nào phù hợp với điều kiện của bạn");
+            }
+            return room;
         }
     }
 }

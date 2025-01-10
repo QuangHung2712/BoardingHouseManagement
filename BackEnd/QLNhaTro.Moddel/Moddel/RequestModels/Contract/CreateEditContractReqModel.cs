@@ -14,7 +14,7 @@ namespace QLNhaTro.Moddel.Moddel.RequestModels
         public long RoomId { get; set; }
         public int ContractPeriod { get; set; }
         public decimal Deposit { get; set; }
-        public List<ContractServiceReqModel> Services { get; set; }
+        public List<ContractServiceReqModel>? Services { get; set; }
         public string? Note { get; set; }
     }
 }

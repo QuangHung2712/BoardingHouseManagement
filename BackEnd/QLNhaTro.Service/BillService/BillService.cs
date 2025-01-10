@@ -49,7 +49,7 @@ namespace QLNhaTro.Service.BillService
                 }).ToList();
             foreach (var contract in contractStillValid)
             {
-                var customer = _Context.ContractCustomers.Where(c => c.ContractId == contract.Id && c.Customer.IsRepresentative).Select(record=>record.Customer).FirstOrDefault();
+                var customer = _Context.ContractCustomers.Where(c => c.ContractId == contract.Id && c.IsRepresentative).Select(record=>record.Customer).FirstOrDefault();
                 var ServiceFees = _Context.ServiceRooms.Where(sr => sr.ContractId == contract.Id).ToList();
                 if (customer == null) throw new NotFoundException("Có hợp đồng không có khách hàng");
                 Bill newbill = new Bill()
@@ -460,7 +460,7 @@ namespace QLNhaTro.Service.BillService
             foreach(var room in input)
             {
                 var customer = _Context.ContractCustomers.Include(c => c.Customer)
-                    .Where(item=> item.ContractId == room.ContractId && item.Customer.IsRepresentative == true)
+                    .Where(item=> item.ContractId == room.ContractId && item.IsRepresentative == true)
                     .Select(record=> new
                     {
                         Id = record.CustomerId,

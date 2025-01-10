@@ -220,5 +220,19 @@ namespace QLNhaTro.API.Controllers
                 return StatusCode(500, new { Message = ex.Message });
             }
         }
+
+        [HttpGet]
+        public IActionResult SearchRoom([FromQuery] string address, [FromQuery] decimal priceFrom, [FromQuery] decimal priceArrive)
+        {
+            try
+            {
+                var result = roomService.SearchRoom(address, priceFrom,priceArrive);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
+        }
     }
 }

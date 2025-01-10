@@ -78,6 +78,10 @@
                 searchRoomName: '',
                 servicedata: [],
                 previewUrls: [],
+                rules: {
+                    maxNumber: [(v) => (v < 10) || 'Số người phải nhỏ hơn 10.'],
+                    requiredNumber: [(v) => !!v || 'Trường này là bắt buộc.'],
+                },
             }
         },
         created(){
@@ -579,7 +583,7 @@
                                 <BCol class="col-lg-6">
                                     <div class="form-group">
                                         <label class="form-label">Số người ở:</label>
-                                        <v-text-field v-model="selectRoom.noPStaying" :rules="[requiredNumber]" type="number" variant="outlined" clearable placeholder="Nhập vào số người tối đa được ở" class="input-control"></v-text-field>
+                                        <v-text-field v-model="selectRoom.noPStaying" :rules="[requiredNumber,...rules.maxNumber]" type="number" variant="outlined" clearable placeholder="Nhập vào số người tối đa được ở" class="input-control"></v-text-field>
                                     </div>
                                 </BCol>
                                 <BCol class="col-lg-6">

@@ -51,6 +51,7 @@ export default {
             searchComelDate: '',
             viewdialogContractExtension: false,
             contractExtension: {},
+            ViewdialogEditContractSample: false,
         }
     },
     created(){
@@ -325,8 +326,8 @@ export default {
                 <BCard no-body class="table-card p-sm-2">
                     <BCardBody>
                         <BRow class="text-end pb-3 ">
-                            
-                            <BCol class="col-sm-12 col-6"><v-btn @click="CreateEditContract(0)" color="blue-lighten-1" class="mt-2"> Thêm hợp đồng </v-btn></BCol>
+                            <BCol class="col-sm-10 col-6"><v-btn @click="(ViewdialogEditContractSample = !ViewdialogEditContractSample) & (EditSampleContract)" color="blue-lighten-1" class="mt-2">Chỉnh sửa hợp đồng mẫu </v-btn></BCol>
+                            <BCol class="col-sm-2 col-6"><v-btn @click="CreateEditContract(0)" color="blue-lighten-1" class="mt-2"> Thêm hợp đồng </v-btn></BCol>
                         </BRow>
                         
                         <v-data-table 
@@ -489,6 +490,26 @@ export default {
                     </div>
                     <div class="modal-footer v-modal-footer">
                         <BButton type="button" variant="light" @click="viewdialogContractExtension = false">Close
+                        </BButton>
+                        <BButton type="button" variant="primary" @click="btnSaveContractExtension()" :disabled="!form">Save Changes</BButton>
+                    </div>
+                </BModal>
+                <BModal v-model="ViewdialogEditContractSample" hide-footer title="Chỉnh sửa hợp đồng mãu" modal-class="fadeInRight"
+                    class="v-modal-custom" centered size="md" >
+                    <div class="card-body">
+                        <v-form v-model="form" ref="form">
+                            <BRow>
+                                <BCol class="col-lg-12">
+                                    <div class="form-group">
+                                        <label class="form-label">Số tháng gia hạn thêm:</label>
+                                        <v-text-field v-model="contractExtension.extensionPeriod"  :rules="[required]" type="number" variant="outlined" clearable placeholder="Nhập vào số tháng bạn muốn gia hạn thêm" class="input-control"></v-text-field>
+                                    </div>
+                                </BCol>
+                            </BRow>
+                        </v-form>
+                    </div>
+                    <div class="modal-footer v-modal-footer">
+                        <BButton type="button" variant="light" @click="ViewdialogEditContractSample = false">Close
                         </BButton>
                         <BButton type="button" variant="primary" @click="btnSaveContractExtension()" :disabled="!form">Save Changes</BButton>
                     </div>

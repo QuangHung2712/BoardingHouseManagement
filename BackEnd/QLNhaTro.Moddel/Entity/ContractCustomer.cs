@@ -13,5 +13,6 @@ namespace QLNhaTro.Moddel.Entity
         public virtual Contract Contract { get; set; }
         public long CustomerId { get; set; }
         public virtual Customers Customer { get; set; }
+        public bool IsRepresentative { get; set; }
     }
 }

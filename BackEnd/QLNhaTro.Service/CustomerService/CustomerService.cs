@@ -1,4 +1,5 @@
-﻿using QLNhaTro.Commons;
+﻿using Microsoft.EntityFrameworkCore;
+using QLNhaTro.Commons;
 using QLNhaTro.Commons.CustomException;
 using QLNhaTro.Moddel;
 using QLNhaTro.Moddel.Entity;
@@ -23,7 +24,7 @@ namespace QLNhaTro.Service.CustomerService
         }
         public List<CustomerResModel> GetCustomerByContract(long contractId)
         {
-            var customerData = _Context.ContractCustomers.Where(c=>c.ContractId == contractId && !c.Contract.IsDeleted).Select(c=> CustomerResModel.Mapping(c.Customer)).ToList();
+            var customerData = _Context.ContractCustomers.Where(c=>c.ContractId == contractId && !c.Contract.IsDeleted).Select(c=> CustomerResModel.Mapping(c.Customer,c.IsRepresentative)).ToList();
             return customerData;
         }
         public string GetCustomerNameByContract(long contractId)
@@ -85,6 +86,32 @@ namespace QLNhaTro.Service.CustomerService
         public void DeteleCustomer(long contractId)
         {
             
+        }
+        public List<ViewBillByEmailResModel> ViewBillByEmail(string email)
+        {
+            var bill = _Context.Bills.Include(b => b.Customer).Where(b => b.Customer.Email.ToLower() == email.ToLower() && b.Status == CommonEnums.StatusBill.DaXacNhanThanhToan).Select(record => new ViewBillByEmailResModel
+            {
+                BillID = CommonFunctions.Encryption(record.Id.ToString()),
+                Amount = record.TotalAmount,
+                PaymentDate = record.PaymentDate.ToString("dd/MM/yyyy"),
+                RoomName = record.Room.Name,
+                AddressTower = record.Room.Tower.Name,
+                Time = record.CreationDate.AddMonths(-1).ToString("MM/yyyy"),
+            }).ToList();
+            if(bill.Count == 0)
+            {
+                throw new Exception($"Không có hoá đơn nào với địa chỉ Email bạn vừa nhập");
+            }
+            return bill;
+        }
+        public CustomerResModel GetByDetail(long id) 
+        {
+            var customer = _Context.Customers.GetAvailableById(id);
+            if(_Context.ContractCustomers.Any(item => item.CustomerId == id && item.Contract.TerminationDate == null && !item.Contract.IsDeleted))
+            {
+                throw new Exception($"Khách hàng {customer.FullName} đã có hợp đồng thuê nhá");
+            }
+            return CustomerResModel.Mapping(customer,false);
         }
     }
 }

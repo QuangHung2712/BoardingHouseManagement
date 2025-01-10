@@ -41,13 +41,7 @@ export default {
                     },
                 ],
                 services:[
-                    {
-                        serviceId: null,
-                        price: '',
-                        number: 1,
-                        isOldNewNumber: false,
-                        currentNumber: 0, 
-                    },
+
                 ],
             },
             formAddress: false,
@@ -67,6 +61,12 @@ export default {
             address: '',
             addressConfirm: '',
             indexAddress: 0,
+            searchCustomerId: null,
+            rules: {
+                required: v => !!v || 'Vui lòng không để trống',
+                validPhone: v => /^0\d{9}$/.test(v) || 'Số điện thoại phải có 10 chữ số và bắt đầu bằng 0',
+                validEmail: v => /^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(v) || 'Email phải hợp lệ và kết thúc bằng @gmail.com',
+            },
 
         }
     },
@@ -264,6 +264,22 @@ export default {
         btnSaveAddress(){
             this.contractData.customers[this.indexAddress].address = this.addressConfirm;
             this.viewDiaLogAddress = false
+        },
+        FindCustomerById(index,isRepresentative){
+            const SaveTemporarily = isRepresentative;
+            apiClient.get(`/Customer/GetDetail/${this.searchCustomerId}`)
+                    .then(response=>{
+                        this.contractData.customers[index] = response.data;
+                        const dateTime = new Date(this.contractData.customers[index].doB);
+                        dateTime.setDate(dateTime.getDate() + 1);
+                        this.contractData.customers[index].doB = dateTime.toISOString().split('T')[0];
+                        this.contractData.customers[index].isRepresentative = SaveTemporarily;
+                    })
+                    .catch(error=>{
+                        this.message = "Lấy thông tin khách hàng bị lỗi: " + error.response?.data?.message || error;
+                        this.snackbar = true;
+                        this.snackbarColor = 'red';
+                    })
         }
     }
 }
@@ -394,8 +410,8 @@ export default {
                                 </div>
                                 <div v-for="(customer, index) in contractData.customers" :key="index" class="row mt-4">
                                     <div class="col card mb-3">
-                                        <div class="card-header d-flex justify-content-between">
-                                            <h4 class="card-title d-flex">
+                                        <div class="card-header d-flex justify-content-between p-0 align-items-center">
+                                            <h4 class="card-title d-flex align-items-center">
                                                 <span>Thông tin của khách hàng {{ index + 1 }}</span>
                                                 <v-checkbox label="Là người đại diện"
                                                     hide-details 
@@ -404,44 +420,54 @@ export default {
                                                     @change="handleRepresentativeChange">
                                                 </v-checkbox>
                                             </h4>
-                                            
+                                            <v-text-field 
+                                                label="Lấy thông tin khách hàng theo ID:" 
+                                                class="mx-3" 
+                                                variant="outlined" 
+                                                hide-details 
+                                                clearable 
+                                                v-model="searchCustomerId"
+                                                append-inner-icon="mdi-magnify"
+                                                @click:append-inner="FindCustomerById(index,customer.isRepresentative)"
+                                                >
+                                            </v-text-field>
                                             <v-btn v-show="index >= 1" class="btn btn-primary" @click="closeCustomer(index)">Xoá</v-btn>
                                         </div>
                                         <div class="row card-body">
                                             <div class="col-sm-4">
                                                 <div class="form-group">
                                                     <label class="form-label">Họ và tên: </label>
-                                                    <v-text-field variant="outlined" :rules="[required]" clearable v-model="customer.fullName"></v-text-field>
+                                                    <v-text-field variant="outlined" :rules="[required]" :readonly="customer.isRepresentative" :clearable="!customer.isSystemRegistrant" v-model="customer.fullName"></v-text-field>
                                                 </div>
                                             </div>
                                             <div class="col-sm-4">
                                                 <div class="form-group">
                                                     <label class="form-label">Ngày sinh: </label>
-                                                    <input type="date" class="form-control" id="example-datemin" :rules="[required]" v-model="customer.doB" min="2000-01-02">
+                                                    <input type="date" class="form-control" :readonly="customer.isSystemRegistrant" id="example-datemin" :rules="[required]" v-model="customer.doB" min="2000-01-02">
                                                 </div>
                                             </div>
                                             <div class="col-sm-4">
                                                 <div class="form-group">
                                                     <label class="form-label">Số điện thoại: </label>
-                                                    <v-text-field variant="outlined" :rules="[required]" clearable v-model="customer.phoneNumber"></v-text-field>
+                                                    <v-text-field variant="outlined" :rules="[required,rules.validPhone]" :readonly="customer.isSystemRegistrant"  :clearable="!customer.isSystemRegistrant" v-model="customer.phoneNumber"></v-text-field>
                                                 </div>
                                             </div>
                                             <div class="col-sm-4" v-if="customer.isRepresentative">
                                                 <div class="form-group">
                                                     <label class="form-label">Email: </label>
-                                                    <v-text-field variant="outlined" :rules="[index === 0 ? required : null]" clearable v-model="customer.email"></v-text-field>
+                                                    <v-text-field variant="outlined" :readonly="customer.isSystemRegistrant" :rules="[index === 0 ? required : null,rules.validEmail]" :clearable="!customer.isSystemRegistrant" v-model="customer.email"></v-text-field>
                                                 </div>
                                             </div>
                                             <div class="col-sm-4">
                                                 <div class="form-group">
                                                     <label class="form-label">Số CCCD: </label>
-                                                    <v-text-field variant="outlined" type="number" :rules=" [required]" clearable v-model="customer.cccd"></v-text-field>
+                                                    <v-text-field variant="outlined" :readonly="customer.isSystemRegistrant" type="number" :rules=" [required]" :clearable="!customer.isSystemRegistrant" v-model="customer.cccd"></v-text-field>
                                                 </div>
                                             </div>
                                             <div class="col-sm-4">
                                                 <div class="form-group">
                                                     <label class="form-label">Địa chỉ: </label>
-                                                    <v-text-field readonly variant="outlined" :rules="[required]" @click="(viewDiaLogAddress = !viewDiaLogAddress) && btnAddress(index)" v-model="customer.address"></v-text-field>
+                                                    <v-text-field readonly variant="outlined" :rules="[required]" @click="(viewDiaLogAddress = !viewDiaLogAddress) && btnAddress(index)" v-model="customer.address" :disabled="customer.isSystemRegistrant"></v-text-field>
                                                 </div>
                                             </div>
                                         </div>
@@ -458,9 +484,9 @@ export default {
                                     <small class="text-muted">Hãy điền các thông tin của các dịch vụ áp dụng cho phòng</small>
                                 </div>
                                 <div class="card" v-for="(service, index) in contractData.services" :key="index">
-                                    <div class="card-header d-flex justify-content-between">
+                                    <div class="card-header d-flex justify-content-between ">
                                         <h4 class="card-title">Thông tin của dịch vụ {{ index + 1 }} {{ service.isOldNewNumber == true ? "(Cần nhập vào số mới và cũ)" : "" }}</h4>
-                                        <v-btn v-show="index >= 1" class="btn btn-primary" @click="closeService(index)">Đóng</v-btn>
+                                        <v-btn class="btn btn-primary" @click="closeService(index)">Đóng</v-btn>
                                     </div>
                                     <div class="row mt-4 card-body">
                                         <div class="col-sm-5">
@@ -473,27 +499,26 @@ export default {
                                                 item-value="id"
                                                 variant="outlined"
                                                 v-model="service.serviceId"
-                                                @update:model-value="onServiceSelected(service)"
-                                                :rules="[required]">
+                                                @update:model-value="onServiceSelected(service)">
                                             </v-select>
                                             </div>
                                         </div>
                                         <div class="col-sm-4">
                                             <div class="form-group">
                                             <label class="form-label">Giá: </label>
-                                            <v-text-field variant="outlined" clearable :rules="[requiredNumber]" v-model="service.price" ></v-text-field>
+                                            <v-text-field variant="outlined" clearable v-model="service.price" ></v-text-field>
                                             </div>
                                         </div>
                                         <div class="col-sm-3" v-if="!service.isOldNewNumber" v-show="service.serviceId">
                                             <div class="form-group">
                                             <label class="form-label">Số lượng người dùng: </label>
-                                            <v-text-field type="number" variant="outlined" :rules="[requiredNumber]" v-model="service.number" clearable></v-text-field>
+                                            <v-text-field type="number" variant="outlined" v-model="service.number" clearable></v-text-field>
                                             </div>
                                         </div>
                                         <div class="col-sm-3" v-else v-show="service.serviceId">
                                             <div class="form-group">
                                             <label class="form-label">Số hiện tại: </label>
-                                            <v-text-field type="number" variant="outlined" :rules="[requiredNumber]" v-model="service.currentNumber" clearable></v-text-field>
+                                            <v-text-field type="number" variant="outlined" v-model="service.currentNumber" clearable></v-text-field>
                                             </div>
                                         </div>
                                     </div>
@@ -522,7 +547,7 @@ export default {
                                 </div>
                             </div> -->
                             <div class="last">
-                                <BButton type="button" variant="primary" @click="CreateEditContract()" :disabled="(!form1 || !form2 || !form3)">Save Changes</BButton>
+                                <BButton type="button" variant="primary" @click="CreateEditContract()" :disabled="(!form1 || !form2)">Save Changes</BButton>
                             </div>
                         </div>
                         <!-- END: Define your controller buttons here-->
