@@ -1,9 +1,17 @@
+
+<style scoped>
+    .saved-button {
+        color: red !important; /* Màu chữ trắng */
+    }
+</style>
 <script>
 import { Swiper, SwiperSlide } from 'swiper/vue';
 
 import Axios from "axios";
 import apiClient from '@/plugins/axios';
 import common from "@/components/common/JavaScripCommon"
+import store from "../../state/store";
+
 
 
 export default {
@@ -21,6 +29,7 @@ export default {
             message: '',
             snackbar: false,
             snackbarColor: '',
+            customerId: 0,
         }
     },
     name: "LANDING",
@@ -31,6 +40,7 @@ export default {
     },
     created(){
         this.GetTinh();
+        this.customerId = store.getters['getCustomerId'];
     },
     methods: {
         GetTinh(){
@@ -89,6 +99,7 @@ export default {
                     address: searchaddress,
                     priceFrom: this.searchPrice[0],
                     priceArrive: priceArrive,
+                    customerId: this.customerId ?? 0,
                 },
             })
                     .then(response=>{
@@ -105,7 +116,26 @@ export default {
         GotoDetail(roomId){
             const route = this.$router.resolve({ name: 'detail', params: { idroom: roomId } });
             window.open(route.href, '_blank');
-        }
+        },
+        SaveRoom(roomId,status){
+            if(status){
+                this.message = "Xoá phòng thành công  ";
+            }
+            else{
+                this.message = "Lưu phòng thành công  ";
+
+            }
+            apiClient.put(`/Room/SaveRoom?customerId=${this.customerId}&roomId=${roomId}&status=${status}`)
+                    .then(()=>{
+                        this.snackbar = true;
+                        this.snackbarColor = 'green';
+                    })
+                    .catch(error=>{
+                        this.message = "Lưu phòng đã xảy ra lỗi: " + error.response?.data?.message || error ;
+                        this.snackbar = true;
+                        this.snackbarColor = 'red';
+                    })   
+        },
     },
 }
 </script>
@@ -262,7 +292,7 @@ export default {
                                                 <p>Thiết bị: {{ room.device }}</p>
                                             </router-link>
                                             <div class="text-right">
-                                                <BButton variant="white"><v-icon >mdi-heart-outline</v-icon></BButton>
+                                                <BButton variant="white" :class="{'saved-button': room.isSave}" @click="SaveRoom(room.id,room.isSave)"><v-icon >mdi-heart</v-icon></BButton>
                                             </div>
                                         </BCol>
                                     </BRow>

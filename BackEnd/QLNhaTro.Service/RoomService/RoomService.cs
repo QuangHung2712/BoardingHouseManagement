@@ -462,7 +462,7 @@ namespace QLNhaTro.Service.RoomService
             }
             return result;
         }
-        public List<SearchRoomResModel> SearchRoom(string address,decimal priceForm, decimal priceArrive)
+        public List<SearchRoomResModel> SearchRoom(string address,decimal priceForm, decimal priceArrive,long customerId)
         {
             var room = _Context.Rooms.Include(r => r.Tower)
                 .Where(item => item.Tower.Address.Contains(address) && item.PriceRoom >= priceForm && item.PriceRoom <= priceArrive && !item.IsDeleted && item.StatusNewCustomer)
@@ -480,6 +480,10 @@ namespace QLNhaTro.Service.RoomService
             }
             foreach(var item in room)
             {
+                if(customerId != 0)
+                {
+                    item.IsSave = _Context.SaveRooms.Any(s => s.CustomerId == customerId && s.RoomId == item.Id);
+                }
                 item.IMG = ConverPathListIMG(_Context.ImgRooms.Where(r => r.RoomId == item.Id).Select(record => record.Path).ToList());
             }
             return room;
@@ -491,6 +495,7 @@ namespace QLNhaTro.Service.RoomService
                 .Where(r => r.Id == Id && !r.IsDeleted && r.StatusNewCustomer)
                 .Select(record => new GetRoomDetailFindRoomResModel
                 {
+                    Id = record.Id,
                     TowerName = record.Tower.Name,
                     TowerAddress = record.Tower.Address,
                     PriceRoom = record.PriceRoom,
@@ -515,27 +520,41 @@ namespace QLNhaTro.Service.RoomService
             }
             return roomData;
         }
-        public async Task SaveRoom(long customerId, long roomId)
+        public async Task SaveRoom(long customerId, long roomId,bool status)
         {
-            if (!_Context.Customers.Any(item => item.Id == customerId && !item.IsDeleted))
+            if(status)
             {
-                throw new Exception("Người dùng không tồn tại");
-            };
-            if(!_Context.Rooms.Any(item=> item.Id == roomId && !item.IsDeleted))
-            {
-                throw new Exception("Phòng không tồn tại");
-            }
-            var newSaveRoom = new SaveRoom
-            {
-                CustomerId = customerId,
-                RoomId = roomId
-            };
-            _Context.SaveRooms.Add(newSaveRoom);
-            await _Context.SaveChangesAsync();
+                var save = _Context.SaveRooms.Where(item => item.RoomId == roomId && item.CustomerId == customerId).FirstOrDefault();
+                if(save == null)
+                {
+                    throw new Exception("Phòng chưa được lưu");
+                }
+                _Context.SaveRooms.Remove(save);
+                await _Context.SaveChangesAsync();
 
-        }
-        public async Task RegisterCustomer()
-        {
+            }
+            else
+            {
+                if (!_Context.Customers.Any(item => item.Id == customerId && !item.IsDeleted))
+                {
+                    throw new Exception("Người dùng không tồn tại");
+                };
+                if (!_Context.Rooms.Any(item => item.Id == roomId && !item.IsDeleted))
+                {
+                    throw new Exception("Phòng không tồn tại");
+                }
+                if (_Context.SaveRooms.Any(item => item.RoomId == roomId && item.CustomerId == customerId))
+                {
+                    throw new Exception("Phòng đã được lưu");
+                }
+                var newSaveRoom = new SaveRoom
+                {
+                    CustomerId = customerId,
+                    RoomId = roomId
+                };
+                _Context.SaveRooms.Add(newSaveRoom);
+                await _Context.SaveChangesAsync();
+            }
 
         }
     }

@@ -13,6 +13,7 @@ namespace QLNhaTro.Moddel.Moddel.ResponseModels
         public decimal Price { get; set; }
         public string TowerAddress { get; set; }
         public string Device { get; set; }
+        public bool IsSave { get; set; }
         public List<string> IMG { get; set; }
     }
 }

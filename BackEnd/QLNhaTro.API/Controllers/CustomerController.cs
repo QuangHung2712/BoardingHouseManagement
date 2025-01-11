@@ -91,5 +91,33 @@ namespace QLNhaTro.API.Controllers
                 return StatusCode(500, new { Message = ex.Message });
             }
         }
+        [HttpPut]
+        public async Task<IActionResult> ChangePassword(ChangePasswordReqModel input)
+        {
+            try
+            {
+                await _customerService.ChangePassword(input);
+                return Ok();
+
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
+
+        }
+        [HttpGet]
+        public IActionResult GetInfo([FromQuery]long Id)
+        {
+            try
+            {
+                var result = _customerService.GetInfoUser(Id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
+        }
     }
 }

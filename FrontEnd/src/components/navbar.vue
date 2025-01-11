@@ -726,7 +726,7 @@ export default {
             </v-form>
         </div>
         <div class="modal-footer v-modal-footer">
-            <BButton type="button" variant="light" @click="viewdialogChangePassword = false">Close
+            <BButton type="button" variant="light" @click="viewdialogInfo = false">Close
             </BButton>
             <BButton type="button" variant="primary" @click="UpdateInfo()" :disabled="!form">Save Changes</BButton>
         </div>

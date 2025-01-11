@@ -1,4 +1,5 @@
-﻿using System;
+﻿using QLNhaTro.Commons;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace QLNhaTro.Moddel.Moddel.ResponseModels
 {
-    public class GetRoomDetailFindRoomResModel
+    public class GetRoomDetailFindRoomResModel: BaseEntity
     {
         public string TowerName { get; set; }
         public string TowerAddress { get; set; }

@@ -23,7 +23,8 @@ namespace QLNhaTro.Service.RoomService
         Task<List<GetDropDownRoom>> GetRoomNoContract(long towerId);
         GetInfomationHomeResModel GetInfoHome(long towerId);
         List<GetInfoCheckOutRoomResModel> GetInfoCheckout(long roomId);
-        List<SearchRoomResModel> SearchRoom(string address, decimal priceForm, decimal priceArrive);
+        List<SearchRoomResModel> SearchRoom(string address, decimal priceForm, decimal priceArrive, long customerId);
         GetRoomDetailFindRoomResModel GetRoomDetailFindRoom(long Id);
+        Task SaveRoom(long customerId, long roomId, bool status);
     }
 }

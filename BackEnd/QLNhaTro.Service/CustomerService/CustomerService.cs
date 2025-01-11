@@ -114,9 +114,25 @@ namespace QLNhaTro.Service.CustomerService
             }
             return CustomerResModel.Mapping(customer,false);
         }
+        public CustomerResModel GetInfoUser(long id)
+        {
+            var customer = _Context.Customers.GetAvailableById(id);
+            return CustomerResModel.Mapping(customer,false);
+        }
         public long Login(string email, string password)
         {
             return _Context.Customers.Where(item=> item.Email != null && item.Email.ToLower() == email.ToLower() && item.Password == password && !item.IsDeleted).Select(record=> record.Id).FirstOrDefault();
+        }
+        public async Task ChangePassword(ChangePasswordReqModel input)
+        {
+            var customer = _Context.Customers.GetAvailableById(input.Id);
+            if (customer.Password != input.PasswordOld)
+            {
+                throw new Exception("Mật khẩu không chính xác");
+            }
+            customer.Password = input.PasswordNew;
+            _Context.Customers.Update(customer);
+            await _Context.SaveChangesAsync();
         }
     }
 }

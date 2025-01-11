@@ -222,11 +222,11 @@ namespace QLNhaTro.API.Controllers
         }
 
         [HttpGet]
-        public IActionResult SearchRoom([FromQuery] string address, [FromQuery] decimal priceFrom, [FromQuery] decimal priceArrive)
+        public IActionResult SearchRoom([FromQuery] string address, [FromQuery] decimal priceFrom, [FromQuery] decimal priceArrive, [FromQuery] long customerId)
         {
             try
             {
-                var result = roomService.SearchRoom(address, priceFrom,priceArrive);
+                var result = roomService.SearchRoom(address, priceFrom,priceArrive, customerId);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -242,6 +242,20 @@ namespace QLNhaTro.API.Controllers
             {
                 var result = roomService.GetRoomDetailFindRoom(roomId);
                 return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+
+            }
+        }
+        [HttpPut]
+        public async Task<IActionResult> SaveRoom([FromQuery] long customerId, [FromQuery] long roomId, [FromQuery] bool status)
+        {
+            try
+            {
+                await roomService.SaveRoom(customerId, roomId, status);
+                return Ok();
             }
             catch (Exception ex)
             {

@@ -20,5 +20,7 @@ namespace QLNhaTro.Service.CustomerService
         List<ViewBillByEmailResModel> ViewBillByEmail(string email);
         CustomerResModel GetByDetail(long id);
         long Login(string email, string password);
+        Task ChangePassword(ChangePasswordReqModel input);
+        CustomerResModel GetInfoUser(long id);
     }
 }
