@@ -1,4 +1,5 @@
-﻿using QLNhaTro.Moddel.Moddel.RequestModels;
+﻿using Microsoft.AspNetCore.Http;
+using QLNhaTro.Moddel.Moddel.RequestModels;
 using QLNhaTro.Moddel.Moddel.ResponseModels;
 using System;
 using System.Collections.Generic;
@@ -11,8 +12,9 @@ namespace QLNhaTro.Service.CustomerService
     public interface ICustomerService
     {
         List<CustomerResModel> GetCustomerByContract(long contractId);
-        Task CreateEditCustomer(CreateEditCustomerReqModel input);
+        Task CreateCustomer(CreateEditCustomerReqModel input);
         string GetCustomerNameByContract(long contractId);
+        Task UpdateCustomer(CreateEditCustomerReqModel input, IFormFile avatar);
         string GetCustomerPhoneByContract(long contractId);
         void DeteleCustomer(long contractId);
         List<ViewBillByEmailResModel> ViewBillByEmail(string email);

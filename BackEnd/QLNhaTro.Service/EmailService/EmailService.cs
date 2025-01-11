@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using MimeKit;
 using MailKit.Net.Smtp;
+using static QLNhaTro.Commons.CommonEnums;
 
 namespace QLNhaTro.Service.EmailService
 {
@@ -43,9 +44,18 @@ namespace QLNhaTro.Service.EmailService
                 throw;
             }
         }
-        public async Task SendEmailCreate(string toEmail,string password)
+        public async Task SendEmailCreate(string toEmail,string password, FeatureCode user)
         {
-            string content = $"Bạn đã tạo tài khoản trên hệ thông quản lý nhà trọ thành công. \n Mật khẩu của bạn là : {password}\n Bạn vui lòng truy cập vào http://localhost:8080/vue/tower để đăng nhập";
+            string content = $"Bạn đã tạo tài khoản trên hệ thông quản lý nhà trọ thành công. \n Mật khẩu của bạn là : {password}\n";
+            if (user == FeatureCode.Landlord)
+            {
+                content += "Bạn vui lòng truy cập vào http://localhost:8080/vue/tower để đăng nhập";
+            }
+            else
+            {
+                content += "Bạn vui lòng truy cập vào http://localhost:8080/vue để đăng nhập";
+            }
+
             await SendEmailAsync(toEmail, "Tạo tài khoản thành công", content);
         }
         public async Task<int> SendEmailCode(string toEmail,string chucNang)

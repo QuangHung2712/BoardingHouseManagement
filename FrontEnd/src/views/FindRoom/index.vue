@@ -46,6 +46,7 @@ export default {
             showPassword: false,
             modalRegister: false,
             form: false,
+            formRegister: false,
             message: '',
             snackbar: false,
             snackbarColor: '',
@@ -109,6 +110,8 @@ export default {
         },
         ViewLogin(){
             this.modalLogin = true;
+            this.login.email = '';
+            this.login.password = '';
         },
         toggleModal() {
             this.form = false;
@@ -139,9 +142,22 @@ export default {
         SignOut(){
             this.$store.dispatch('logoutCustomer');
             this.LoginStatus = false;
-            this.login.email = '';
-            this.login.password = '';
         },
+        Register(){
+            apiClient.post(`/Customer/Create`,this.register)
+                    .then(()=>{
+                        this.message = `Đăng ký tài khoản thành công. Mật khẩu đã được gửi qua ${this.register.email}. Bạn vui lòng vào email để lấy mật khẩu`;
+                        this.snackbar = true;
+                        this.snackbarColor = 'green';
+                        this.modalRegister = false;
+                    })
+                    .catch((error) => {
+                        // Hiển thị thông báo lỗi nếu có
+                        this.message = `Đăng ký tài khoản đã xảy ra lỗi: ${error}`;
+                        this.snackbar = true;
+                        this.snackbarColor = 'red';
+                    });
+        }
         
     },
     setup() {
@@ -262,11 +278,11 @@ export default {
                     <BModal v-model="modalLogin" hide-footer class="v-modal-custom" id="login-modal" centered>
                         <template #title>
                             <h4 class="f-w-500 mb-1">Đăng nhập bằng Email</h4>
-                            <p class="mb-3 pb-0">Chưa có tài khoản?<a href="#" class="link-primary ms-2" 
+                            <p class="m-0 pb-0">Chưa có tài khoản?<a href="#" class="link-primary ms-2" 
                                     data-bs-target="#registration-modal" @click="toggleModal">Tạo tài khoản</a></p>
                         </template>
                         <v-form v-model="form">
-                            <div class="form-group mb-3">
+                            <div class="form-group">
                                 <label class="form-label">Email </label>
                                 <v-text-field 
                                         type="email" 
@@ -277,7 +293,7 @@ export default {
                                         prepend-inner-icon="mdi-email-outline"
                                 ></v-text-field>
                             </div>
-                            <div class="form-group mb-3">
+                            <div class="form-group">
                                 <label class="form-label">Mật khẩu</label>
                                 <v-text-field 
                                     :type="showPassword ? 'text' : 'password'" 
@@ -298,7 +314,7 @@ export default {
                             </div>
                         </div>
                         <div class="d-grid mt-4">
-                            <button type="button" @click="Login()" class="btn btn-primary">Đăng nhập</button>
+                            <button type="button" @click="Login()" :disabled="!form" class="btn btn-primary">Đăng nhập</button>
                             <p v-if="errorMessage" class="text-danger mt-2">{{ errorMessage }}</p>
                         </div>
                     </BModal>
@@ -377,10 +393,16 @@ export default {
                                         ></v-text-field>                        
                                     </div>
                                 </BCol>
-                                <BCol class="col-lg-6">
+                                <BCol class="col-lg-12">
                                     <div class="form-group m-0">
-                                        <label class="form-label">Nhập lại mật khẩu</label>
-                                        <input type="password" class="form-control" placeholder="Enter Confirm Password">
+                                        <label class="form-label">Địa chỉ</label>
+                                        <v-text-field 
+                                            type="text" 
+                                            variant="outlined" 
+                                            placeholder="Địa chỉ thường trù" 
+                                            :rules="[rules.required]" 
+                                            v-model="register.address"
+                                        ></v-text-field>                                     
                                     </div>
                                 </BCol>
                             </BRow>
@@ -393,7 +415,7 @@ export default {
                             </div>
                         </v-form>
                         <div class="d-grid mt-4">
-                            <button type="button" class="btn btn-primary">Đăng ký</button>
+                            <button type="button" @click="Register()" :disabled="!form" class="btn btn-primary">Đăng ký</button>
                         </div>
                     </BModal>
                 </div>

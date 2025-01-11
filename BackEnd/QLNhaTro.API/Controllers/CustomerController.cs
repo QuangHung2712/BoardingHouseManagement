@@ -6,6 +6,8 @@ using QLNhaTro.Moddel.Moddel.RequestModels;
 using QLNhaTro.Moddel.Moddel.ResponseModels;
 using QLNhaTro.Service;
 using QLNhaTro.Service.CustomerService;
+using QLNhaTro.Service.EmailService;
+using QLNhaTro.Service.Service;
 
 
 namespace QLNhaTro.API.Controllers
@@ -16,11 +18,13 @@ namespace QLNhaTro.API.Controllers
     {
         private readonly ICustomerService _customerService;
         private readonly IAuthService _authService;
+        private readonly IEmailService _emailService;
 
-        public CustomerController(ICustomerService customerService, IAuthService authService)
+        public CustomerController(ICustomerService customerService, IAuthService authService, IEmailService emailService)
         {
             _customerService = customerService;
             _authService = authService;
+            _emailService = emailService;
         }
         [HttpGet]
         public IActionResult GetBillByEmail([FromQuery] string email) 
@@ -65,6 +69,22 @@ namespace QLNhaTro.API.Controllers
                     UserId = customer,
                 };
                 return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreateEditCustomerReqModel data)
+        {
+
+            try
+            {
+                await _customerService.CreateCustomer(data);
+                await _emailService.SendEmailCreate(data.Email,CommonConstants.DefaultValue.DEFAULT_PASSWORD,CommonEnums.FeatureCode.Customer);
+                return Ok();
             }
             catch (Exception ex)
             {

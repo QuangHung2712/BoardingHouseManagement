@@ -71,7 +71,7 @@ namespace QLNhaTro.API.Controllers
             try
             {
                 await _Service.CreateLandlord(data);
-                await _emailService.SendEmailCreate(data.Email, "defaultpassword");
+                await _emailService.SendEmailCreate(data.Email, "defaultpassword",CommonEnums.FeatureCode.Landlord);
                 return Ok();
             }
             catch (Exception ex)

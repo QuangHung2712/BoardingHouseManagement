@@ -1,9 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
@@ -98,6 +100,48 @@ namespace QLNhaTro.Commons
             var field = value.GetType().GetField(value.ToString());
             var attribute = field.GetCustomAttribute<DescriptionAttribute>();
             return attribute?.Description ?? value.ToString();
+        }
+        public static string SaveImgLocal(IFormFile input, long userId, string PathImgQROld, string nameFile)
+        {
+            if (!string.IsNullOrEmpty(PathImgQROld))
+            {
+                File.Delete(PathImgQROld);
+            }
+            // Tạo tên ảnh
+            string fileName = nameFile + Path.GetExtension(input.FileName);
+
+            // Đường dẫn thư mục lưu ảnh
+            string directoryPath = Path.Combine(Directory.GetCurrentDirectory(), $@"{DefaultValue.DEFAULT_BASE_Directory_IMG}\images\UserInformation\{userId}");
+
+            // Kiểm tra và tạo thư mục nếu chưa tồn tại
+            if (!Directory.Exists(directoryPath))
+            {
+                Directory.CreateDirectory(directoryPath);
+            }
+
+            // Đường dẫn đầy đủ của ảnh
+            string filePath = Path.Combine(directoryPath, fileName);
+
+            // Lưu file vào đường dẫn đã chỉ định
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                input.CopyTo(stream);
+            }
+
+            // Trả về đường dẫn ảnh đã lưu
+            return filePath;
+        }
+        public static void CoppyFile(string OriginalPath, string NewPath)
+        {
+            try
+            {
+                // Copy ảnh từ sourcePath sang destinationPath
+                File.Copy(OriginalPath, NewPath, overwrite: true); // `overwrite: true` cho phép ghi đè nếu file tồn tại
+            }
+            catch (IOException ex)
+            {
+                Console.WriteLine($"Lỗi khi copy file: {ex.Message}");
+            }
         }
     }
 }

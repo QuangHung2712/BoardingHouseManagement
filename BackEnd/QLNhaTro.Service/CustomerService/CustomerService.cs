@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using QLNhaTro.Commons;
 using QLNhaTro.Commons.CustomException;
 using QLNhaTro.Moddel;
@@ -37,51 +38,51 @@ namespace QLNhaTro.Service.CustomerService
             var customerData = _Context.ContractCustomers.Where(c => c.ContractId == contractId && !c.Contract.IsDeleted).Select(c => c.Customer.PhoneNumber).ToList();
             return string.Join(", ", customerData);
         }
-        public async Task CreateEditCustomer(CreateEditCustomerReqModel input)
+        public async Task CreateCustomer(CreateEditCustomerReqModel input)
         {
-            if (input.Id <= 0)
+            try
             {
-                try
+                var result = new Customers
                 {
-                    var result = new Customers
-                    {
-                        Id = input.Id,
-                        FullName = input.FullName,
-                        DoB = input.DoB,
-                        PhoneNumber = input.PhoneNumber,
-                        Email = input.Email,
-                        Address = input.Address,
-                        CCCD = input.CCCD,
-
-                    };
-                    _Context.Customers.Add(result);
-                    await _Context.SaveChangesAsync();
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex);
-                    throw;
-                }
-            }
-            else 
-            {
-                var customer = _Context.Customers.Where(c=>c.Id == input.Id && !c.IsDeleted).FirstOrDefault();
-                if (customer == null) 
-                {
-                    throw new NotFoundException(nameof(input.FullName));
-                }
-                customer = new Customers
-                {
+                        
                     FullName = input.FullName,
                     DoB = input.DoB,
                     PhoneNumber = input.PhoneNumber,
                     Email = input.Email,
                     Address = input.Address,
                     CCCD = input.CCCD,
+                    SDTZalo = input.SDTZalo,
+                    PathAvatar = CommonConstants.DefaultValue.DEFAULT_IMG_AVATAR,
+                    Password = CommonConstants.DefaultValue.DEFAULT_PASSWORD,
                 };
-                _Context.Customers.Update(customer);
+                _Context.Customers.Add(result);
                 await _Context.SaveChangesAsync();
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                throw;
+            }
+        }
+        public async Task UpdateCustomer(CreateEditCustomerReqModel input, IFormFile avatar)
+        {
+            var customer = _Context.Customers.Where(c => c.Id == input.Id && !c.IsDeleted).FirstOrDefault();
+            if (customer == null)
+            {
+                throw new NotFoundException(nameof(input.FullName));
+            }
+            customer = new Customers
+            {
+                FullName = input.FullName,
+                DoB = input.DoB,
+                PhoneNumber = input.PhoneNumber,
+                Email = input.Email,
+                Address = input.Address,
+                CCCD = input.CCCD,
+                SDTZalo = input.SDTZalo,
+            };
+            _Context.Customers.Update(customer);
+            await _Context.SaveChangesAsync();
         }
         public void DeteleCustomer(long contractId)
         {

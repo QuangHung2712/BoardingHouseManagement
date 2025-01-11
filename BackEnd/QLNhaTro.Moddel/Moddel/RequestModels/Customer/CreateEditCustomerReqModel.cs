@@ -16,5 +16,6 @@ namespace QLNhaTro.Moddel.Moddel.RequestModels
         public string CCCD { get; set; }
         public string Address { get; set; }
         public bool IsRepresentative { get; set; }//Có phải là người đại diện không
+        public string? SDTZalo { get; set; }
     }
 }

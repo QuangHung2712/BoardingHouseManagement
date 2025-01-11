@@ -74,7 +74,7 @@ namespace QLNhaTro.Service.LandlordService
             var landlord = _Context.Landlords.GetAvailableById(input.Id);
             landlord.Bank = input.bank;
             landlord.STK = input.STK;
-            landlord.PaymentQRImageLink = SaveImgLocal(ImgQR, landlord.Id,landlord.PaymentQRImageLink, "Ảnh QR ngân hàng thanh toán");
+            landlord.PaymentQRImageLink = CommonFunctions.SaveImgLocal(ImgQR, landlord.Id,landlord.PaymentQRImageLink, "Ảnh QR ngân hàng thanh toán");
             _Context.Landlords.Update(landlord);
             await _Context.SaveChangesAsync();
         }
@@ -120,7 +120,7 @@ namespace QLNhaTro.Service.LandlordService
                 landlord.CCCD = input.CCCD;
                 landlord.Address = input.Address;
                 landlord.SDTZalo = input.SDTZalo;
-                landlord.PathAvatar = SaveImgLocal(ImgAvatar, landlord.Id, landlord.PathAvatar, "Avatar");
+                landlord.PathAvatar = CommonFunctions.SaveImgLocal(ImgAvatar, landlord.Id, landlord.PathAvatar, "Avatar");
                 _Context.Landlords.Update(landlord);
                 await _Context.SaveChangesAsync();
             }
@@ -204,36 +204,7 @@ namespace QLNhaTro.Service.LandlordService
             };
 
         }
-        private string SaveImgLocal(IFormFile input,long userId,string PathImgQROld,string nameFile)
-        {
-            if (!string.IsNullOrEmpty(PathImgQROld))
-            {
-                File.Delete(PathImgQROld);
-            }
-            // Tạo tên ảnh
-            string fileName = nameFile + Path.GetExtension(input.FileName);
-
-            // Đường dẫn thư mục lưu ảnh
-            string directoryPath = Path.Combine(Directory.GetCurrentDirectory(), $@"{DefaultValue.DEFAULT_BASE_Directory_IMG}\images\UserInformation\{userId}");
-
-            // Kiểm tra và tạo thư mục nếu chưa tồn tại
-            if (!Directory.Exists(directoryPath))
-            {
-                Directory.CreateDirectory(directoryPath);
-            }
-
-            // Đường dẫn đầy đủ của ảnh
-            string filePath = Path.Combine(directoryPath, fileName);
-
-            // Lưu file vào đường dẫn đã chỉ định
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                input.CopyTo(stream);
-            }
-
-            // Trả về đường dẫn ảnh đã lưu
-            return filePath;
-        }
+        
         public async Task MonthlyReport()
         {
             var date = DateTime.Now.ToString("MM/yyyy");

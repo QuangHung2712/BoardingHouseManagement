@@ -515,5 +515,28 @@ namespace QLNhaTro.Service.RoomService
             }
             return roomData;
         }
+        public async Task SaveRoom(long customerId, long roomId)
+        {
+            if (!_Context.Customers.Any(item => item.Id == customerId && !item.IsDeleted))
+            {
+                throw new Exception("Người dùng không tồn tại");
+            };
+            if(!_Context.Rooms.Any(item=> item.Id == roomId && !item.IsDeleted))
+            {
+                throw new Exception("Phòng không tồn tại");
+            }
+            var newSaveRoom = new SaveRoom
+            {
+                CustomerId = customerId,
+                RoomId = roomId
+            };
+            _Context.SaveRooms.Add(newSaveRoom);
+            await _Context.SaveChangesAsync();
+
+        }
+        public async Task RegisterCustomer()
+        {
+
+        }
     }
 }
