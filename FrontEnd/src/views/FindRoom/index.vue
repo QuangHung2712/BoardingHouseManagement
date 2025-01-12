@@ -442,12 +442,12 @@ export default {
                                                     <span>Thông tin cá nhân</span>
                                                 </span>
                                             </div>
-                                            <a href="#" class="dropdown-item">
+                                            <router-link to="/listPost" class="dropdown-item">
                                                 <span class="d-flex align-items-center">
                                                     <i class="ph-duotone ph-gear-six"></i>
                                                     <span>Quản lý bài đăng</span>
                                                 </span>
-                                            </a>
+                                            </router-link>
                                             <div to="/login" class="dropdown-item" @click="SignOut()">
                                                 <span class="d-flex align-items-center">
                                                     <i class="ph-duotone ph-power"></i>

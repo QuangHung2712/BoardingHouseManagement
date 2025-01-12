@@ -143,7 +143,7 @@ export default [
             {
                 path: "/listPost",
                 name: "listPost",
-                meta: { title: "Đăng bài" },
+                meta: { title: "Quản lý bài đăng" },
                 component: () => import("../views/FindRoom/ListPost.vue"),
             },
         ]
