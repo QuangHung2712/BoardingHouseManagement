@@ -488,7 +488,7 @@ namespace QLNhaTro.Service.RoomService
             }
             return room;
         }
-        public GetRoomDetailFindRoomResModel GetRoomDetailFindRoom(long Id)
+        public GetRoomDetailFindRoomResModel GetRoomDetailFindRoom(long Id,long customerId)
         {
             var roomData = _Context.Rooms.Include(r => r.Tower)
                 .ThenInclude(t => t.Landlord)
@@ -518,10 +518,15 @@ namespace QLNhaTro.Service.RoomService
             {
                 throw new Exception("Phòng không tồn tại");
             }
+            roomData.IsSave = _Context.SaveRooms.Any(item => item.CustomerId == customerId && item.RoomId == roomData.Id);
             return roomData;
         }
         public async Task SaveRoom(long customerId, long roomId,bool status)
         {
+            if(customerId == 0)
+            {
+                throw new Exception("Vui lòng đăng nhập trước");
+            }
             if(status)
             {
                 var save = _Context.SaveRooms.Where(item => item.RoomId == roomId && item.CustomerId == customerId).FirstOrDefault();
@@ -557,5 +562,6 @@ namespace QLNhaTro.Service.RoomService
             }
 
         }
+
     }
 }

@@ -29,12 +29,16 @@
         background-color: green;
         border-color: green;
     }
+    .saved-button {
+        color: red !important; /* Màu chữ trắng */
+    }
 </style>
 <script>
     import pageheader from "@/components/PageHeader.vue";
     import apiClient from "@/plugins/axios";
     import VueEasyLightbox from "vue-easy-lightbox";
     import { formatTablePrice } from "@/components/common/JavaScripCommon"
+    import store from "../../state/store";
 
 
     export default {
@@ -53,10 +57,12 @@
             message: '',
             snackbar: false,
             snackbarColor: '',
+            customerId:0,
         }
     },
     created(){
         const roomId = this.$route.params.idroom;
+        this.customerId = store.getters['getCustomerId'];
         this.GetDetailRoom(roomId);
     },
     methods:{
@@ -68,7 +74,7 @@
             this.visible = false;
         },
         GetDetailRoom(roomId){
-            apiClient.get(`/Room/GetDetailFindRoom?roomId=${roomId}`)
+            apiClient.get(`/Room/GetDetailFindRoom?roomId=${roomId}&customerId=${this.customerId}`)
                 .then(response=>{
                     this.roomData = response.data;
                     console.log(this.roomData);
@@ -105,7 +111,37 @@
                 this.snackbar = true;
                 this.snackbarColor = 'red';
             });
-        }
+        },
+        SaveRoom(roomId,status){
+            // Đặt trạng thái đang xử lý
+            this.roomData.isProcessing = true;
+
+            // Gửi yêu cầu API
+            apiClient
+            .put(`/Room/SaveRoom?customerId=${this.customerId}&roomId=${roomId}&status=${status}`)
+            .then(() => {
+                // Cập nhật trạng thái `isSave` sau khi API trả về thành công
+                this.roomData.isSave = !this.roomData.isSave;
+
+                // Hiển thị thông báo thành công
+                this.snackbar = true;
+                this.snackbarColor = "green";
+                this.message = "Xoá phòng thành công";
+            })
+            .catch((error) => {
+                // Xử lý lỗi
+                this.message =
+                "Lưu phòng đã xảy ra lỗi: " +
+                (error.response?.data?.message || error.message || "Không xác định");
+                this.snackbar = true;
+                this.snackbarColor = "red";
+                this.roomData.isProcessing = false;
+            })
+            .finally(() => {
+                // Đặt lại trạng thái xử lý
+                this.roomData.isProcessing = false;
+            });
+        },
     }
 }
 </script>
@@ -185,7 +221,18 @@
                                     <BButton variant="primary" @click="GoToInfoZalo"><v-icon class="mr-2">mdi-chat-processing-outline</v-icon>Nhắn tin Zalo</BButton>
                                 </div>
                                 <div class="d-flex justify-space-evenly mt-3">
-                                    <BButton variant="white" class="p-0"><v-icon class="mr-2">mdi-heart-outline</v-icon>Lưu phòng</BButton>
+                                    <!-- <BButton variant="white" class="p-0"><v-icon >mdi-heart-outline</v-icon>Lưu phòng</BButton> -->
+                                    <BButton variant="white" class="p-0" :class="{'saved-button': roomData.isSave}" @click="SaveRoom(roomData.id,roomData.isSave)">
+                                        <v-icon class="mr-2" v-if="!roomData.isProcessing">mdi-heart</v-icon>
+                                        
+                                        <v-progress-circular
+                                        v-else
+                                        indeterminate
+                                        color="white"
+                                        size="20"
+                                        ></v-progress-circular>
+                                        Lưu phòng
+                                    </BButton>
                                     <BButton variant="white" class="p-0" @click="copyCurrentURL"><v-icon class="mr-2">mdi-share-variant</v-icon>Chia sẻ phòng</BButton>
                                 </div>
                             </BCardBody>

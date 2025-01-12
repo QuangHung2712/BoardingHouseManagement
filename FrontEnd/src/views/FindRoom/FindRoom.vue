@@ -30,6 +30,7 @@ export default {
             snackbar: false,
             snackbarColor: '',
             customerId: 0,
+            indexSelect: 0,
         }
     },
     name: "LANDING",
@@ -38,9 +39,11 @@ export default {
         SwiperSlide,
         
     },
+    computed:{
+    },
     created(){
         this.GetTinh();
-        this.customerId = store.getters['getCustomerId'];
+        this.customerId = store.getters['getCustomerId'] ?? 0;
     },
     methods: {
         GetTinh(){
@@ -83,7 +86,7 @@ export default {
             const tinh = this.tinhData.find(item => item.id === this.selectTinh);
             const huyen = this.huyenData.find(item => item.id === this.selectHuyen);
             var searchaddress ='';
-
+            
             if (tinh && huyen) {
                 searchaddress = ` ${huyen.full_name} ${tinh.full_name}`;
             }
@@ -104,7 +107,6 @@ export default {
             })
                     .then(response=>{
                         this.roomData = response.data
-                        console.log(this.roomData);
                         this.status = false;
                     })
                     .catch(error=>{
@@ -117,24 +119,41 @@ export default {
             const route = this.$router.resolve({ name: 'detail', params: { idroom: roomId } });
             window.open(route.href, '_blank');
         },
-        SaveRoom(roomId,status){
-            if(status){
-                this.message = "Xoá phòng thành công  ";
+        SaveRoom(roomId,status,index){
+            // Hiển thị thông báo dựa trên trạng thái
+            if (status) {
+            this.message = "Xoá phòng thành công";
+            } else {
+            this.message = "Lưu phòng thành công";
             }
-            else{
-                this.message = "Lưu phòng thành công  ";
 
-            }
-            apiClient.put(`/Room/SaveRoom?customerId=${this.customerId}&roomId=${roomId}&status=${status}`)
-                    .then(()=>{
-                        this.snackbar = true;
-                        this.snackbarColor = 'green';
-                    })
-                    .catch(error=>{
-                        this.message = "Lưu phòng đã xảy ra lỗi: " + error.response?.data?.message || error ;
-                        this.snackbar = true;
-                        this.snackbarColor = 'red';
-                    })   
+            // Đặt trạng thái đang xử lý
+            this.roomData[index].isProcessing = true;
+
+            // Gửi yêu cầu API
+            apiClient
+            .put(`/Room/SaveRoom?customerId=${this.customerId}&roomId=${roomId}&status=${status}`)
+            .then(() => {
+                // Cập nhật trạng thái `isSave` sau khi API trả về thành công
+                this.roomData[index].isSave = !this.roomData[index].isSave;
+
+                // Hiển thị thông báo thành công
+                this.snackbar = true;
+                this.snackbarColor = "green";
+                this.indexSelect = index;
+            })
+            .catch((error) => {
+                // Xử lý lỗi
+                this.message =
+                "Lưu phòng đã xảy ra lỗi: " +
+                (error.response?.data?.message || error.message || "Không xác định");
+                this.snackbar = true;
+                this.snackbarColor = "red";
+            })
+            .finally(() => {
+                // Đặt lại trạng thái xử lý
+                this.roomData[index].isProcessing = false;
+            });
         },
     },
 }
@@ -292,7 +311,15 @@ export default {
                                                 <p>Thiết bị: {{ room.device }}</p>
                                             </router-link>
                                             <div class="text-right">
-                                                <BButton variant="white" :class="{'saved-button': room.isSave}" @click="SaveRoom(room.id,room.isSave)"><v-icon >mdi-heart</v-icon></BButton>
+                                                <BButton variant="white" :class="{'saved-button': room.isSave}" @click="SaveRoom(room.id,room.isSave,index)">
+                                                   <v-icon v-if="!room.isProcessing">mdi-heart</v-icon>
+                                                    <v-progress-circular
+                                                    v-else
+                                                    indeterminate
+                                                    color="white"
+                                                    size="20"
+                                                    ></v-progress-circular>
+                                                </BButton>
                                             </div>
                                         </BCol>
                                     </BRow>

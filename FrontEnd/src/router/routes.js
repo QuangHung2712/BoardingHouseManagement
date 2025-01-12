@@ -134,6 +134,18 @@ export default [
                 meta: { title: "Quản lý bài đăng" },
                 component: () => import("../views/FindRoom/ManagePosts.vue"),
             },
+            {
+                path: "/detailpost/:idpost",
+                name: "detailpost",
+                meta: { title: "Đăng bài" },
+                component: () => import("../views/FindRoom/Post.vue"),
+            },
+            {
+                path: "/listPost",
+                name: "listPost",
+                meta: { title: "Đăng bài" },
+                component: () => import("../views/FindRoom/ListPost.vue"),
+            },
         ]
     },
 ]

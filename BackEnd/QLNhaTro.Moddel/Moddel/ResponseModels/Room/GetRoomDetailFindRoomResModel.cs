@@ -20,5 +20,6 @@ namespace QLNhaTro.Moddel.Moddel.ResponseModels
         public List<string> PathImgRoom { get; set; }
         public List<GetAllServiceResModel> Service { get; set; }
         public string LandlordAvata { get; set; }
+        public bool IsSave { get; set; }
     }
 }

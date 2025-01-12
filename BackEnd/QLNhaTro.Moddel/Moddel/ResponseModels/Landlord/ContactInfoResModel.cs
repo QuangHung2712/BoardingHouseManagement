@@ -11,5 +11,6 @@ namespace QLNhaTro.Moddel.Moddel.ResponseModels
         public string PathAvatar { get; set; }
         public string PhoneNumber { get; set; }
         public string SDTZalo { get; set; }
+        public string FullName { get; set; }
     }
 }

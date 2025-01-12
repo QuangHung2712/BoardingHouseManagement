@@ -6,6 +6,7 @@ using QLNhaTro.Service.CustomerService;
 using QLNhaTro.Service.EmailService;
 using QLNhaTro.Service.IncurService;
 using QLNhaTro.Service.LandlordService;
+using QLNhaTro.Service.Post;
 using QLNhaTro.Service.RoomService;
 using QLNhaTro.Service.Service;
 using QLNhaTro.Service.TowerService;
@@ -27,6 +28,7 @@ namespace QLNhaTro.API.Extensions
             services.AddScoped<ILandlordService, LandlordService>();
             services.AddScoped<IRoomService, RoomService>();
             services.AddScoped<ITowerService,TowerService>();
+            services.AddScoped<IPostService, PostService>();
             services.AddMemoryCache();
             // Cấu hình dịch vụ Hosted Quartz (Quartz sẽ chạy job ngay cả khi không có người truy cập)
             services.AddQuartz(q =>

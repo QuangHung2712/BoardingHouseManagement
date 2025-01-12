@@ -47,6 +47,7 @@ export default {
                 address: '',
                 sdtZalo: '',
             },
+            userName: '',
             imgAvatar: null,
             form: false,
             landlordId: 0,
@@ -239,6 +240,8 @@ export default {
             apiClient.get(`/Landlord/GetInfoContact?id=${this.landlordId}`)
                     .then(response=>{
                         this.infoUser.pathAvatar = response.data.pathAvatar;
+                        this.userName = response.data.fullName;
+
                     })
                     .catch(error=>{
                         this.message = `Đã xảy ra lỗi: ${error.response?.data?.message || error.message}`;
@@ -489,9 +492,8 @@ export default {
                                                 <img :src="infoUser.pathAvatar" alt="user-image" class="wid-50 rounded-circle">
                                             </div>
                                             <div class="flex-grow-1 mx-3">
-                                                <h5 class="mb-0">Phạm Quang Hưng</h5>
+                                                <h5 class="mb-0">{{ userName }}</h5>
                                             </div>
-                                            <span class="badge bg-primary">PRO</span>
                                         </div>
                                     </li>
                                     <li class="list-group-item">

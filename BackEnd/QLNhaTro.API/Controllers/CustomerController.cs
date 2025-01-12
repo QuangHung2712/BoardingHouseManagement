@@ -92,6 +92,20 @@ namespace QLNhaTro.API.Controllers
             }
         }
         [HttpPut]
+        public async Task<IActionResult> Update([FromForm] CreateEditCustomerReqModel data, [FromForm] IFormFile ImgAvatar)
+        {
+
+            try
+            {
+                await _customerService.UpdateCustomer(data, ImgAvatar);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
+        }
+        [HttpPut]
         public async Task<IActionResult> ChangePassword(ChangePasswordReqModel input)
         {
             try
@@ -112,6 +126,32 @@ namespace QLNhaTro.API.Controllers
             try
             {
                 var result = _customerService.GetInfoUser(Id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
+        }
+        [HttpGet]
+        public ActionResult GetInfoContact([FromQuery] long id)
+        {
+            try
+            {
+                var result = _customerService.GetContactInfo(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
+        }
+        [HttpGet]
+        public ActionResult GetSaveRoom([FromQuery] long id)
+        {
+            try
+            {
+                var result = _customerService.GetSaveRoom(id);
                 return Ok(result);
             }
             catch (Exception ex)

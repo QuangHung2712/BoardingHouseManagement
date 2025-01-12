@@ -29,6 +29,7 @@ import 'swiper/css/navigation';
 import apiClient from "@/plugins/axios";
 import store from "../../state/store";
 import Axios from "axios";
+import CryptoJS from 'crypto-js';
 
 
 
@@ -64,7 +65,9 @@ export default {
             previewImage: null,
             viewdialogInfo: false,
             handleIconClick: false,
+            customerId: 0,
             address: '',
+            userName:'',
             tinhData: [
                     
             ],
@@ -107,7 +110,10 @@ export default {
         if (token) {
             // Token tồn tại, chuyển hướng đến trang tower
             this.LoginStatus = true;
+            this.customerId = store.getters['getCustomerId'];
+            this.GetInfo();
         }
+        
     },
     methods: {
         changeMode(mode) {
@@ -165,6 +171,7 @@ export default {
                             localStorage.setItem('tokencustomer',response.data.token)
                             localStorage.setItem('customerId',response.data.userId)
                         }
+                        this.GetInfo();
                         this.modalLogin = false;
                         this.errorMessage = ""
                         this.LoginStatus = true;
@@ -198,7 +205,7 @@ export default {
                     });
         },
         btnChangePassword(){
-            this.changePassword.id = store.getters['getCustomerId'];
+            this.changePassword.id = this.customerId;
             apiClient.put(`/Customer/ChangePassword`,this.changePassword)
                     .then(()=>{
                         this.message = "Đổi mật khẩu thành công ";
@@ -240,6 +247,31 @@ export default {
                             })
             
         },
+        UpdateInfo(){
+            const formData = new FormData();
+            formData.append("id",this.customerId);
+            formData.append("fullName", this.infoUser.fullName);
+            formData.append("doB", this.infoUser.doB);
+            formData.append("PhoneNumber",this.infoUser.phoneNumber);
+            formData.append("email", this.infoUser.email);
+            formData.append("cccd", this.infoUser.cccd);
+            formData.append("address",this.infoUser.address);
+            formData.append("sdtZalo", this.infoUser.sdtZalo);
+            formData.append("imgAvatar", this.imgAvatar);
+            apiClient.put(`/Customer/Update`,formData)
+                    .then(()=>{
+                        this.snackbarColor = 'green';
+                        this.snackbar = true;
+                        this.message = 'Cập nhật thông tin người dùng thành công!';
+                        this.viewdialogInfo = false;
+                        window.location.reload();
+                    })
+                    .catch(error=>{
+                        this.message = `Đã xảy ra lỗi: ${error.response?.data?.message || error.message}`;
+                        this.snackbarColor = 'red';
+                        this.snackbar = true;
+                    })
+        },
         async loadImages(path){
             if(path)
             try {
@@ -252,6 +284,13 @@ export default {
                 this.snackbarColor = 'red';
                 this.snackbar = true;
                 return null; // Trả về null nếu lỗi
+            }
+        },
+        onFileSelected(event) {
+            const file = event.target.files[0];
+            if (file) {
+                this.imgAvatar = file;
+                this.previewImage = URL.createObjectURL(file); // Tạo URL để xem trước
             }
         },
         onTinhChange(){
@@ -289,6 +328,22 @@ export default {
         FormatAddress(){
             this.infoUser.address = this.address + this.onPhuongChange();
         },
+        GetInfo(){
+            apiClient.get(`/Customer/GetInfoContact?id=${this.customerId}`)
+                    .then(response=>{
+                        this.infoUser.pathAvatar = response.data.pathAvatar;
+                        this.userName = response.data.fullName;
+                    })
+                    .catch(error=>{
+                        this.message = `Đã xảy ra lỗi: ${error.response?.data?.message || error.message}`;
+                        this.snackbarColor = 'red';
+                        this.snackbar = true;
+                    })
+        },
+        GotoPost(postid){
+            const encryptedId = CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(postid));
+            this.$router.push({ name: 'detailpost', params: { idpost: encryptedId } });
+        }
         
     },
     setup() {
@@ -338,14 +393,14 @@ export default {
                         </li>
 
                         <li class="nav-item" v-show="LoginStatus">
-                            <router-link to="/tower" class="btn btn-primary">Đăng bài</router-link>
+                            <button @click="GotoPost(0)" class="btn btn-primary">Đăng bài</button>
                         </li>
                         <li class="nav-item" v-show="!LoginStatus">
                             <button @click="ViewLogin()" class="btn btn-primary mr-4">Đăng nhập</button>
                         </li>
                     </ul>
                     <BDropdown v-show="LoginStatus" variant="link-secondary" auto-close="outside" class="info card-header-dropdown py-0" toggle-class="text-reset dropdown-btn arrow-none me-0" menu-class="dropdown-menu-end dropdown-user-profile dropdown-menu-end pc-h-dropdown" aria-haspopup="true" :offset="{ alignmentAxis: -145, crossAxis: 0, mainAxis: 20 }">
-                        <template  #button-content><span class="text-muted"> <img src="/images/UserInformation/1/Avatar.jpg" alt="user-image" class="user-avtar">
+                        <template  #button-content><span class="text-muted"> <img :src="infoUser.pathAvatar" alt="user-image" class="user-avtar">
                             </span>
                         </template>
                         <div class="dropdown-header d-flex align-items-center justify-content-between">
@@ -358,12 +413,11 @@ export default {
                                         <li class="list-group-item">
                                             <div class="d-flex align-items-center">
                                                 <div class="flex-shrink-0">
-                                                    <img src="/images/UserInformation/1/Avatar.jpg" alt="user-image" class="wid-50 rounded-circle">
+                                                    <img :src="infoUser.pathAvatar" alt="user-image" class="wid-50 rounded-circle">
                                                 </div>
                                                 <div class="flex-grow-1 mx-3">
-                                                    <h5 class="mb-0">Phạm Quang Hưng</h5>
+                                                    <h5 class="mb-0">{{ userName }}</h5>
                                                 </div>
-                                                <span class="badge bg-primary">PRO</span>
                                             </div>
                                         </li>
                                         <li class="list-group-item">

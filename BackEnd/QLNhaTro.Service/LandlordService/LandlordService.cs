@@ -74,7 +74,7 @@ namespace QLNhaTro.Service.LandlordService
             var landlord = _Context.Landlords.GetAvailableById(input.Id);
             landlord.Bank = input.bank;
             landlord.STK = input.STK;
-            landlord.PaymentQRImageLink = CommonFunctions.SaveImgLocal(ImgQR, landlord.Id,landlord.PaymentQRImageLink, "Ảnh QR ngân hàng thanh toán");
+            landlord.PaymentQRImageLink = CommonFunctions.SaveImgLocal(ImgQR, landlord.Id,landlord.PaymentQRImageLink, "Ảnh QR ngân hàng thanh toán",FeatureCode.Landlord);
             _Context.Landlords.Update(landlord);
             await _Context.SaveChangesAsync();
         }
@@ -96,7 +96,8 @@ namespace QLNhaTro.Service.LandlordService
                     CCCD = input.CCCD,
                     Address = input.Address,
                     SDTZalo = input.SDTZalo,
-                    Password = "defaultpassword",
+                    Password = CommonConstants.DefaultValue.DEFAULT_PASSWORD,
+                    PathAvatar = CommonConstants.DefaultValue.DEFAULT_BASE_Directory_IMG,
                     Bank = "Chưa có",
                 };
                 _Context.Landlords.Add(landlord);
@@ -120,7 +121,7 @@ namespace QLNhaTro.Service.LandlordService
                 landlord.CCCD = input.CCCD;
                 landlord.Address = input.Address;
                 landlord.SDTZalo = input.SDTZalo;
-                landlord.PathAvatar = CommonFunctions.SaveImgLocal(ImgAvatar, landlord.Id, landlord.PathAvatar, "Avatar");
+                landlord.PathAvatar = CommonFunctions.SaveImgLocal(ImgAvatar, landlord.Id, landlord.PathAvatar, "Avatar",FeatureCode.Landlord);
                 _Context.Landlords.Update(landlord);
                 await _Context.SaveChangesAsync();
             }
@@ -200,7 +201,8 @@ namespace QLNhaTro.Service.LandlordService
             {
                 PathAvatar = CommonFunctions.ConverPathIMG(infoContact.PathAvatar),
                 PhoneNumber = infoContact.PhoneNumber,
-                SDTZalo = infoContact.SDTZalo
+                SDTZalo = infoContact.SDTZalo,
+                FullName = infoContact.FullName,
             };
 
         }

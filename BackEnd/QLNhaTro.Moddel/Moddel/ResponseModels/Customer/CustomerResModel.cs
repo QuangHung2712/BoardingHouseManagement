@@ -34,7 +34,7 @@ namespace QLNhaTro.Moddel.Moddel.ResponseModels
                 Address = customer.Address,
                 IsRepresentative = isRepresentative,
                 IsSystemRegistrant = customer.Password != null,
-                PathAvatar = customer.PathAvatar,
+                PathAvatar = CommonFunctions.ConverPathIMG(customer.PathAvatar),
                 SDTZalo = customer.SDTZalo,
             };
         }

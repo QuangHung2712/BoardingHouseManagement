@@ -22,5 +22,7 @@ namespace QLNhaTro.Service.CustomerService
         long Login(string email, string password);
         Task ChangePassword(ChangePasswordReqModel input);
         CustomerResModel GetInfoUser(long id);
+        ContactInfoResModel GetContactInfo(long id);
+        List<GetSaveRoomByCustomerResModel> GetSaveRoom(long customerId);
     }
 }

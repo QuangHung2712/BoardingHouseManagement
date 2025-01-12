@@ -12,6 +12,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using static QLNhaTro.Commons.CommonConstants;
+using static QLNhaTro.Commons.CommonEnums;
 
 namespace QLNhaTro.Commons
 {
@@ -101,7 +102,7 @@ namespace QLNhaTro.Commons
             var attribute = field.GetCustomAttribute<DescriptionAttribute>();
             return attribute?.Description ?? value.ToString();
         }
-        public static string SaveImgLocal(IFormFile input, long userId, string PathImgQROld, string nameFile)
+        public static string SaveImgLocal(IFormFile input, long userId, string PathImgQROld, string nameFile,FeatureCode user)
         {
             if (!string.IsNullOrEmpty(PathImgQROld))
             {
@@ -111,7 +112,7 @@ namespace QLNhaTro.Commons
             string fileName = nameFile + Path.GetExtension(input.FileName);
 
             // Đường dẫn thư mục lưu ảnh
-            string directoryPath = Path.Combine(Directory.GetCurrentDirectory(), $@"{DefaultValue.DEFAULT_BASE_Directory_IMG}\images\UserInformation\{userId}");
+            string directoryPath = Path.Combine(Directory.GetCurrentDirectory(), $@"{DefaultValue.DEFAULT_BASE_Directory_IMG}\images\UserInformation\{user.ToString()}\{userId}");
 
             // Kiểm tra và tạo thư mục nếu chưa tồn tại
             if (!Directory.Exists(directoryPath))

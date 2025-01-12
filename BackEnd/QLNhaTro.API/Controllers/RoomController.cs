@@ -236,11 +236,11 @@ namespace QLNhaTro.API.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetDetailFindRoom([FromQuery] long roomId)
+        public IActionResult GetDetailFindRoom([FromQuery] long roomId, [FromQuery] long customerId)
         {
             try
             {
-                var result = roomService.GetRoomDetailFindRoom(roomId);
+                var result = roomService.GetRoomDetailFindRoom(roomId, customerId);
                 return Ok(result);
             }
             catch (Exception ex)

@@ -12,6 +12,7 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static QLNhaTro.Commons.CommonEnums;
 
 namespace QLNhaTro.Service.CustomerService
 {
@@ -71,16 +72,14 @@ namespace QLNhaTro.Service.CustomerService
             {
                 throw new NotFoundException(nameof(input.FullName));
             }
-            customer = new Customers
-            {
-                FullName = input.FullName,
-                DoB = input.DoB,
-                PhoneNumber = input.PhoneNumber,
-                Email = input.Email,
-                Address = input.Address,
-                CCCD = input.CCCD,
-                SDTZalo = input.SDTZalo,
-            };
+            customer.FullName = input.FullName;
+            customer.DoB = input.DoB;
+            customer.PhoneNumber = input.PhoneNumber;
+            customer.Email = input.Email;
+            customer.CCCD = input.CCCD;
+            customer.Address = input.Address;
+            customer.SDTZalo = input.SDTZalo;
+            customer.PathAvatar = CommonFunctions.SaveImgLocal(avatar, customer.Id, customer.PathAvatar, "Avatar", FeatureCode.Customer);
             _Context.Customers.Update(customer);
             await _Context.SaveChangesAsync();
         }
@@ -133,6 +132,32 @@ namespace QLNhaTro.Service.CustomerService
             customer.Password = input.PasswordNew;
             _Context.Customers.Update(customer);
             await _Context.SaveChangesAsync();
+        }
+        public ContactInfoResModel GetContactInfo(long id)
+        {
+            var infoContact = _Context.Customers.GetAvailableById(id);
+            return new ContactInfoResModel
+            {
+                PathAvatar = CommonFunctions.ConverPathIMG(infoContact.PathAvatar),
+                PhoneNumber = infoContact.PhoneNumber,
+                SDTZalo = infoContact.SDTZalo,
+                FullName = infoContact.FullName,
+
+            };
+        }
+        public List<GetSaveRoomByCustomerResModel> GetSaveRoom(long customerId)
+        {
+            var saveRoom = _Context.SaveRooms.Include(s => s.Room).ThenInclude(r => r.Tower)
+                .Where(item => item.CustomerId == customerId)
+                .Select(record => new GetSaveRoomByCustomerResModel
+                {
+                    RoomId = record.RoomId,
+                    TowerName = record.Room.Tower.Name,
+                    TowerAddress = record.Room.Tower.Address,
+                    Device = record.Room.Equipment,
+                    Price = record.Room.PriceRoom,
+                }).ToList();
+            return saveRoom;
         }
     }
 }
