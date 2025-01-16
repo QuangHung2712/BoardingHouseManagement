@@ -64,13 +64,6 @@
                 contractData: [],
                 towerData: [],
                 changeRoom: {
-                    services:[
-                    {
-                        serviceId: '',
-                        price: '',
-                        number: 1,
-                    },
-                ],
                 },
                 roomDataChange: [],
                 searchStatusRoom: null,
@@ -288,17 +281,12 @@
                 this.form = false;
                 this.changeRoom = {
                     roomIdOld : id,
-                    services:[
-                        {
-                            serviceId: '',
-                            price: '',
-                            number: 1,
-                        }
-                    ],
                 }
-                apiClient.get(`/Tower/GetAllTowerByLandLordId/${1}`)
+                const landlordId =  localStorage.getItem('landlordId');
+                apiClient.get(`/Tower/GetAllTowerByLandLordId/${landlordId}`)
                         .then(response=>{
                             this.towerData = response.data;
+                            console.log(this.towerData);
                         })
                         .catch(error =>{
                             this.message = 'Đã xảy ra lỗi ' + error.response?.data?.message || error.message;
@@ -313,16 +301,6 @@
                 } else {
                     service.price = ''; // Xóa giá nếu không có dịch vụ
                 }
-            },
-            addService(){
-                this.changeRoom.services.push({
-                    serviceId: '',
-                    price: '',
-                    number: 1,
-                })
-            },
-            closeService(index){
-                this.changeRoom.services.splice(index, 1);
             },
             createEditRoom(){
                 if(this.selectRoom.id === undefined){
@@ -402,12 +380,14 @@
                 // Đặt thời gian của currentDate và selectedDate về 00:00:00 để chỉ so sánh ngày
                 currentDate.setHours(0, 0, 0, 0);
                 selectedDate.setHours(0, 0, 0, 0);
+                
 
                 if (selectedDate < currentDate) {
                     this.message = "Thời gian đổi đang nhỏ hơn ngày hiện tại. Bạn vui lòng chọn lại";
                     this.snackbar = true;
                     this.snackbarColor = 'red';
                 } else {
+                    this.changeRoom.isRepresentative = this.towerData.find(item=> item.id == this.changeRoom.towerId)?.userEnterInformation || false;
                     apiClient.put(`Room/ChangeRoom`,this.changeRoom)
                         .then(response => {
                             if(response.status){
@@ -858,42 +838,6 @@
                                         <v-text-field v-model="changeRoom.contractPeriod" type="number" :rules="[required]" variant="outlined" clearable placeholder="Nhập vào số tháng thời hạn hợp đồng" class="input-control"></v-text-field>
                                     </div>
                                 </BCol>
-                                <div class="card" v-show="changeRoom.towerId" v-for="(service, index) in changeRoom.services" :key="index">
-                                    <div class="card-header d-flex justify-content-between">
-                                        <h4 class="card-title">Thông tin của dịch vụ {{ index + 1 }}</h4>
-                                        <v-btn v-show="index >= 1" class="btn btn-primary" @click="closeService(index)">Đóng</v-btn>
-                                    </div>
-                                    <div class="row mt-4 card-body">
-                                        <div class="col-sm-5">
-                                            <div class="form-group">
-                                            <label class="form-label">Tên dịch vụ: </label>
-                                            <v-select
-                                                clearable
-                                                :items="servicedata"
-                                                item-title="name"
-                                                item-value="id"
-                                                variant="outlined"
-                                                v-model="service.serviceId"
-                                                @update:model-value="onServiceSelected(service)"
-                                                :rules="[required]">
-                                            </v-select>
-                                            </div>
-                                        </div>
-                                        <div class="col-sm-4">
-                                            <div class="form-group">
-                                            <label class="form-label">Giá: </label>
-                                            <v-text-field variant="outlined" clearable @input="FormatPrice(index)" :rules="[requiredNumber]" v-model="service.price" ></v-text-field>
-                                            </div>
-                                        </div>
-                                        <div class="col-sm-3">
-                                            <div class="form-group">
-                                            <label class="form-label">Số lượng người dùng: </label>
-                                            <v-text-field type="number" variant="outlined" :rules="[requiredNumber]" v-model="service.number" clearable></v-text-field>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <v-btn v-show="changeRoom.towerId" class="btn btn-primary" @click="addService">Thêm dịch vụ</v-btn>
                             </BRow>
                         </v-form>
                     </div>

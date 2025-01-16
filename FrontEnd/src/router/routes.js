@@ -129,14 +129,8 @@ export default [
                 component: () => import("../views/FindRoom/Save.vue"),
             },
             {
-                path: "/managePosts",
-                name: "managePosts",
-                meta: { title: "Quản lý bài đăng" },
-                component: () => import("../views/FindRoom/ManagePosts.vue"),
-            },
-            {
-                path: "/detailpost/:idpost",
-                name: "detailpost",
+                path: "/editpost/:idpost",
+                name: "editpost",
                 meta: { title: "Đăng bài" },
                 component: () => import("../views/FindRoom/Post.vue"),
             },
@@ -144,7 +138,13 @@ export default [
                 path: "/listPost",
                 name: "listPost",
                 meta: { title: "Quản lý bài đăng" },
-                component: () => import("../views/FindRoom/ListPost.vue"),
+                component: () => import("../views/FindRoom/ManagePosts..vue"),
+            },
+            {
+                path: "/detailpost/:idpost",
+                name: "detailpost",
+                meta: { title: "Chi tiết bài đăng" },
+                component: () => import("../views/FindRoom/DetailPost.vue"),
             },
         ]
     },

@@ -180,7 +180,6 @@ namespace QLNhaTro.API.Controllers
             try
             {
                 await roomService.ChangeRoom(data);
-                //Xử lý việc chênh tiền trọ
                 return Ok();
             }
             catch (Exception ex)

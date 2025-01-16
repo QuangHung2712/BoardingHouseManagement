@@ -6,6 +6,7 @@ using QLNhaTro.Moddel;
 using QLNhaTro.Moddel.Entity;
 using QLNhaTro.Moddel.Moddel.RequestModels;
 using QLNhaTro.Moddel.Moddel.ResponseModels;
+using QLNhaTro.Moddel.Moddel.ResponseModels.Post;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
@@ -158,6 +159,20 @@ namespace QLNhaTro.Service.CustomerService
                     Price = record.Room.PriceRoom,
                 }).ToList();
             return saveRoom;
+        }
+        public List<GetAllPostByFindPeopleResModel> GetSavePost(long customerId)
+        {
+            var savePost = _Context.SaveNews.Include(item => item.New)
+                .Where(item => item.CustomerId == customerId)
+                .Select(record => new GetAllPostByFindPeopleResModel
+                {
+                    Id = record.NewId,
+                    Address = record.New.Address,
+                    Gender = record.New.Gender == 1 ? "Nam" : "Nữ",
+                    Name = record.New.Name,
+                    Price = record.New.PriceRoom,
+                }).ToList();
+            return savePost;
         }
     }
 }

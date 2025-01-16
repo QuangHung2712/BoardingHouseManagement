@@ -342,7 +342,7 @@ export default {
         },
         GotoPost(postid){
             const encryptedId = CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(postid));
-            this.$router.push({ name: 'detailpost', params: { idpost: encryptedId } });
+            this.$router.push({ name: 'editpost', params: { idpost: encryptedId } });
         }
         
     },

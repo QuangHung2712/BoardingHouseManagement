@@ -92,9 +92,13 @@ namespace QLNhaTro.Commons
         }
         public static string ConverPathIMG(string input)
         {
-            string path = Path.GetRelativePath(DefaultValue.DEFAULT_BASE_Directory_IMG, input);
-            var result = path.Replace("\\", "/");
-            return "/" + result;
+            if(input != null)
+            {
+                string path = Path.GetRelativePath(DefaultValue.DEFAULT_BASE_Directory_IMG, input);
+                var result = path.Replace("\\", "/");
+                return "/" + result;
+            }
+            return "";
         }
         public static string GetDescription(this Enum value)
         {

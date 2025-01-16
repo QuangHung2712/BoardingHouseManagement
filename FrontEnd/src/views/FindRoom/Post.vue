@@ -47,6 +47,8 @@
                 apiClient.get(`/Post/GetDetail/${this.post.id}`)
                         .then(response=>{
                             this.post = response.data;
+                            this.loadImages();
+                            
                         })
                         .catch(error=>{
                             this.message = `Đã xảy ra lỗi: ${error.response?.data?.message || error.message}`;
@@ -110,6 +112,24 @@
             FormatPrice(){
                 this.post.priceRoom =  common.formatPrice(this.post.priceRoom );
             },
+            async loadImages(){
+                this.post.imgRoom = [];
+                for (let url of this.post.pathImgRoom) {
+                    try {
+                    
+                        const response = await fetch(url);
+                        
+                        const blob = await response.blob(); // Chuyển phản hồi thành Blob
+                        const file = new File([blob], url.split('/').pop(), { type: blob.type }); // Tạo File từ Blob
+                        // Lưu vào mảng imgRoom
+                    this.post.imgRoom.push(file);
+                        console.log(`Ảnh từ ${url} đã được tải và lưu vào imgRoom.`);
+                    } catch (error) {
+                        console.error(`Lỗi khi tải ảnh từ ${url}:`, error);
+                    }
+                }
+                console.log('Tất cả ảnh đã được tải:', this.post.imgRoom);
+            },
             handleFileChange() {
                 this.previewUrls = [];
                 if (this.post.imgRoom) {
@@ -149,16 +169,10 @@
                     })
                 }
                 apiClient.put(`/Post/CreateEdit`,formData)
-                .then(response => {
-                    if(response.status){
-                        this.snackbarColor = 'green'
-                        this.snackbar = true
-                    }
-                    else{
-                        this.message = 'Đã xảy ra lỗi '
-                        this.snackbarColor = 'red'
-                        this.snackbar = true
-                    }
+                .then(() => {
+                    this.snackbarColor = 'green'
+                    this.snackbar = true
+                    this.$router.push({ name: 'listPost'});
                 })
                 .catch(error =>{
                     this.message = 'Đã xảy ra lỗi ' + error.response?.data?.message || error

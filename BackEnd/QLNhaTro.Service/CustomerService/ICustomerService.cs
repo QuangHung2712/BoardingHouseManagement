@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using QLNhaTro.Moddel.Moddel.RequestModels;
 using QLNhaTro.Moddel.Moddel.ResponseModels;
+using QLNhaTro.Moddel.Moddel.ResponseModels.Post;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,5 +25,6 @@ namespace QLNhaTro.Service.CustomerService
         CustomerResModel GetInfoUser(long id);
         ContactInfoResModel GetContactInfo(long id);
         List<GetSaveRoomByCustomerResModel> GetSaveRoom(long customerId);
+        List<GetAllPostByFindPeopleResModel> GetSavePost(long customerId);
     }
 }

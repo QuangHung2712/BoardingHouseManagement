@@ -2,6 +2,7 @@
 using DocumentFormat.OpenXml.InkML;
 using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.Vml.Office;
+using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -187,7 +188,7 @@ namespace QLNhaTro.Service.RoomService
             roomData.IsDeleted = true;
             _Context.Rooms.Update(roomData);
             _Context.SaveChanges();
-            //DeleteImgRoomByRoomId(roomId, towerId);
+            DeleteImgRoomByRoomId(@$"{DefaultValue.DEFAULT_BASE_Directory_IMG}\images\Room\{roomData.TowerId}\{roomData.Id}", roomId);
         }
         private void DeleteImgRoomByRoomId(string path,long roomId)
         {
@@ -352,18 +353,13 @@ namespace QLNhaTro.Service.RoomService
             await _Context.SaveChangesAsync();
 
             //Cập nhập lại hợp đồng ở bảng khách hàng
-
-
-            //Thêm lại các dịch vụ
-            var contractService = input.Services.Select(s => new ServiceRoom
+            var customers = _Context.ContractCustomers.Where(item => item.ContractId == contractOld.Id).ToList();
+            var contractCustomer = customers.Select(c => new ContractCustomer
             {
                 ContractId = contractNew.Id,
-                ServiceId = s.ServiceId,
-                Price = s.Price,
-                Number = s.Number.Value,
-                CurrentNumber = s.CurrentNumber.Value
+                CustomerId = c.Id,
+                IsRepresentative = input.IsRepresentative,
             }).ToList();
-            await _Context.ServiceRooms.AddRangeAsync(contractService);
 
             //Cập nhật lại trạng thái phòng
             roomOld.StatusNewCustomer = true;
@@ -560,8 +556,6 @@ namespace QLNhaTro.Service.RoomService
                 _Context.SaveRooms.Add(newSaveRoom);
                 await _Context.SaveChangesAsync();
             }
-
         }
-
     }
 }

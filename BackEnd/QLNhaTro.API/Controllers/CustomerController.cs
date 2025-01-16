@@ -159,5 +159,18 @@ namespace QLNhaTro.API.Controllers
                 return StatusCode(500, new { Message = ex.Message });
             }
         }
+        [HttpGet]
+        public ActionResult GetSavePost([FromQuery] long id)
+        {
+            try
+            {
+                var result = _customerService.GetSavePost(id);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
+        }
     }
 }

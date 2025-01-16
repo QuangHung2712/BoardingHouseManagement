@@ -34,9 +34,7 @@
     }
 </style>
 <script>
-    import pageheader from "@/components/PageHeader.vue";
     import apiClient from "@/plugins/axios";
-    import VueEasyLightbox from "vue-easy-lightbox";
     import { formatTablePrice } from "@/components/common/JavaScripCommon"
     import store from "../../state/store";
 
@@ -44,7 +42,6 @@
     export default {
         name: "LANDING",
         components: {
-            pageheader,VueEasyLightbox
         },
     data() {
         return{
@@ -113,6 +110,11 @@
             });
         },
         SaveRoom(roomId,status){
+            if (status) {
+                this.message = "Xoá phòng thành công";
+            } else {
+                this.message = "Lưu phòng thành công";
+            }
             // Đặt trạng thái đang xử lý
             this.roomData.isProcessing = true;
 
@@ -126,7 +128,6 @@
                 // Hiển thị thông báo thành công
                 this.snackbar = true;
                 this.snackbarColor = "green";
-                this.message = "Xoá phòng thành công";
             })
             .catch((error) => {
                 // Xử lý lỗi
@@ -156,7 +157,6 @@
         </v-snackbar>
         <v-row class="m-4"> 
             <v-col cols="12" xxl="11">
-                <pageheader title="" pageTitle="Chi tiết phòng trọ" />
                 <BRow>
                     <BCol class="col-lg-8">
                         <BCard no-body class="mt-2">

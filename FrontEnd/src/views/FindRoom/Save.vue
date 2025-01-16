@@ -22,17 +22,30 @@
                 length: 3,
                 roomSaveData:[],
                 customerId: 0,
+                postSaveData:[],
             }
         },
         created(){
             this.customerId = store.getters['getCustomerId'] ?? 0;
             this.GetSaveRoom();
+            this.GetSavePost();
         },
         methods:{
             GetSaveRoom(){
                 apiClient.get(`/Customer/GetSaveRoom?id=${this.customerId}`)
                         .then(response=>{
                             this.roomSaveData = response.data;
+                        })
+                        .catch(error=>{
+                            this.message = "Lấy danh sách phòng lưu bị lỗi " + error;
+                            this.snackbar = true;
+                            this.snackbarColor = 'red';
+                        })
+            },
+            GetSavePost(){
+                apiClient.get(`/Customer/GetSavePost?id=${this.customerId}`)
+                        .then(response=>{
+                            this.postSaveData = response.data;
                         })
                         .catch(error=>{
                             this.message = "Lấy danh sách phòng lưu bị lỗi " + error;
@@ -54,7 +67,27 @@
                 .catch((error) => {
                     // Xử lý lỗi
                     this.message =
-                    "Lưu phòng đã xảy ra lỗi: " +
+                    "Xóa lưu phòng đã xảy ra lỗi: " +
+                    (error.response?.data?.message || error.message || "Không xác định");
+                    this.snackbar = true;
+                    this.snackbarColor = "red";
+                })
+            },
+            Savepost(postId){
+                // Gửi yêu cầu API
+                apiClient
+                .put(`/Post/SavePost?customerId=${this.customerId}&postId=${postId}&status=${true}`)
+                .then(() => {
+                     // Hiển thị thông báo thành công
+                    this.message = "Xoá phòng thành công";
+                    this.snackbar = true;
+                    this.snackbarColor = "green";
+                    this.GetSavePost();
+                })
+                .catch((error) => {
+                    // Xử lý lỗi
+                    this.message =
+                    "Xóa lưu bài đăng đã xảy ra lỗi: " +
                     (error.response?.data?.message || error.message || "Không xác định");
                     this.snackbar = true;
                     this.snackbarColor = "red";
@@ -109,13 +142,36 @@
             <v-col cols="6">
                 <BCard no-body>
                     <BCardHeader class="p-3">
-                        <h4 class="m-0">Tin đã lưu</h4>
+                        <h4 class="m-0">Bài đăng đã lưu</h4>
                     </BCardHeader>
                     <BCardBody class="p-2">
-                       <h2>Không có tin nào</h2>
+                        <h2 v-if="postSaveData == 0">Không có bài đăng nào</h2>
+                        <BCard no-body v-else v-for="(post,index) in postSaveData" :key="index">
+                            <BRow>
+                                <BCol class="col-md-4 col-12">
+                                    <v-img
+                                        src="/images/Room/20241119180012-04a6_wm.jpg"
+                                        alt="Room Image"
+                                        aspect-ratio="16/9"
+                                        class="rounded elevation-2"
+                                        contain
+                                    ></v-img>
+                                </BCol>
+                                <BCol class="col-md-8 col-12 mt-2">
+                                    <button @click="GotoDetail(post.id)" class="text-left">
+                                        <h5> {{ post.name }} </h5>
+                                        <h6>Giá: <span style="color: red;">{{ FormatPrice(post.price) }}</span></h6>
+                                        <p><v-icon>mdi-map-marker-radius</v-icon>Địa chỉ: {{ post.address }} </p>
+                                        <p>Giới tính: {{ post.gender }}</p>
+                                    </button>
+                                    <div class="text-right">
+                                        <BButton variant="white" style="color: red;" @click="Savepost(post.id)"><v-icon>mdi-heart</v-icon></BButton>
+                                    </div>
+                                </BCol>
+                            </BRow>
+                        </BCard>
                     </BCardBody>
                 </BCard>
-                
             </v-col>
         </v-row>
     </v-container>

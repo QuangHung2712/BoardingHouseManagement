@@ -6,6 +6,7 @@ using QLNhaTro.Moddel;
 using QLNhaTro.Moddel.Entity;
 using QLNhaTro.Moddel.Moddel.RequestModels;
 using QLNhaTro.Moddel.Moddel.ResponseModels;
+using QLNhaTro.Moddel.Moddel.ResponseModels.Post;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -44,9 +45,10 @@ namespace QLNhaTro.Service.Post
             {
                 Id = record.Id,
                 Address = record.Address,
-                Gender= record.Gender,
+                Gender= record.Gender == 1 ? "Nam" : "Nữ",
                 Name = record.Name,
                 Price = record.PriceRoom,
+                Status = record.IsFound
             }).ToList();
             foreach (var item in post)
             {
@@ -90,7 +92,7 @@ namespace QLNhaTro.Service.Post
                 post.Gender = input.Gender;
                 post.Describe = input.Describe;
                 string path = @$"{DefaultValue.DEFAULT_BASE_Directory_IMG}\images\Post\{post.Id}";
-                DeleteImgRoom(path, post.Id);
+                DeleteImg(path, post.Id);
                 SaveImgToDB(ImgRoom, input.Id);
                 _Context.SharedResidents.Update(post);
                 await _Context.SaveChangesAsync();
@@ -134,7 +136,7 @@ namespace QLNhaTro.Service.Post
                 throw;
             }
         }
-        private void DeleteImgRoom(string path, long newId)
+        private void DeleteImg(string path, long newId)
         {
             try
             {
@@ -164,7 +166,140 @@ namespace QLNhaTro.Service.Post
         {
             var post = _Context.SharedResidents.GetAvailableById(Id);
             _Context.SharedResidents.Remove(post);
+            var imgPost = _Context.NewRoomPhotos.Where(item => item.NewId == post.Id).ToList();
+            _Context.NewRoomPhotos.RemoveRange(imgPost);
+            try
+            {
+                string path = @$"{DefaultValue.DEFAULT_BASE_Directory_IMG}\images\Post\{post.Id}";
+                if (Directory.Exists(path))
+                {
+                    // Xóa thư mục và tất cả các thư mục con
+                    Directory.Delete(path, true);
+                }
+                else
+                {
+                    throw new Exception("Thử mục lưu ảnh không tồn tại");
+                }
+            }
+            catch(Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
             await _Context.SaveChangesAsync();
+        }
+        public async Task Repost(long postId)
+        {
+            var post = _Context.SharedResidents.GetAvailableById(postId);
+            if(!post.IsFound)
+            {
+                throw new Exception("Bài đăng vẫn đang được tìm kiếm ");
+            }
+            post.IsFound = false;
+            _Context.SharedResidents.Update(post);
+            await _Context.SaveChangesAsync();
+        }
+        public async Task Found(long postId)
+        {
+            var post = _Context.SharedResidents.GetAvailableById(postId);
+            if (post.IsFound)
+            {
+                throw new Exception("Bài đăng đã được đóng");
+            }
+            post.IsFound = true;
+            _Context.SharedResidents.Update(post);
+            await _Context.SaveChangesAsync();
+        }
+        public List<GetAllPostByFindPeopleResModel> FindPeople(string address, decimal priceForm, decimal priceArrive, long customerId,int genter)
+        {
+            var post = _Context.SharedResidents
+                .Where(item => item.Address.Contains(address) && item.PriceRoom >= priceForm && item.PriceRoom <= priceArrive && !item.IsDeleted && !item.IsFound && (genter == 0 || item.Gender == genter))
+                .Select(p => new GetAllPostByFindPeopleResModel
+                {
+                    Name = p.Name,
+                    Address = p.Address,
+                    Id = p.Id,
+                    Price = p.PriceRoom,
+                    Gender = p.Gender == 1 ? "Nam" : "Nữ",
+                    
+                }).ToList();
+            if (post.Count == 0)
+            {
+                throw new Exception("Không có phòng nào phù hợp với điều kiện của bạn");
+            }
+            foreach (var item in post)
+            {
+                if (customerId != 0)
+                {
+                    item.IsSave = _Context.SaveNews.Any(s => s.CustomerId == customerId && s.NewId == item.Id);
+                }
+                item.Img = ConverPathListIMG(_Context.NewRoomPhotos.Where(r => r.NewId == item.Id).Select(record => record.Path).ToList());
+            }
+            return post;
+        }
+        public async Task SavePost(long customerId, long postId, bool status)
+        {
+            if (customerId == 0)
+            {
+                throw new Exception("Vui lòng đăng nhập trước");
+            }
+            if (status)
+            {
+                var save = _Context.SaveNews.Where(item => item.NewId == postId && item.CustomerId == customerId).FirstOrDefault();
+                if (save == null)
+                {
+                    throw new Exception("Phòng chưa được lưu");
+                }
+                _Context.SaveNews.Remove(save);
+                await _Context.SaveChangesAsync();
+
+            }
+            else
+            {
+                if (!_Context.Customers.Any(item => item.Id == customerId && !item.IsDeleted))
+                {
+                    throw new Exception("Người dùng không tồn tại");
+                };
+                if (!_Context.SharedResidents.Any(item => item.Id == postId && !item.IsDeleted))
+                {
+                    throw new Exception("Phòng không tồn tại");
+                }
+                if (_Context.SaveNews.Any(item => item.NewId == postId && item.CustomerId == customerId))
+                {
+                    throw new Exception("Phòng đã được lưu");
+                }
+                var newSavePost = new SaveNews
+                {
+                    CustomerId = customerId,
+                    NewId = postId
+                };
+                _Context.SaveNews.Add(newSavePost);
+                await _Context.SaveChangesAsync();
+            }
+        }
+        public GetDetailPostByFindResModel GetDetailPostByFind(long Id, long customerId)
+        {
+            var postData = _Context.SharedResidents.Include(r => r.Customer)
+                .Where(r => r.Id == Id && !r.IsDeleted && !r.IsFound)
+                .Select(record => new GetDetailPostByFindResModel
+                {
+                    Id = record.Id,
+                    Name = record.Name,
+                    Address = record.Address,
+                    PriceRoom = record.PriceRoom,
+                    Gender = record.Gender == 1 ? "Nam" : "Nữ",
+                    MoTa = record.Describe,
+                    CustomerName = record.Customer.FullName,
+                    SDTZalo = record.Customer.SDTZalo,
+                    SDTCustomer = record.Customer.PhoneNumber,
+                    CustomerAvata = CommonFunctions.ConverPathIMG(record.Customer.PathAvatar),
+                    PathImgRoom = ConverPathListIMG(_Context.NewRoomPhotos.Where(item => item.NewId == record.Id).Select(i => i.Path).ToList()),
+                }).FirstOrDefault();
+            if (postData == null)
+            {
+                throw new Exception("Phòng không tồn tại");
+            }
+            postData.IsSave = _Context.SaveNews.Any(item => item.CustomerId == customerId && item.NewId == postData.Id);
+            return postData;
         }
     }
 }

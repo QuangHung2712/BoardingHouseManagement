@@ -3,3 +3,8 @@ Chức năng xem hoá đơn theo email của khách hàng chưa đăng ký trên
 Chức năng báo cáo
 Chức năng đổi phòng
 Chức năng đổi hợp đồng mẫu
+
+- giao diện quản lý hệ thống:
+	+ báo cáo: số lượng phòng đang hoạt động, số lượng chủ trọ, số lượng khách hàng
+	+ Danh sách chủ nhà
+	+ Danh sách khách thuê
