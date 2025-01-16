@@ -73,5 +73,19 @@ namespace QLNhaTro.API.Controllers
             }
 
         }
+        [HttpGet]
+        public IActionResult ReportByTower([FromQuery] long towerId, [FromQuery] DateTime stratDate, [FromQuery] DateTime endDate)
+        {
+            try
+            {
+                var result = _towerService.ReportByTower(towerId, stratDate, endDate);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
+
+        }
     }
 }

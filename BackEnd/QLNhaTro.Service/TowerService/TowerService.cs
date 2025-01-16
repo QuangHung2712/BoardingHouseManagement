@@ -95,5 +95,24 @@ namespace QLNhaTro.Service.TowerService
             if (result == null) throw new Exception("Toà nhà không tồn tại");
             return result;
         }
+        public List<Report> ReportByTower(long towerId, DateTime stratDate, DateTime endDate)
+        {
+            var data = _Context.Bills.Where(item => item.PaymentDate >= stratDate && item.PaymentDate <= endDate && !item.IsDeleted && item.Room.TowerId == towerId)
+                .GroupBy(b => new { b.PaymentDate.Year, b.PaymentDate.Month })
+                .Select(record => new
+                {
+                    Year = record.Key.Year,
+                    Month = record.Key.Month,
+                    TotalAmount = record.Sum(bill => bill.TotalAmount)
+                }).ToList();
+            var result = data.OrderBy(b=> b.Year).ThenBy(b=> b.Month)
+                .Select(item=> new Report
+                {
+                    Month = $"{item.Month}/{item.Year}",
+                    Quantity = item.TotalAmount,
+                }).ToList();
+            if (result.Count == 0) throw new Exception("Không có bản ghi nào thoả mãn điều kiện");
+            return result;
+        }
     }
 }

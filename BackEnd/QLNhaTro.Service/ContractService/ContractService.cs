@@ -179,6 +179,10 @@ namespace QLNhaTro.Service.ContractService
                 try
                 {
                     Contract contractUpdate = _Context.Contracts.GetAvailableById(input.Id);
+                    if (contractUpdate.TerminationDate != null) 
+                    {
+                        throw new Exception("Hợp đồng đã hết hạn không thế sửa");
+                    }
                     contractUpdate.Deposit = input.Deposit;
                     contractUpdate.Note = input.Note;
                     _Context.Update(contractUpdate);
@@ -589,6 +593,11 @@ namespace QLNhaTro.Service.ContractService
                 };
                 _Context.ContractCustomers.Add(contractCustomer);
             }
+        }
+        public string GetContractSample(long landlordId)
+        {
+            //return _Context.Landlords.GetAvailableById(landlordId).SampleContractLink;
+            return "D:\\Code\\BoardingHouseManagement\\BoardingHouseManagement\\Tài liệu\\HopDongMau.docx";
         }
 
     }

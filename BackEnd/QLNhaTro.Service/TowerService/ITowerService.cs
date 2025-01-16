@@ -14,5 +14,6 @@ namespace QLNhaTro.Service.TowerService
         Task CreateEditTower(CreateEditTowerReqModel input);
         void DeleteTower(long Id);
         string GetAddressTower(long towerId);
+        List<Report> ReportByTower(long towerId, DateTime stratDate, DateTime endDate);
     }
 }

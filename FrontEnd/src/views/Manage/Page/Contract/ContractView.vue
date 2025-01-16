@@ -1,12 +1,7 @@
 <style scoped>
     .row-red {
-        background-color: rgba(255, 0, 0, 0.1); /* Màu đỏ nhạt */
-        color: red;
-    }
-
-    .rowYellow {
-        background-color: rgba(255, 255, 0, 0.1); /* Màu vàng nhạt */
-        color: orange;
+    background-color: #ffebee !important; /* Màu nền đỏ nhạt */
+    color: #b71c1c !important; /* Màu chữ đỏ đậm */
     }
 </style>
 <script>
@@ -253,26 +248,26 @@ export default {
                     this.snackbar = true
                 })
         },
-        rowClass(item) {
-            const today = new Date();
-            const endDate = new Date(item.endDate);
-            // Điều kiện màu đỏ: endDate <= ngày hiện tại
-            if (endDate <= today) {
-                return 'row-red';
-            }
+        ViewSampleContract() {
+            apiClient.get(`/Contract/GetContractSample?landlordId${1}`, null, { responseType: "blob" })
+            .then((response) => {
+                const fileURL = window.URL.createObjectURL(new Blob([response.data]));
 
-            // Điều kiện màu vàng: endDate nằm trong khoảng từ hôm nay đến 1 tháng sau
-            const oneMonthLater = new Date(today);
-            oneMonthLater.setMonth(today.getMonth() + 1);
+                const fileLink = document.createElement("a");
+                fileLink.href = fileURL;
+                fileLink.setAttribute("download", "contract.docx");
+                document.body.appendChild(fileLink);
 
-            if (endDate > today && endDate <= oneMonthLater) {
-                return 'row-yellow';
-            }
-
-            // Mặc định không màu
-            return 'row-yellow';
-        }
-
+                fileLink.click();
+                document.body.removeChild(fileLink);
+            })
+            .catch((error) => {
+                this.message = "Tải hợp đồng mẫu bị lỗi: " + error.response?.data?.message || error.message;
+                console.log(error.response);
+                this.snackbar = true;
+                this.snackbarColor = "red";
+            });
+        },
     }
 }
 </script>
@@ -326,14 +321,14 @@ export default {
                 <BCard no-body class="table-card p-sm-2">
                     <BCardBody>
                         <BRow class="text-end pb-3 ">
-                            <BCol class="col-sm-10 col-6"><v-btn @click="(ViewdialogEditContractSample = !ViewdialogEditContractSample) & (EditSampleContract)" color="blue-lighten-1" class="mt-2">Chỉnh sửa hợp đồng mẫu </v-btn></BCol>
+                            <BCol class="col-sm-8 col-6"><v-btn @click="(ViewdialogEditContractSample = !ViewdialogEditContractSample) & (EditSampleContract)" color="blue-lighten-1" class="mt-2">Chỉnh sửa hợp đồng mẫu </v-btn></BCol>
+                            <BCol class="col-sm-2 col-6"><v-btn @click="ViewSampleContract" color="blue-lighten-1" class="mt-2">Xem hợp đồng mẫu </v-btn></BCol>
                             <BCol class="col-sm-2 col-6"><v-btn @click="CreateEditContract(0)" color="blue-lighten-1" class="mt-2"> Thêm hợp đồng </v-btn></BCol>
                         </BRow>
                         
                         <v-data-table 
                             :headers = "headersTable"
                             :items="filteredContracts"
-                            item-class="rowYellow"
                             class="border-sm rounded-lg "
                             >
                             <template v-slot:[`item.stt`]="{ index }">

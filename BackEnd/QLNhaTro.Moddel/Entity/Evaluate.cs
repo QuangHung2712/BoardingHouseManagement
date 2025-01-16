@@ -17,7 +17,7 @@ namespace QLNhaTro.Moddel.Entity
         public Landlord? Landlord { get; set; } 
         public DateTime EvaluationDate { get; set; } // Ngày đánh giá
         public string EvaluationContent { get; set; }//Nội dung đánh giá
-        public long ReviewFatherId { get; set; } // Trả lời cho đánh giá nào
-        public Evaluate ReviewFather { get; set; }
+        public long? ReviewFatherId { get; set; } // Trả lời cho đánh giá nào
+        public Evaluate? ReviewFather { get; set; }
     }
 }

@@ -179,8 +179,8 @@ namespace QLNhaTro.API.Controllers
         {
             try
             {
-                await roomService.ChangeRoom(data);
-                return Ok();
+                var result =  await roomService.ChangeRoom(data);
+                return Ok(result);
             }
             catch (Exception ex)
             {

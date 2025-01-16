@@ -325,7 +325,7 @@ namespace QLNhaTro.Service.RoomService
             //Tính tiền thừa
             return $"Bạn phải thanh toán lại cho khách thuê {contract.Deposit} - {newBill.TotalAmount} = {contract.Deposit - newBill.TotalAmount} VND";
         }
-        public async Task ChangeRoom(ChangeRoomReqModel input)
+        public async Task<long> ChangeRoom(ChangeRoomReqModel input)
         {
             //Lấy thông tin của phòng cũ và mới
             var roomNew = _Context.Rooms.Where(r => r.Id == input.RoomIdNew).FirstOrDefault();
@@ -345,21 +345,23 @@ namespace QLNhaTro.Service.RoomService
                 StartDate = input.TimesChange,
                 EndDate = input.TimesChange.AddMonths(input.ContractPeriod),
                 Deposit = contractOld.Deposit,
+                UserEnterInformation = input.IsRepresentative
             };
             contractOld.TerminationDate = input.TimesChange;
-            contractOld.Note = $"Khách đã chuyển sang phòng {roomNew.Name} ở địa chỉ {roomNew.Tower.Address}";
             _Context.Contracts.Update(contractOld);
             _Context.Contracts.Add(contractNew);
             await _Context.SaveChangesAsync();
 
             //Cập nhập lại hợp đồng ở bảng khách hàng
-            var customers = _Context.ContractCustomers.Where(item => item.ContractId == contractOld.Id).ToList();
-            var contractCustomer = customers.Select(c => new ContractCustomer
-            {
-                ContractId = contractNew.Id,
-                CustomerId = c.Id,
-                IsRepresentative = input.IsRepresentative,
-            }).ToList();
+            var customers = _Context.ContractCustomers.Where(item => item.ContractId == contractOld.Id)
+                .Select(c => new ContractCustomer
+                {
+                    ContractId = contractNew.Id,
+                    CustomerId = c.CustomerId,
+                    IsRepresentative = c.IsRepresentative,
+
+                }).ToList();
+            _Context.ContractCustomers.AddRange(customers);
 
             //Cập nhật lại trạng thái phòng
             roomOld.StatusNewCustomer = true;
@@ -376,12 +378,14 @@ namespace QLNhaTro.Service.RoomService
                     CreationDate = input.TimesChange,
                     Reason = "Tiền cọc chênh của phòng mới và phòng cũ",
                     TowerId = roomNew.TowerId,
+                    
                 };
                 _Context.Incurs.Add(incurNew);
             }
             
             //Lưu tất cả các thông tin vừa chỉnh sửa
             await _Context.SaveChangesAsync();
+            return contractNew.Id;
         }
         public async Task<List<GetDropDownRoom>> GetRoomNoContract(long towerId)
         {

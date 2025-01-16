@@ -396,6 +396,9 @@
                                 this.message = 'ĐỔi phòng thành công',
                                 this.viewdialogChangeRoom = false
                                 this.GetRoomByTowerId();
+                                this.$store.commit('setRoom', null);
+                                const encryptedId = CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(response.data));
+                                this.$router.push({ name: 'createEdit', params: { idcontract: encryptedId } });
                             }
                             else{
                                 this.message = 'Đã xảy ra lỗi '
