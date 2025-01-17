@@ -8,6 +8,9 @@
             return{
                 postData:[],
                 customerId: 0,
+                message: '',
+                snackbar: false,
+                snackbarColor: '',
             }
         },
         created(){

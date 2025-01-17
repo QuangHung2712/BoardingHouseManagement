@@ -663,7 +663,7 @@
                                             <BCol class="col-lg-8">
                                                 <div class="form-group">
                                                     <label class="form-label">Mô tả:</label>
-                                                    <v-text-field v-model="selectRoom.note" type="number" variant="outlined" readonly class="input-control"></v-text-field>
+                                                    <v-text-field v-model="selectRoom.note" type="text" variant="outlined" readonly class="input-control"></v-text-field>
                                                 </div>
                                             </BCol>
                                             <div class="form-group">

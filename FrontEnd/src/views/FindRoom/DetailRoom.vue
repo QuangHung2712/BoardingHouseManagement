@@ -202,7 +202,7 @@
                                     </BCol>
                                 </BRow>
                                 <h4>Mô tả</h4>
-                                <p>{{ roomData.note }}</p>
+                                <p>{{ roomData.moTa }}</p>
                             </BCardBody>
                         </BCard>
                     </BCol>

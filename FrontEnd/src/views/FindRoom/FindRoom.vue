@@ -120,6 +120,7 @@ export default {
             window.open(route.href, '_blank');
         },
         SaveRoom(roomId,status,index){
+            this.customerId = store.getters['getCustomerId'] ?? 0;
             // Hiển thị thông báo dựa trên trạng thái
             if (status) {
             this.message = "Xoá phòng thành công";

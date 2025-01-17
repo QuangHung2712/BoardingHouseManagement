@@ -39,7 +39,7 @@ namespace QLNhaTro.Moddel.SeedData
                                 PaymentQRImageLink = "D:\\Du_An\\BoardingHouseManagement\\FrontEnd\\public\\images\\UserInformation\\4\\Ảnh QR ngân hàng thanh toán.jpg",
                                 SDTZalo = "0359988934",
                                 Bank = "MB Bank",
-                                PathAvatar = "D:\\Du_An\\BoardingHouseManagement\\FrontEnd\\public\\images\\UserInformation\\1\\Avatar.jpg",
+                                PathAvatar = "D:\\Du_An\\BoardingHouseManagement\\FrontEnd\\public\\images\\UserInformation\\Landlord\\1\\Avatar.jpg",
                             }
                         };
                         context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT [dbo].[Landlords] ON");
@@ -182,8 +182,8 @@ namespace QLNhaTro.Moddel.SeedData
                             new Contract {Id = 8, RoomId = 8, StartDate = currentDate.AddMonths(-8), EndDate = currentDate.AddMonths(0),Deposit = 3700000,TerminationDate = currentDate.AddMonths(-2),Note = null, IsDeleted = false, UserEnterInformation = true},
                             new Contract {Id = 9, RoomId = 9, StartDate = currentDate.AddMonths(-6), EndDate = currentDate.AddMonths(0),Deposit = 3700000,TerminationDate = currentDate.AddMonths(-1),Note = null, IsDeleted = false, UserEnterInformation = true},
                             new Contract {Id = 10, RoomId = 10, StartDate = currentDate.AddMonths(-8), EndDate = currentDate.AddMonths(0),Deposit = 3700000,TerminationDate = currentDate.AddMonths(-3),Note = null, IsDeleted = false, UserEnterInformation = true},
-                            new Contract {Id = 11, RoomId = 1, StartDate = currentDate.AddMonths(-6), EndDate = currentDate.AddMonths(1),Deposit = 3700000,TerminationDate = null,Note = null, IsDeleted = false, UserEnterInformation = true},
-                            new Contract {Id = 12, RoomId = 2, StartDate = currentDate.AddMonths(-6), EndDate = currentDate.AddMonths(0),Deposit = 3700000,TerminationDate = null,Note = null, IsDeleted = false, UserEnterInformation = true,},
+                            new Contract {Id = 11, RoomId = 1, StartDate = currentDate.AddMonths(-6), EndDate = currentDate.AddMonths(1),Deposit = 3700000,TerminationDate = null,Note = null, IsDeleted = false, UserEnterInformation = false},
+                            new Contract {Id = 12, RoomId = 2, StartDate = currentDate.AddMonths(-6), EndDate = currentDate.AddMonths(0),Deposit = 3700000,TerminationDate = null,Note = null, IsDeleted = false, UserEnterInformation = false,},
 
 
                         };
@@ -218,6 +218,8 @@ namespace QLNhaTro.Moddel.SeedData
                             new Customers {Id = 8,FullName = "Nguyễn Văn D",DoB = new DateTime(2000,02,14), PhoneNumber = "0327786189", CCCD = "800095517479",Address = "Đường Nguyễn Văn Linh, Quận 9, Huế",IsDeleted = false,Email = "Khachhang4@gmail.com"},
                             new Customers {Id = 9,FullName = "Lê Thị E",DoB = new DateTime(2000,5,14), PhoneNumber = "0329391131", CCCD = "373072204337",Address = "Đường Nguyễn Văn Linh, Quận 7, Huế",IsDeleted = false,Email = "Khachhang5@gmail.com"},
                             new Customers {Id = 10,FullName = "Lê Thị G",DoB = new DateTime(2004,8,20), PhoneNumber = "0916124628", CCCD = "047784617208",Address = "Đường Võ Nguyên Giáp, Quận 9, Hà Nội",IsDeleted = false,Email = "Khachhang6@gmail.com"},
+                            new Customers {Id = 11,FullName = "Lê Thị H",DoB = new DateTime(2000,5,14), PhoneNumber = "0329391131", CCCD = "373072204337",Address = "Đường Nguyễn Văn Linh, Quận 7, Huế",IsDeleted = false,Email = "quanghungksdtqn@gmail.com"},
+                            new Customers {Id = 12,FullName = "Lê Thị I",DoB = new DateTime(2004,8,20), PhoneNumber = "0916124628", CCCD = "047784617208",Address = "Đường Võ Nguyên Giáp, Quận 9, Hà Nội",IsDeleted = false,Email = "vu24593@gmail.com"},
                         };
                         context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT [dbo].[Customers] ON");
                         context.Customers.AddRange(NewCustomer);
@@ -325,6 +327,8 @@ namespace QLNhaTro.Moddel.SeedData
                             new ContractCustomer {Id = 18,ContractId = 9,CustomerId = 8,IsRepresentative = false},
                             new ContractCustomer {Id = 19,ContractId = 10,CustomerId = 9,IsRepresentative = true},
                             new ContractCustomer {Id = 20,ContractId = 10,CustomerId = 10, IsRepresentative = false},
+                            new ContractCustomer {Id = 21,ContractId = 11,CustomerId =11,IsRepresentative = true},
+                            new ContractCustomer {Id = 22,ContractId = 12,CustomerId = 12, IsRepresentative = true},
                         };
                         context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT [dbo].[ContractCustomers] ON");
                         context.ContractCustomers.AddRange(NewContractCustomers);
@@ -402,6 +406,28 @@ namespace QLNhaTro.Moddel.SeedData
                         context.ServiceInvoiceDetails.AddRange(NewServiceInvoiceDetails);
                         context.SaveChanges();
                         context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT [dbo].[ServiceInvoiceDetails] OFF");
+                        transaction.Commit();
+                    }
+                    catch (Exception)
+                    {
+                        transaction.Rollback();
+                        throw;
+                    }
+                }
+            }
+            if (!context.SharedResidents.Any())
+            {
+                using (var transaction = context.Database.BeginTransaction())
+                {
+                    try
+                    {
+                        var NewSharedResidents = new List<SharedResidents>
+                        {
+                        };
+                        context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT [dbo].[SharedResidents] ON");
+                        context.SharedResidents.AddRange(NewSharedResidents);
+                        context.SaveChanges();
+                        context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT [dbo].[SharedResidents] OFF");
                         transaction.Commit();
                     }
                     catch (Exception)
