@@ -1,4 +1,5 @@
-﻿using QLNhaTro.Moddel.Moddel.RequestModels;
+﻿using Microsoft.AspNetCore.Http;
+using QLNhaTro.Moddel.Moddel.RequestModels;
 using QLNhaTro.Moddel.Moddel.ResponseModels;
 using System;
 using System.Collections.Generic;
@@ -18,5 +19,6 @@ namespace QLNhaTro.Service.ContractService
         string ExportWord(long contractId);
         Task<GetContractByRoomIDResModel> GetContractByRoomId(long roomID);
         string GetContractSample(long landlordId);
+        Task EditContractSample(long landlordId, IFormFile file);
     }
 }

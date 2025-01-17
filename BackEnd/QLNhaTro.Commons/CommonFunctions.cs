@@ -108,7 +108,7 @@ namespace QLNhaTro.Commons
         }
         public static string SaveImgLocal(IFormFile input, long userId, string PathImgQROld, string nameFile,FeatureCode user)
         {
-            if (!string.IsNullOrEmpty(PathImgQROld))
+            if (!string.IsNullOrEmpty(PathImgQROld) && PathImgQROld != DefaultValue.DEFAULT_IMG_AVATAR)
             {
                 File.Delete(PathImgQROld);
             }

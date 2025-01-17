@@ -97,7 +97,7 @@ namespace QLNhaTro.Service.LandlordService
                     Address = input.Address,
                     SDTZalo = input.SDTZalo,
                     Password = CommonConstants.DefaultValue.DEFAULT_PASSWORD,
-                    PathAvatar = CommonConstants.DefaultValue.DEFAULT_BASE_Directory_IMG,
+                    PathAvatar = CommonConstants.DefaultValue.DEFAULT_IMG_AVATAR,
                     Bank = "Chưa có",
                 };
                 _Context.Landlords.Add(landlord);

@@ -13,7 +13,7 @@ namespace QLNhaTro.Commons
             public const string DEFAULT_CONTROLLER_ROUTER = "api/[controller]/[action]";
             public const string DEFAULT_BASE_Directory_IMG = @"D:\Du_An\BoardingHouseManagement\FrontEnd\public";
             public const string DEFAULT_IMG_AVATAR = @"D:\Du_An\BoardingHouseManagement\FrontEnd\public\images\AvatarDefault.jpg";
-            public const string DEFAULT_CONTRACT = @"";
+            public const string DEFAULT_CONTRACT = @"D:\Du_An\BoardingHouseManagement\Tài liệu\HopDongMau.docx";
             public const string DEFAULT_PASSWORD = "defaultpassword";
 
         }

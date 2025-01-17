@@ -106,13 +106,28 @@ namespace QLNhaTro.API.Controllers
                 return StatusCode(500, new { Message = ex.Message });
             }
         }
-        [HttpGet]
+        [HttpPost]
         public IActionResult GetContractSample([FromQuery]long landlordId)
         {
             try
             {
                 string outputPath = _Contract.GetContractSample(landlordId);
                 return PhysicalFile(outputPath, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "contract.docx");
+
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+            }
+        }
+
+        [HttpPut]
+        public async Task<ActionResult> EditContractSample([FromForm] long landlordId,[FromForm] IFormFile file)
+        {
+            try
+            {
+                await _Contract.EditContractSample(landlordId, file);
+                return Ok() ;
 
             }
             catch (Exception ex)

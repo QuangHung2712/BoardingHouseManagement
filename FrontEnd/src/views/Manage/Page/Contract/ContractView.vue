@@ -47,6 +47,7 @@ export default {
             viewdialogContractExtension: false,
             contractExtension: {},
             ViewdialogEditContractSample: false,
+            contractSampleNew: null
         }
     },
     created(){
@@ -249,7 +250,7 @@ export default {
                 })
         },
         ViewSampleContract() {
-            apiClient.get(`/Contract/GetContractSample?landlordId${1}`, null, { responseType: "blob" })
+            apiClient.post(`/Contract/GetContractSample?landlordId=${1}`, null, { responseType: "blob" })
             .then((response) => {
                 const fileURL = window.URL.createObjectURL(new Blob([response.data]));
 
@@ -268,6 +269,31 @@ export default {
                 this.snackbarColor = "red";
             });
         },
+        onFileSelected(event){
+            const file = event.target.files[0];
+            if (!file) {
+                alert("Vui lòng chọn một tệp!");
+                return;
+            }
+            this.contractSampleNew = file;
+        },
+        SaveContractSample(){
+            const formData = new FormData();
+            formData.append("landlordId", 1);
+            formData.append("file", this.contractSampleNew);
+            apiClient.put(`/Contract/EditContractSample`,formData)
+                    .then(()=>{
+                        this.snackbarColor = 'green';
+                        this.snackbar = true;
+                        this.message = 'Thay đổi hợp đồng mẫu thành công!';
+                        this.ViewdialogEditContractSample = false;
+                    })
+                    .catch(error=>{
+                        this.message = `Đã xảy ra lỗi: ${error.response?.data?.message || error.message}`;
+                        this.snackbarColor = 'red';
+                        this.snackbar = true;
+                    })
+        }
     }
 }
 </script>
@@ -496,8 +522,9 @@ export default {
                             <BRow>
                                 <BCol class="col-lg-12">
                                     <div class="form-group">
-                                        <label class="form-label">Số tháng gia hạn thêm:</label>
-                                        <v-text-field v-model="contractExtension.extensionPeriod"  :rules="[required]" type="number" variant="outlined" clearable placeholder="Nhập vào số tháng bạn muốn gia hạn thêm" class="input-control"></v-text-field>
+                                        <label class="form-label w-100">Hợp đồng mới:</label>
+                                        <input  type="file"  @change="onFileSelected"  accept=".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" class="input-control" />
+                                        <p style="color: red;">Lưu ý không sửa các giá trị trong dấu "{}"</p>
                                     </div>
                                 </BCol>
                             </BRow>
@@ -506,7 +533,7 @@ export default {
                     <div class="modal-footer v-modal-footer">
                         <BButton type="button" variant="light" @click="ViewdialogEditContractSample = false">Close
                         </BButton>
-                        <BButton type="button" variant="primary" @click="btnSaveContractExtension()" :disabled="!form">Save Changes</BButton>
+                        <BButton type="button" variant="primary" @click="SaveContractSample()">Save Changes</BButton>
                     </div>
                 </BModal>
             </BCol>

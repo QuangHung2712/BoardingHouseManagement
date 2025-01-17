@@ -26,6 +26,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using static QLNhaTro.Commons.CommonConstants;
 using Bold = DocumentFormat.OpenXml.Wordprocessing.Bold;
 using Break = DocumentFormat.OpenXml.Wordprocessing.Break;
 using Contract = QLNhaTro.Moddel.Entity.Contract;
@@ -34,6 +35,7 @@ using FontSize = DocumentFormat.OpenXml.Wordprocessing.FontSize;
 using Justification = DocumentFormat.OpenXml.Wordprocessing.Justification;
 using Paragraph = DocumentFormat.OpenXml.Wordprocessing.Paragraph;
 using ParagraphProperties = DocumentFormat.OpenXml.Wordprocessing.ParagraphProperties;
+using Path = System.IO.Path;
 using Run = DocumentFormat.OpenXml.Wordprocessing.Run;
 using RunProperties = DocumentFormat.OpenXml.Wordprocessing.RunProperties;
 using TabStop = DocumentFormat.OpenXml.Wordprocessing.TabStop;
@@ -597,8 +599,34 @@ namespace QLNhaTro.Service.ContractService
         public string GetContractSample(long landlordId)
         {
             //return _Context.Landlords.GetAvailableById(landlordId).SampleContractLink;
-            return "D:\\Code\\BoardingHouseManagement\\BoardingHouseManagement\\Tài liệu\\HopDongMau.docx";
+            return "D:\\Du_An\\BoardingHouseManagement\\Tài liệu\\HopDongMau.docx";
+        }
+        public async Task EditContractSample(long landlordId,IFormFile file)
+        {
+            var info = _Context.Landlords.GetAvailableById(landlordId);
+            if (!System.IO.File.Exists(info.SampleContractLink) && info.SampleContractLink != DefaultValue.DEFAULT_CONTRACT)
+            {
+                System.IO.File.Delete(info.SampleContractLink);
+            }
+            if (file == null || file.Length == 0)
+            {
+                throw new Exception("Tệp không hợp lệ.");
+            }
+            string directoryPath = Path.Combine(Directory.GetCurrentDirectory(), $@"D:\Du_An\BoardingHouseManagement\Tài liệu\HopDongMau");
+            if (!Directory.Exists(directoryPath))
+            {
+                Directory.CreateDirectory(directoryPath);
+            }
+            var name = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+            var filePath = Path.Combine(directoryPath, name);
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+            info.SampleContractLink = filePath;
+            _Context.Landlords.Update(info);
+            await _Context.SaveChangesAsync();
         }
 
-    }
+    }   
 }
