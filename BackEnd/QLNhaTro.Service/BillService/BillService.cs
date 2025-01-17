@@ -121,7 +121,7 @@ namespace QLNhaTro.Service.BillService
                     UnitPrice = record.Service.UnitPrice,
                     UsageNumber = record.Number,
                     IsOldNewNumber = record.IsOldNewNumber,
-                    OldNumber = 0,
+                    OldNumber = record.CurrentNumber,
                 }).ToList();
             }
             else
@@ -296,8 +296,20 @@ namespace QLNhaTro.Service.BillService
         public async Task AcceptPayments(RefusePayReqModel input)
         {
             var bill = _Context.Bills.Where(item => item.Id == input.BillId).Include(item => item.Customer).FirstOrDefault();
+            if(bill == null)
+            {
+                throw new Exception("Hoá đơn không tồn tại");
+            }
             var notifications = _Context.Notifications.Where(item => item.Id == input.Id).FirstOrDefault();
             var arise = _Context.Incurs.Where(item => item.RoomId == bill.RoomId);
+            var serviceInvoce = _Context.ServiceInvoiceDetails.Where(item=> item.BillId == bill.Id && item.NewNumber != null).ToList();
+            var serviceroom = _Context.ServiceRooms.Include(item=> item.Contract)
+                .Where(item=> item.Contract.RoomId == bill.RoomId && !item.Contract.IsDeleted && item.Contract.TerminationDate == null && item.IsOldNewNumber)
+                .ToList();
+            foreach(var service in serviceroom)
+            {
+                service.CurrentNumber = (int)_Context.ServiceInvoiceDetails.Where(item => item.BillId == bill.Id && item.ServiceId == service.ServiceId).OrderByDescending(item => item.Id).Select(item=>item.NewNumber).FirstOrDefault();
+            }
 
             string content = $"Hoá đơn phòng {input.NumberOfRoom} được thanh toán vào ngày {bill.PaymentDate} đã thanh toán thành công. ";
             await _Email.SendEmailAsync(bill.Customer.Email, "Thanh toán hoá đơn thành công", content);
@@ -311,7 +323,7 @@ namespace QLNhaTro.Service.BillService
         }
         public List<GetAllBillByTowerResModel> GetAll(long towerId)
         {
-            var billData = _Context.Bills.Include(b => b.Room).Where(item => item.Room.TowerId == towerId && !item.IsDeleted && item.Status != StatusBill.ChuaDienThongTin).OrderByDescending(item=> item.CreationDate)
+            var billData = _Context.Bills.Include(b => b.Room).Where(item => item.Room.TowerId == towerId && !item.IsDeleted ).OrderByDescending(item=> item.CreationDate)
                 .Select(record => new GetAllBillByTowerResModel
                 {
                     Id = record.Id,
@@ -327,7 +339,7 @@ namespace QLNhaTro.Service.BillService
         public async Task DeleteBill(long billId) 
         {
             var bill = _Context.Bills.GetAvailableById(billId);
-            if(bill.Status != StatusBill.ChuaThanhToan)
+            if(bill.Status == StatusBill.DaXacNhanThanhToan || bill.Status == StatusBill.ChuaXacNhanThanhToan)
             {
                 throw new Exception("Hoá đơn đã được thanh toán không thể xoá");
             }
@@ -530,6 +542,11 @@ namespace QLNhaTro.Service.BillService
                 await _Email.SendEmailAsync(customer.Email, "Nhập hóa đơn tháng mới", EmailContent);
                 #endregion
             }
+        }
+        public string EncryptionID(long billId)
+        {
+            var bill = _Context.Bills.GetAvailableById(billId);
+            return CommonFunctions.Encryption(bill.Id.ToString());
         }
     }
 }

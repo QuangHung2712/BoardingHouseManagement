@@ -16,7 +16,7 @@ namespace QLNhaTro.Commons
         }
         public enum StatusBill
         {
-            [Description("Chưa có hoá đơn")]
+            [Description("Chưa điền thông tin")]
             ChuaDienThongTin = 1,
             [Description("Chưa thanh toán")]
             ChuaThanhToan = 2,

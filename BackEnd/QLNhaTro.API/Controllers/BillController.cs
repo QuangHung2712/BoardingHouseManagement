@@ -210,5 +210,19 @@ namespace QLNhaTro.API.Controllers
 
             }
         }
+        [HttpGet]
+        public IActionResult EncryptionID([FromQuery] long billID)
+        {
+            try
+            {
+                var result =  _billService.EncryptionID(billID);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = ex.Message });
+
+            }
+        }
     }
 }

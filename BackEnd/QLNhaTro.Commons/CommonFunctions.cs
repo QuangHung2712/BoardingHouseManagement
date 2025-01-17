@@ -66,13 +66,14 @@ namespace QLNhaTro.Commons
                         {
                             sw.Write(plainText);
                         }
-                        return Convert.ToBase64String(ms.ToArray());
+                        return Convert.ToBase64String(ms.ToArray()).Replace("/","_");
                     }
                 }
             }
         }
         public static string Decrypt(string cipherText)
         {
+            cipherText = cipherText.Replace("_", "/");
             using (Aes aes = Aes.Create())
             {
                 aes.Key = Encoding.UTF8.GetBytes(Key);

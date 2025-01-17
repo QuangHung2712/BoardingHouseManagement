@@ -246,6 +246,17 @@ export default {
                             this.snackbar = true;
                             this.snackbarColor = 'red';
                         })
+        },
+        FillInvoice(billID){
+            apiClient.get(`/Bill/EncryptionID?billID=${billID}`)
+                    .then(reponse=>{
+                        this.$router.push({ name: 'EnterBill', params: { idbill: reponse.data } });
+                    })
+                    .catch(error=>{
+                        this.message = "Lấy thông tin của hoá đơn bị lỗi: " + error.response?.data?.message || error;
+                        this.snackbar = true;
+                        this.snackbarColor = 'red';
+                    })
         }
     }
 }
@@ -290,6 +301,10 @@ export default {
                                 <!-- Hiển thị giá đã định dạng -->
                                 {{ FormatTablePrice(item.totalAmount) }}
                             </template>
+                            <template v-slot:[`item.paymentDate`]="{ item }">
+                                
+                                {{ item.paymentDate === '01/01/0001' ? 'Chưa thanh toán' : item.paymentDate  }}
+                            </template>
                             <template v-slot:[`item.status`]="{ item }">
                                 <span :class="getStatusClass(item.status)">
                                     {{ item.status }}
@@ -298,7 +313,8 @@ export default {
                             <template v-slot:[`item.actions`]="{ item }">
                                 <v-icon small @click="(viewdialog = !viewdialog) &&(DetailBill(item.id))">mdi-eye</v-icon>
                                 <v-icon class="ml-lg-3" v-show="item.status === 'Chưa thanh toán'" small @click="(viewdialogEdit = !viewdialogEdit) && (btnUpdate(item.id)) " >mdi-pencil-circle </v-icon>
-                                <v-icon class="ml-lg-3"  v-show="item.status === 'Chưa thanh toán'" small @click="deleteBill(item.id,item.numberOfRoom)" >mdi-delete-empty </v-icon>
+                                <v-icon class="ml-lg-3"  v-show="item.status !== 'Đã thanh toán'" small @click="deleteBill(item.id,item.numberOfRoom)" >mdi-delete-empty </v-icon>
+                                <v-icon class="ml-lg-3"  v-if="item.status === 'Chưa điền thông tin'" small @click="FillInvoice(item.id)" title="Điền thông tin">mdi-pencil-circle</v-icon>
                             </template>
                         </v-data-table>
                     </BCardBody>

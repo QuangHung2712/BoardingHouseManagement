@@ -23,5 +23,6 @@ namespace QLNhaTro.Service.BillService
         Task UpdateBill(UpdateBillReqModel input);
         List<CalculateRoomResModel> CalculateRoom(long towerId);
         Task SendInvoice(List<CalculateRoomResModel> input);
+        string EncryptionID(long billId);
     }
 }
