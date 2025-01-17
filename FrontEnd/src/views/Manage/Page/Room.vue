@@ -580,8 +580,8 @@
                                 </BCol>
                                 <BCol class="col-lg-12">
                                     <div class="form-group">
-                                        <label class="form-label">Ghi chú:</label>
-                                        <v-text-field v-model="selectRoom.note" type="text" variant="outlined" clearable placeholder="Nhập vào số người tối đa được ở" class="input-control"></v-text-field>
+                                        <label class="form-label">Mô tả:</label>
+                                        <v-text-field v-model="selectRoom.note"  :rules="[required]" type="text" variant="outlined" clearable placeholder="Nhập vào số người tối đa được ở" class="input-control"></v-text-field>
                                     </div>
                                 </BCol>
                                 <BCol class="col-lg-12">
@@ -655,7 +655,7 @@
                                             </BCol>
                                             <BCol class="col-lg-8">
                                                 <div class="form-group">
-                                                    <label class="form-label">Ghi chú:</label>
+                                                    <label class="form-label">Mô tả:</label>
                                                     <v-text-field v-model="selectRoom.note" type="number" variant="outlined" readonly class="input-control"></v-text-field>
                                                 </div>
                                             </BCol>

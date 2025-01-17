@@ -247,9 +247,8 @@ namespace QLNhaTro.Service.ContractService
         }
         public string ExportWord(long contractId)
         {
-            string SampleContract = "D:\\Du_An\\BoardingHouseManagement\\Tài liệu\\HopDongMau.docx";
+            string SampleContract = _Context.Contracts.Where(item => item.Id == contractId).Select(item => item.Room.Tower.Landlord.SampleContractLink).FirstOrDefault() ?? throw new Exception("Bạn chưa có hợp mẫu");
             string outputPath = "D:\\Du_An\\BoardingHouseManagement\\Tài liệu\\output_contract.docx";
-
             var contractData = _Context.Contracts.GetAvailableById(contractId);
             var roomDetails = _Context.Rooms
                 .Where(r => r.Id == contractData.RoomId)

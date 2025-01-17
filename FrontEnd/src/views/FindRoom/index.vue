@@ -388,10 +388,12 @@ export default {
                         <li class="nav-item px-1">
                             <h5><router-link class="nav-link" to="/findpeople">Tìm người ở ghép</router-link></h5>
                         </li>
-                        <li class="nav-item px-1">
-                            <h5><router-link to="/save" class="nav-link" v-show="LoginStatus">Phòng, tin đã lưu</router-link></h5>
+                        <li class="nav-item px-1" v-show="LoginStatus">
+                            <h5><router-link to="/save" class="nav-link" >Phòng, tin đã lưu</router-link></h5>
                         </li>
-
+                        <li class="nav-item px-1">
+                            <h5><router-link to="/viewbill" class="nav-link"> Hoá đơn của bạn</router-link></h5>
+                        </li>
                         <li class="nav-item" v-show="LoginStatus">
                             <button @click="GotoPost(0)" class="btn btn-primary">Đăng bài</button>
                         </li>

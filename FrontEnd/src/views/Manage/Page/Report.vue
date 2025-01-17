@@ -4,6 +4,7 @@
     import CryptoJS from 'crypto-js';
 
 
+
     export default {
         name: "PRODUCT-LIST",
         components: {
@@ -11,17 +12,13 @@
         },
         data(){
             return{
-                viewdialog: false,
-                titleDialog:'',
-                form: false,
+                status: false,
                 towerId: 0,
                 message: '',
                 snackbar: false,
                 snackbarColor: '',
                 searchStratDate: null,
                 searchEndDate: null,
-                ElectricChat: [
-                ],
                 chartOptions: {
                     chart: {
                         type: 'bar',
@@ -34,7 +31,7 @@
                         },
                     },
                     xaxis: {
-                        categories: [],
+                        categories: [] ,
                         title: {
                             text: 'Tháng',
                         },
@@ -44,8 +41,16 @@
                             text: 'Doanh thu',
                         },
                     },
+                    
                     dataLabels: {
-                        enabled: false,
+                        enabled: true, // Bật tính năng hiển thị giá trị trên các cột
+                        style: {
+                            fontSize: '12px', // Kích thước chữ
+                            colors: ['#000'], // Màu chữ
+                        },
+                        formatter: function(val) {
+                            return val.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) // Hiển thị giá trị của cột
+                        }
                     },
                     colors: ['#4285F4'], // Màu cột
                 },
@@ -63,12 +68,13 @@
             this.towerId = DecodingIdTower;
         },
         methods:{
-            initializeChart() {
-                // Gán dữ liệu cho biểu đồ
-                this.chartOptions.xaxis.categories = this.ElectricChat.map(item=>item.month);
-                this.chartSeries[0].data = this.ElectricChat.map(item=>item.quantity);
-            },
             ViewReport(){
+                if(!this.searchStratDate|| !this.searchEndDate){
+                    this.message = "Vui lòng chọn đầy đủ thời gian trước";
+                    this.snackbar = true;
+                    this.snackbarColor = 'red';
+                    return
+                }
                 const [startYear, startMonth] = this.searchStratDate.split("-");
                 const StratDate = `${startYear}-${startMonth}-01`;
                 const [endYear, endMonth] = this.searchEndDate.split("-");
@@ -82,9 +88,22 @@
                     },
                 })
                 .then(response=>{
-                    this.ElectricChat = response.data;
-                    this.chartOptions.xaxis.categories = response.data.map(item=>item.month);
-                    this.chartSeries[0].data= response.data.map(item=>item.quantity);
+                    this.status = true,
+                    // Cập nhật lại danh mục trên trục X và dữ liệu của biểu đồ
+                    this.chartOptions = {
+                        ...this.chartOptions, // Giữ nguyên các cấu hình khác
+                        xaxis: {
+                            ...this.chartOptions.xaxis,
+                            categories: response.data.map((item) => `Tháng ${item.month}`), // Cập nhật danh mục trên trục X
+                        },
+                    };
+
+                    this.chartSeries = [
+                        {
+                            name: 'Doanh thu',
+                            data: response.data.map((item) => item.quantity), // Cập nhật dữ liệu trên cột
+                        },
+                    ];
                 })
                 .catch(error=>{
                     this.message = "Báo cáo bị lỗi: " + error.response?.data?.message || error;
@@ -127,7 +146,7 @@
             </BRow>
         </BCardBody>
     </BCard>
-    <BCard>
+    <BCard v-show="status" >
         <BCardHeader class="p-2">
             <h4>Doanh thu</h4>
         </BCardHeader>
@@ -136,7 +155,7 @@
                 <p class="text-muted mb-1"><span>Tổng doanh thu</span></p>
                 <h4 class="mb-0">{{ chartSeries[0].data.reduce((a, b) => a + b, 0) }}</h4>
             </div>
-            <apexchart type="bar" :options="chartOptions" :series="chartSeries"></apexchart>
+            <apexchart  type="bar" :options="chartOptions" :series="chartSeries"></apexchart>
         </BCardBody>
     </BCard>
 </template>

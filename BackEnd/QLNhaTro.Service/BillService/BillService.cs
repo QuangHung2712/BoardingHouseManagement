@@ -311,16 +311,17 @@ namespace QLNhaTro.Service.BillService
         }
         public List<GetAllBillByTowerResModel> GetAll(long towerId)
         {
-            var billData = _Context.Bills.Include(b => b.Room).Where(item => item.Room.TowerId == towerId && item.Status != StatusBill.ChuaDienThongTin).Select(record => new GetAllBillByTowerResModel
-            {
-                Id = record.Id,
-                NumberOfRoom = record.Room.Name,
-                PaymentDate = record.PaymentDate.ToString("dd/MM/yyyy"),
-                Time = record.CreationDate.AddMonths(-1).ToString("MM/yyyy"),
-                TotalAmount = record.TotalAmount,
-                CustomerName = record.Customer.FullName,
-                Status = record.Status.GetDescription(),
-            }).ToList();
+            var billData = _Context.Bills.Include(b => b.Room).Where(item => item.Room.TowerId == towerId && !item.IsDeleted && item.Status != StatusBill.ChuaDienThongTin).OrderByDescending(item=> item.CreationDate)
+                .Select(record => new GetAllBillByTowerResModel
+                {
+                    Id = record.Id,
+                    NumberOfRoom = record.Room.Name,
+                    PaymentDate = record.PaymentDate.ToString("dd/MM/yyyy"),
+                    Time = record.CreationDate.AddMonths(-1).ToString("MM/yyyy"),
+                    TotalAmount = record.TotalAmount,
+                    CustomerName = record.Customer.FullName,
+                    Status = record.Status.GetDescription(),
+                }).ToList();
             return billData;
         }
         public async Task DeleteBill(long billId) 
@@ -437,10 +438,10 @@ namespace QLNhaTro.Service.BillService
             foreach (var room in contractStillValid)
             {
                 var OldNumberService = _Context.ServiceInvoiceDetails.Include(item => item.Bills)
-                        .Where(item => item.Bills.RoomId == room.RoomId && !item.Bills.IsDeleted)
+                        .Where(item => item.Bills.RoomId == room.RoomId && !item.Bills.IsDeleted && item.NewNumber != null)
                         .OrderByDescending(b => b.Bills.CreationDate)
-                        .Select(record => record.NewNumber)
-                        .FirstOrDefault();
+                        .Select(record => new { NewNumber = record.NewNumber,ServiceId = record.ServiceId } )
+                        .ToList();
                 var service = _Context.ServiceRooms.Where(item => item.ContractId == room.ContractId).Include(s => s.Service).Select(s => new ServiceCalculateRoomResModel
                 {
                     Id = s.ServiceId,

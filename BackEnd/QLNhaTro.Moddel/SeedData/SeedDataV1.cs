@@ -315,16 +315,16 @@ namespace QLNhaTro.Moddel.SeedData
                             new ContractCustomer {Id = 8,ContractId = 4,CustomerId = 8,IsRepresentative = false},
                             new ContractCustomer {Id = 9,ContractId = 5,CustomerId = 9,IsRepresentative = true},
                             new ContractCustomer {Id = 10,ContractId = 5,CustomerId = 10, IsRepresentative = false},
-                            new ContractCustomer {Id = 1,ContractId = 6,CustomerId = 1,IsRepresentative = true},
-                            new ContractCustomer {Id = 2,ContractId = 6,CustomerId = 2,IsRepresentative = false},
-                            new ContractCustomer {Id = 3,ContractId = 7,CustomerId = 3,IsRepresentative = true},
-                            new ContractCustomer {Id = 4,ContractId = 7,CustomerId = 4,IsRepresentative = false},
-                            new ContractCustomer {Id = 5,ContractId = 7,CustomerId = 5,IsRepresentative = false},
-                            new ContractCustomer {Id = 6,ContractId = 8,CustomerId = 6,IsRepresentative = true},
-                            new ContractCustomer {Id = 7,ContractId = 9,CustomerId = 7,IsRepresentative = true},
-                            new ContractCustomer {Id = 8,ContractId = 9,CustomerId = 8,IsRepresentative = false},
-                            new ContractCustomer {Id = 9,ContractId = 10,CustomerId = 9,IsRepresentative = true},
-                            new ContractCustomer {Id = 10,ContractId = 10,CustomerId = 10, IsRepresentative = false},
+                            new ContractCustomer {Id = 11,ContractId = 6,CustomerId = 1,IsRepresentative = true},
+                            new ContractCustomer {Id = 12,ContractId = 6,CustomerId = 2,IsRepresentative = false},
+                            new ContractCustomer {Id = 13,ContractId = 7,CustomerId = 3,IsRepresentative = true},
+                            new ContractCustomer {Id = 14,ContractId = 7,CustomerId = 4,IsRepresentative = false},
+                            new ContractCustomer {Id = 15,ContractId = 7,CustomerId = 5,IsRepresentative = false},
+                            new ContractCustomer {Id = 16,ContractId = 8,CustomerId = 6,IsRepresentative = true},
+                            new ContractCustomer {Id = 17,ContractId = 9,CustomerId = 7,IsRepresentative = true},
+                            new ContractCustomer {Id = 18,ContractId = 9,CustomerId = 8,IsRepresentative = false},
+                            new ContractCustomer {Id = 19,ContractId = 10,CustomerId = 9,IsRepresentative = true},
+                            new ContractCustomer {Id = 20,ContractId = 10,CustomerId = 10, IsRepresentative = false},
                         };
                         context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT [dbo].[ContractCustomers] ON");
                         context.ContractCustomers.AddRange(NewContractCustomers);
@@ -376,7 +376,7 @@ namespace QLNhaTro.Moddel.SeedData
                         context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT [dbo].[Bills] ON");
                         context.Bills.AddRange(NewBills);
                         context.SaveChanges();
-                        context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT [dbo].[NewBills] OFF");
+                        context.Database.ExecuteSqlRaw("SET IDENTITY_INSERT [dbo].[Bills] OFF");
                         transaction.Commit();
                     }
                     catch (Exception)
