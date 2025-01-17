@@ -39,7 +39,7 @@ namespace QLNhaTro.Service.LandlordService
         }
         public long Login(LoginReqModels request)
         {
-             return _Context.Landlords.Where(item=> item.Email == request.Email && item.Password == request.Password && !item.IsDeleted && item.IsActive).Select(record => record.Id).FirstOrDefault();
+             return _Context.Landlords.Where(item=> item.Email == request.Email && item.Password == request.Password && !item.IsDeleted).Select(record => record.Id).FirstOrDefault();
         }
         public LandlordResModel GetDetail(long id)
         {
@@ -99,6 +99,7 @@ namespace QLNhaTro.Service.LandlordService
                     Password = CommonConstants.DefaultValue.DEFAULT_PASSWORD,
                     PathAvatar = CommonConstants.DefaultValue.DEFAULT_IMG_AVATAR,
                     Bank = "Chưa có",
+                    SampleContractLink = CommonConstants.DefaultValue.DEFAULT_CONTRACT
                 };
                 _Context.Landlords.Add(landlord);
                 await _Context.SaveChangesAsync();

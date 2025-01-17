@@ -294,6 +294,7 @@
                                                 v-model="post.selectimg"
                                                 show-arrows
                                                 theme="dark"
+                                                v-if="post.img != 0"
                                             >
                                                 <v-window-item
                                                 v-for="(item,index) in post.img"
@@ -310,6 +311,7 @@
                                                 </v-card>
                                                 </v-window-item>
                                             </v-window>
+                                            <h4 v-else class="text-center">Không có ảnh</h4>
                                         </BCol>
                                         <BCol class="col-md-8 col-12 mt-4">
                                             <router-link @click="GotoDetail(post.id)" target="_blank">

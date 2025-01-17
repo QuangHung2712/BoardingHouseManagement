@@ -59,7 +59,7 @@
     },
     created(){
         const roomId = this.$route.params.idroom;
-        this.customerId = store.getters['getCustomerId'];
+        this.customerId = store.getters['getCustomerId'] ?? 0;
         this.GetDetailRoom(roomId);
     },
     methods:{
@@ -159,7 +159,7 @@
             <v-col cols="12" xxl="11">
                 <BRow>
                     <BCol class="col-lg-8">
-                        <BCard no-body class="mt-2">
+                        <BCard no-body class="mt-2" v-if="roomData.pathImgRoom != 0">
                             <v-row justify="center" class="m-0" >
                                 <!-- Carousel chính -->
                                 <v-carousel v-model="currentSlide" hide-delimiters show-arrows="hover" height="480" class="item" >

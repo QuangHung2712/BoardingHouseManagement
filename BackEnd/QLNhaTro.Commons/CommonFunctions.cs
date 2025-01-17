@@ -148,5 +148,14 @@ namespace QLNhaTro.Commons
                 Console.WriteLine($"Lỗi khi copy file: {ex.Message}");
             }
         }
+        public static List<string> ConverPathListIMG(List<string> input)
+        {
+            List<string> result = new List<string>();
+            foreach (var item in input)
+            {
+                result.Add(CommonFunctions.ConverPathIMG(item));
+            }
+            return result;
+        }
     }
 }

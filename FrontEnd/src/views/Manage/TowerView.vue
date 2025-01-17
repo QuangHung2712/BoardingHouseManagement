@@ -50,10 +50,7 @@
         data(){
             return{
                 towerData: [
-                    {id : 1,address: 'Số 11 ngõ 91',sumRoom: '11',roomRented:'5',roomStillEmpty: '5'},
-                    {id : 2,address: 'Số 11 ngõ 91',sumRoom: '11',roomRented:'5',roomStillEmpty: '5'},
-                    {id : 3,address: 'Số 11 ngõ 91',sumRoom: '11',roomRented:'5',roomStillEmpty: '5'},
-                    {id : 4,address: 'Số 11 ngõ 91',sumRoom: '11',roomRented:'5',roomStillEmpty: '5'},
+
                 ],
                 landLordId: 1,
                 message: '',
@@ -91,6 +88,7 @@
             },
         },
         created(){
+            this.landLordId =  localStorage.getItem('landlordId');
             this.getTower();
         },
         methods:{
@@ -108,7 +106,7 @@
                             this.towerData = response.data;
                         })
                         .catch(error=>{
-                            this.message = "Lấy danh sách tòa nhà bị lỗi " + error;
+                            this.message = "Lấy danh sách tòa nhà bị lỗi " + error.response?.data?.message || error;
                             this.snackbar = true;
                             this.snackbarColor = 'red';
                         })

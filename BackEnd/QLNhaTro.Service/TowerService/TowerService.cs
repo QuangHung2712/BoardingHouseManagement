@@ -33,15 +33,14 @@ namespace QLNhaTro.Service.TowerService
                 SumRoom = _Context.Rooms.Count(r=> r.TowerId == t.Id && !r.IsDeleted),
                 RoomRented = _Context.Rooms.Count(r =>r.TowerId == t.Id &&
                     !r.IsDeleted &&
-                     _Context.Contracts.Any(c =>c.RoomId == r.Id &&(c.TerminationDate == null || c.TerminationDate > DateTime.Now) && !c.IsDeleted)),
+                     _Context.Contracts.Any(c =>c.RoomId == r.Id && c.TerminationDate == null && !c.IsDeleted)),
                 RoomStillEmpty = _Context.Rooms.Count(r => r.TowerId == t.Id && !r.IsDeleted) -
                          _Context.Rooms.Count(r => r.TowerId == t.Id &&
                              !r.IsDeleted &&
-                             _Context.Contracts.Any(c => c.RoomId == r.Id &&
-                                 (c.TerminationDate == null || c.TerminationDate > DateTime.Now) &&
+                             _Context.Contracts.Any(c => c.RoomId == r.Id && c.TerminationDate == null &&
                                  !c.IsDeleted))
             }).ToListAsync();
-            if(towerData.Count == 0) throw new NotFoundException("Chủ nhà không tồn tại");
+            if(towerData.Count == 0) throw new NotFoundException("Chủ nhà không có tòa nhà nào");
             return towerData;
         }
         public async Task CreateEditTower(CreateEditTowerReqModel input)

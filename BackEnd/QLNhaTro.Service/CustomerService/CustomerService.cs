@@ -157,6 +157,7 @@ namespace QLNhaTro.Service.CustomerService
                     TowerAddress = record.Room.Tower.Address,
                     Device = record.Room.Equipment,
                     Price = record.Room.PriceRoom,
+                    Img = CommonFunctions.ConverPathListIMG(_Context.ImgRooms.Where(item => item.RoomId == record.RoomId).Select(i => i.Path).ToList())
                 }).ToList();
             return saveRoom;
         }
@@ -171,6 +172,7 @@ namespace QLNhaTro.Service.CustomerService
                     Gender = record.New.Gender == 1 ? "Nam" : "Nữ",
                     Name = record.New.Name,
                     Price = record.New.PriceRoom,
+                    Img = CommonFunctions.ConverPathListIMG(_Context.NewRoomPhotos.Where(item => item.NewId == record.NewId).Select(i => i.Path).ToList())
                 }).ToList();
             return savePost;
         }

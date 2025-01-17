@@ -59,7 +59,7 @@
     },
     created(){
         const postId = this.$route.params.idpost;
-        this.customerId = store.getters['getCustomerId'];
+        this.customerId = store.getters['getCustomerId'] ?? 0;
         this.GetDetailPost(postId);
     },
     methods:{
@@ -161,7 +161,7 @@
             <v-col cols="10" xxl="10">
                 <BRow>
                     <BCol class="col-lg-8">
-                        <BCard no-body class="mt-2">
+                        <BCard no-body class="mt-2"  v-if="postData.pathImgRoom != 0">
                             <v-row justify="center" class="m-0" >
                                 <!-- Carousel chính -->
                                 <v-carousel v-model="currentSlide" hide-delimiters show-arrows="hover" height="480" class="item" >

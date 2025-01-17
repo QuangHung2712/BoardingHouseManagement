@@ -35,6 +35,7 @@
                 apiClient.get(`/Customer/GetSaveRoom?id=${this.customerId}`)
                         .then(response=>{
                             this.roomSaveData = response.data;
+                            console.log(this.roomSaveData);
                         })
                         .catch(error=>{
                             this.message = "Lấy danh sách phòng lưu bị lỗi " + error;
@@ -114,14 +115,29 @@
                         <h2 v-if="roomSaveData == 0">Không có phòng nào</h2>
                         <BCard no-body v-else v-for="(room,index) in roomSaveData" :key="index">
                             <BRow>
-                                <BCol class="col-md-4 col-12">
-                                    <v-img
-                                        src="/images/Room/20241119180012-04a6_wm.jpg"
-                                        alt="Room Image"
-                                        aspect-ratio="16/9"
-                                        class="rounded elevation-2"
-                                        contain
-                                    ></v-img>
+                                <BCol class="col-md-4 col-12" >
+                                    <v-window style="height: 100%;"
+                                        v-model="room.selectimg"
+                                        show-arrows
+                                        theme="dark"
+                                        v-if="room.img != 0"
+                                    >
+                                        <v-window-item
+                                        v-for="(item,index) in room.img"
+                                        :key="index"
+                                        >
+                                        <v-card class="d-flex justify-center align-center" height="200px">
+                                            <v-img
+                                                :src="item"
+                                                alt="Room Image"
+                                                aspect-ratio="16/9"
+                                                class="rounded elevation-2"
+                                                contain
+                                            ></v-img>
+                                        </v-card>
+                                        </v-window-item>
+                                    </v-window>
+                                    <h4 v-else class="text-center">Không có ảnh</h4>
                                 </BCol>
                                 <BCol class="col-md-8 col-12 mt-2">
                                     <button @click="GotoDetail(room.roomId)" class="text-left">
@@ -149,13 +165,28 @@
                         <BCard no-body v-else v-for="(post,index) in postSaveData" :key="index">
                             <BRow>
                                 <BCol class="col-md-4 col-12">
-                                    <v-img
-                                        src="/images/Room/20241119180012-04a6_wm.jpg"
-                                        alt="Room Image"
-                                        aspect-ratio="16/9"
-                                        class="rounded elevation-2"
-                                        contain
-                                    ></v-img>
+                                    <v-window style="height: 100%;"
+                                        v-model="post.selectimg"
+                                        show-arrows
+                                        theme="dark"
+                                        v-if="post.img != 0"
+                                    >
+                                        <v-window-item
+                                        v-for="(item,index) in post.img"
+                                        :key="index"
+                                        >
+                                        <v-card class="d-flex justify-center align-center" height="200px">
+                                            <v-img
+                                                :src="item"
+                                                alt="Room Image"
+                                                aspect-ratio="16/9"
+                                                class="rounded elevation-2"
+                                                contain
+                                            ></v-img>
+                                        </v-card>
+                                        </v-window-item>
+                                    </v-window>
+                                    <h4 v-else class="text-center">Không có ảnh</h4>
                                 </BCol>
                                 <BCol class="col-md-8 col-12 mt-2">
                                     <button @click="GotoDetail(post.id)" class="text-left">

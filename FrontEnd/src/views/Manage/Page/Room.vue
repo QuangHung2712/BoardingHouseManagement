@@ -268,6 +268,7 @@
                             this.message = 'Trả phòng thánh công:  ' + response.data
                             this.snackbarColor = 'Green'
                             this.snackbar = true
+                            this.GetRoomByTowerId();
                             this.viewdialogCheckOut = false
                         })
                         .catch(error =>{
@@ -458,7 +459,11 @@
                             this.snackbarColor = 'red'
                             this.snackbar = true
                         })
-            }
+            },
+            GotoDetail(roomId){
+                const route = this.$router.resolve({ name: 'detail', params: { idroom: roomId } });
+                window.open(route.href, '_blank');
+            },
         }
 }
 </script>
@@ -543,8 +548,10 @@
                                 <v-icon class="ml-lg-3" v-show="!item.customerName" small @click="deleteRoom(item.id,item.numberOfRoom)" title="Xoá phòng" >mdi-delete-empty </v-icon>
                                 <v-icon class="ml-lg-3" v-show="item.customerName" small @click="(viewdialogCheckOut = !viewdialogCheckOut) && (CheckOutRoom(item.id))" title="Trả phòng">mdi-refresh</v-icon>
                                 <v-icon class="ml-lg-3" v-show="item.customerName" small @click="(viewdialogChangeRoom = !viewdialogChangeRoom) && (ChangeRoom(item.id))" title="Đổi phòng">mdi-swap-horizontal</v-icon>
-                                <v-icon class="ml-lg-3" v-show="item.status == false" small @click="FineNewCustomers(item.id,item.numberOfRoom)">mdi-account-multiple-plus</v-icon>
-                                <v-icon class="ml-lg-3" v-show="item.status == true" small @click="CancelFineNewCustomers(item.id,item.numberOfRoom)">mdi-account-multiple-remove</v-icon>
+                                <v-icon class="ml-lg-3" v-show="item.status == false" small @click="FineNewCustomers(item.id,item.numberOfRoom)" title="Tìm khách mới">mdi-account-multiple-plus</v-icon>
+                                <v-icon class="ml-lg-3" v-show="item.status == true" small @click="CancelFineNewCustomers(item.id,item.numberOfRoom)" title="Hủy tìm khách mới">mdi-account-multiple-remove</v-icon>
+                                <v-icon class="ml-lg-3" v-show="item.status == true" small @click="GotoDetail(item.id)" title="Xem phòng dưới dạng bài đăng">mdi-magnify</v-icon>
+
                             </template>
                         </v-data-table>
                     </BCardBody>

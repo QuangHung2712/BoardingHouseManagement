@@ -286,6 +286,7 @@ export default {
                                                 v-model="room.selectimg"
                                                 show-arrows
                                                 theme="dark"
+                                                v-if="room.img != 0"
                                             >
                                                 <v-window-item
                                                 v-for="(item,index) in room.img"
@@ -302,6 +303,7 @@ export default {
                                                 </v-card>
                                                 </v-window-item>
                                             </v-window>
+                                            <h4 v-else class="text-center">Không có ảnh</h4>
                                         </BCol>
                                         <BCol class="col-md-8 col-12 mt-4">
                                             <router-link @click="GotoDetail(room.id)" target="_blank">

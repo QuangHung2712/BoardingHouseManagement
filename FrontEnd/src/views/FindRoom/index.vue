@@ -171,6 +171,7 @@ export default {
                             localStorage.setItem('tokencustomer',response.data.token)
                             localStorage.setItem('customerId',response.data.userId)
                         }
+                        this.customerId = response.data.userId;
                         this.GetInfo();
                         this.modalLogin = false;
                         this.errorMessage = ""

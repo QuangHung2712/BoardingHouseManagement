@@ -268,7 +268,7 @@ namespace QLNhaTro.Service.RoomService
                 RoomId = room.Id,
                 CustomerId = customer.CustomerId,
                 CreationDate = DateOnly.FromDateTime(DateTime.Now),
-                PriceRoom = room.PriceRoom,
+                PriceRoom = 0,
                 PaymentDate = DateTime.Now,
                 Status = CommonEnums.StatusBill.DaXacNhanThanhToan,
                 TotalAmount = 0,
@@ -308,7 +308,7 @@ namespace QLNhaTro.Service.RoomService
 
             });
             _Context.ServiceInvoiceDetails.AddRange(service);
-            newBill.TotalAmount += newBill.PriceRoom + arise.Sum(item => item.Amount) + service.Sum(item=> item.UnitPrice * item.UsageNumber);
+            newBill.TotalAmount += arise.Sum(item => item.Amount) + service.Sum(item=> item.UnitPrice * item.UsageNumber);
             _Context.Bills.Update(newBill);
 
             _Context.Contracts.Update(contract);
