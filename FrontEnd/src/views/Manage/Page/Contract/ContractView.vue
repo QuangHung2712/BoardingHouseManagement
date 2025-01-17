@@ -256,7 +256,7 @@ export default {
 
                 const fileLink = document.createElement("a");
                 fileLink.href = fileURL;
-                fileLink.setAttribute("download", "contract.docx");
+                fileLink.setAttribute("download", "contractSample.docx");
                 document.body.appendChild(fileLink);
 
                 fileLink.click();

@@ -597,8 +597,8 @@ namespace QLNhaTro.Service.ContractService
         }
         public string GetContractSample(long landlordId)
         {
-            //return _Context.Landlords.GetAvailableById(landlordId).SampleContractLink;
-            return "D:\\Du_An\\BoardingHouseManagement\\Tài liệu\\HopDongMau.docx";
+            return _Context.Landlords.GetAvailableById(landlordId).SampleContractLink ?? throw new Exception("Bạn chưa có hợp đồng mẫu");
+            //return "D:\\Du_An\\BoardingHouseManagement\\Tài liệu\\HopDongMau.docx";
         }
         public async Task EditContractSample(long landlordId,IFormFile file)
         {

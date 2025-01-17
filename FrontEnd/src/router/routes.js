@@ -93,12 +93,6 @@ export default [
         component: () => import("../views/Manage/Page/Bill/EnterBillInformation.vue"),
     },
     {
-        path: "/viewbill",
-        name: "viewbill",
-        meta: { title: "Xem hoá đơn" },
-        component: () => import("../views/Manage/Page/Bill/ViewBill.vue"),
-    },
-    {
         path: "/",
         name: "Home",
         meta: { title: "Trang chủ" },
@@ -145,6 +139,12 @@ export default [
                 name: "detailpost",
                 meta: { title: "Chi tiết bài đăng" },
                 component: () => import("../views/FindRoom/DetailPost.vue"),
+            },
+            {
+                path: "/viewbill",
+                name: "viewbill",
+                meta: { title: "Xem hoá đơn" },
+                component: () => import("../views/Manage/Page/Bill/ViewBill.vue"),
             },
         ]
     },

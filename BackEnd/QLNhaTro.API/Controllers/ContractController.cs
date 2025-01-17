@@ -112,7 +112,7 @@ namespace QLNhaTro.API.Controllers
             try
             {
                 string outputPath = _Contract.GetContractSample(landlordId);
-                return PhysicalFile(outputPath, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "contract.docx");
+                return PhysicalFile(outputPath, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "contractSample.docx");
 
             }
             catch (Exception ex)
