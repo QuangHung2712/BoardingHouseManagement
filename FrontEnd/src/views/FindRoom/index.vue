@@ -188,6 +188,7 @@ export default {
         SignOut(){
             this.$store.dispatch('logoutCustomer');
             this.LoginStatus = false;
+            window.location.reload();
         },
         Register(){
             apiClient.post(`/Customer/Create`,this.register)

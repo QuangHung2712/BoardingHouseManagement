@@ -437,7 +437,7 @@ export default {
                                             <div class="col-sm-4">
                                                 <div class="form-group">
                                                     <label class="form-label">Họ và tên: </label>
-                                                    <v-text-field variant="outlined" :rules="[required]" :readonly="customer.isRepresentative" :clearable="!customer.isSystemRegistrant" v-model="customer.fullName"></v-text-field>
+                                                    <v-text-field variant="outlined" :rules="[required]" :readonly="customer.isSystemRegistrant" :clearable="!customer.isSystemRegistrant" v-model="customer.fullName"></v-text-field>
                                                 </div>
                                             </div>
                                             <div class="col-sm-4">

@@ -83,7 +83,7 @@
                 })
         },
         FormatPrice(price){
-            return formatTablePrice (price);
+            return formatTablePrice(price);
         },
         GoToInfoZalo(){
             const url = 'https://zalo.me/' + this.roomData.sdtZalo;
@@ -188,9 +188,9 @@
                         </BCard>
                         <BCard>
                             <BCardHeader >
-                                <h4>{{ roomData.towerName }}</h4>
+                                <h4>Phòng {{ roomData.towerName }}</h4>
                                 <p><v-icon>mdi-map-marker-radius</v-icon>{{ roomData.towerAddress }}</p>
-                                <h3>Giá: <span style="color: red;">{{ roomData.priceRoom }}</span></h3>
+                                <h3>Giá: <span style="color: red;">{{ roomData.priceRoom }} VND</span></h3>
                             </BCardHeader>
                             <BCardBody class="p-0 py-3">
                                 <h4>Thông tin thiết bị</h4>
@@ -202,7 +202,7 @@
                                     </BCol>
                                 </BRow>
                                 <h4>Mô tả</h4>
-                                <p>{{ moTa }}</p>
+                                <p>{{ roomData.note }}</p>
                             </BCardBody>
                         </BCard>
                     </BCol>

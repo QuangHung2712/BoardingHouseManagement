@@ -468,7 +468,7 @@ namespace QLNhaTro.Service.RoomService
                 .Where(item => item.Tower.Address.Contains(address) && item.PriceRoom >= priceForm && item.PriceRoom <= priceArrive && !item.IsDeleted && item.StatusNewCustomer)
                 .Select(r => new SearchRoomResModel
                 {
-                    TowerName = r.Tower.Name,
+                    TowerName = r.Name,
                     TowerAddress = r.Tower.Address,
                     Id = r.Id,
                     Device = r.Equipment,
@@ -496,7 +496,7 @@ namespace QLNhaTro.Service.RoomService
                 .Select(record => new GetRoomDetailFindRoomResModel
                 {
                     Id = record.Id,
-                    TowerName = record.Tower.Name,
+                    TowerName = record.Name,
                     TowerAddress = record.Tower.Address,
                     PriceRoom = record.PriceRoom,
                     Device = record.Equipment,

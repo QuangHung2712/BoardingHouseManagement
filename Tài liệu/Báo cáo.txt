@@ -1,0 +1,10 @@
+ - Lý do chọn đề tài:Hiện nay nhu cầu tìm kiếm phòng trọ ở các thành phố lớn như Hà Nội và Hồ Chí Minh đang ngày càng gia tăng. Các nhóm đối tượng như sinh viên, người lao động, và các gia đình trẻ đều gặp khó khăn trong việc tìm kiếm nơi ở phù hợp với nhu cầu và tài chính cá nhân. Bên cạnh đó, các chủ nhà trọ cũng đang gặp phải nhiều thách thức trong việc quản lý phòng như: hợp đồng, hóa đơn, thông tin người thuê và việc tìm kiếm tiếp cận khách thuê mới.
+. Mặc dù đã có nhiều trang web và ứng dụng hỗ trợ việc quản lý nhà trọ nhưng vẫn tồn tại một vài vấn đề như hệ thông chưa giúp chủ nhà tự động tính hoá đơn cho khách thuê và báo cáo thông kê hàng tháng.Ngoài ra các trang web quản lý nhà trọ đó chưa có chức năng hỗ trợ chủ nhà tự đọng đăng bài tìm kiếm khách thuê mới khi hợp đồng với khách thuê cũ kết thúc, chưa có chức năng tìm kiếm phòng trọ cho người thuê. Ví vậy em quyết định chọn đề tài thiết kế website quản lý nhà trọ để giải quyết các vấn đề còn tồn tại.
+ - Công nghệ sử dụng: Server(Hệ thống xử lý dữ liệu) C#, APS.NETCore, Entity Frameword
+			WebApp(Giao diện người dùng): VueJS, Vuetify
+			DataBase(Cở sở dữ liệu): SqlServer
+ - Ưu điểm: Có hệ thống gửi yêu cầu nhập thông tin hoá đơn đến khách hang tự động, Hệ thông thông báo cáo hàng tháng tự động 
+ - Cần phát triển thêm: Chức năng xác nhận thanh toán tự động. Hiện nay để xác nhận thành toán cần chủ trọ vào hệ thông xác nhận việc đã nhận được tiền
+			Chức năng quét ảnh để lấy ra các thông tin số dịch vụ mới như điện, nước. Hệ thông đang cho phép người dung nhập vào số dịch vụ mới điều này có thể xảy ra sai sót trong việc nhập thông tin lên cần chức năng quét ảnh để tránh nhưng sai sót.
+			Chức năng báo cáo về sai phạm của người bài: Hiện này hệ thông chưa có chức năng đánh giá hoặc báo cáo về các sai phạm của người đăng bài
+			Chức năng quản trị website: Hiện tại website chỉ có 2 đối tượng dung là Chủ nhà và khách thuê. Chưa có chức năng cho quản trị website

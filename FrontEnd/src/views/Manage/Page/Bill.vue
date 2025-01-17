@@ -228,6 +228,7 @@ export default {
                         this.message = "Đã xảy ra lỗi: " + error.response?.data?.message || error;
                         this.snackbar = true;
                         this.snackbarColor = 'red';
+                        this.viewdialogCalculateRoomCharges = false;
                     })
         },
         SendInvoice(){

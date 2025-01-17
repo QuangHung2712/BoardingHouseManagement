@@ -581,7 +581,7 @@
                                 <BCol class="col-lg-12">
                                     <div class="form-group">
                                         <label class="form-label">Mô tả:</label>
-                                        <v-text-field v-model="selectRoom.note"  :rules="[required]" type="text" variant="outlined" clearable placeholder="Nhập vào số người tối đa được ở" class="input-control"></v-text-field>
+                                        <v-textarea v-model="selectRoom.note"  :rules="[required]" type="text" variant="outlined" clearable placeholder="Nhập vào mô tả của phòng" class="input-control"></v-textarea>
                                     </div>
                                 </BCol>
                                 <BCol class="col-lg-12">

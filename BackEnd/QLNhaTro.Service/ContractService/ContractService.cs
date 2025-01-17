@@ -240,6 +240,10 @@ namespace QLNhaTro.Service.ContractService
         public async Task ContractExtension(ContractExtensionReqModel input)
         {
             Contract contract = _Context.Contracts.GetAvailableById(input.ContractId);
+            if(contract.TerminationDate != null)
+            {
+                throw new Exception("Hợp đồng đã kết thúc không thể gia hạn");
+            }
             DateTime timeNew = contract.EndDate.AddMonths(input.ExtensionPeriod);
             contract.EndDate = timeNew;
             _Context.Contracts.Update(contract);

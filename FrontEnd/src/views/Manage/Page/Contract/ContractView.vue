@@ -116,7 +116,6 @@ export default {
                     if (confirm.value) {
                             apiClient.delete(`/Contract/Delete/${id}`)
                                     .then(reponse=> {
-                                        console.log(reponse)
                                         if(reponse.status){
                                             swalWithBootstrapButtons.fire(
                                             "Xóa thành công!",
@@ -147,7 +146,6 @@ export default {
             apiClient.get(`/Contract/GetDetail?contractId=${id}`)
                     .then(response=>{
                         this.selectContract = response.data;
-                        console.log(response.data);
                     })
                     .catch(error=>{
                         this.message = "Lấy thông tin của hợp đồng bị lỗi " + error.response?.data?.message || error.message;
@@ -194,7 +192,6 @@ export default {
             })
             .catch((error) => {
                 this.message = "Tải hợp đồng bị lỗi: " + error.response?.data?.message || error.message;
-                console.log(error.response);
                 this.snackbar = true;
                 this.snackbarColor = "red";
             });
@@ -264,7 +261,6 @@ export default {
             })
             .catch((error) => {
                 this.message = "Tải hợp đồng mẫu bị lỗi: " + error.response?.data?.message || error.message;
-                console.log(error.response);
                 this.snackbar = true;
                 this.snackbarColor = "red";
             });
@@ -293,6 +289,9 @@ export default {
                         this.snackbarColor = 'red';
                         this.snackbar = true;
                     })
+        },
+        getItemClass(item){
+            console.log(item);
         }
     }
 }
@@ -356,6 +355,7 @@ export default {
                             :headers = "headersTable"
                             :items="filteredContracts"
                             class="border-sm rounded-lg "
+                            :item-class="getItemClass"
                             >
                             <template v-slot:[`item.stt`]="{ index }">
                                 {{ index + 1 }}

@@ -125,7 +125,7 @@
                                 </BCol>
                                 <BCol class="col-md-8 col-12 mt-2">
                                     <button @click="GotoDetail(room.roomId)" class="text-left">
-                                        <h5> {{ room.towerName }} </h5>
+                                        <h5>Phòng {{ room.towerName }} </h5>
                                         <h6>Giá: <span style="color: red;">{{ FormatPrice(room.price) }}</span></h6>
                                         <p><v-icon>mdi-map-marker-radius</v-icon>Địa chỉ: {{ room.towerAddress }} </p>
                                         <p>Thiết bị: {{ room.device }}</p>

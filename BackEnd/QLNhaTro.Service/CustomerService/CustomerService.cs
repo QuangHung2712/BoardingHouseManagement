@@ -153,7 +153,7 @@ namespace QLNhaTro.Service.CustomerService
                 .Select(record => new GetSaveRoomByCustomerResModel
                 {
                     RoomId = record.RoomId,
-                    TowerName = record.Room.Tower.Name,
+                    TowerName = record.Room.Name,
                     TowerAddress = record.Room.Tower.Address,
                     Device = record.Room.Equipment,
                     Price = record.Room.PriceRoom,
